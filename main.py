@@ -32,17 +32,54 @@ async def lobby_view(game_id: str): return FileResponse("static/room.html")
 @app.get("/play")
 async def player_view(): return FileResponse("static/player.html")
 
+# --- NEW TEMPLATE REPOSITORY ENDPOINTS ---
+@app.get("/admin/templates", dependencies=[Depends(verify_host)])
+async def get_templates():
+    templates = supabase.table("game_templates").select("id, theme_title, short_description, player_count, accomplice_count, has_drunk, has_investigator").order("created_at", desc=True).execute()
+    return {"templates": templates.data}
+
+@app.post("/admin/create-from-template/{template_id}", dependencies=[Depends(verify_host)])
+async def create_from_template(request: Request, template_id: str):
+    template_res = supabase.table("game_templates").select("*").eq("id", template_id).execute()
+    if not template_res.data: raise HTTPException(status_code=404, detail="Template not found")
+    data = template_res.data[0]
+
+    # Spawn the game without AI
+    game_insert = supabase.table("games").insert({
+        "theme": data["theme_title"], "theme_title": data["theme_title"], 
+        "short_description": data["short_description"], "master_story": json.dumps(data["master_story"])
+    }).execute()
+    game_id = game_insert.data[0]["id"]
+
+    for char in data["characters"]:
+        player_id = supabase.table("players").insert({
+            "game_id": game_id, "access_key": generate_key(), "character_name": char["name"],
+            "role_description": char["role_description"], "public_summary": char["public_summary"],
+            "ghost_clue": char.get("ghost_clue") or "The spirits are silent... I took my secrets to the grave.",
+            "is_killer": char["is_killer"], "is_accomplice": char.get("is_accomplice", False),
+            "is_investigator": char.get("is_investigator", False), "is_drunk": char.get("is_drunk", False)
+        }).execute().data[0]["id"]
+
+        clues_to_insert = [{"game_id": game_id, "player_id": player_id, "round_number": c["round"], "content": c["content"]} for c in char["clues"]]
+        supabase.table("clues").insert(clues_to_insert).execute()
+
+    return { "message": "Game spawned from template!", "game_id": game_id, "room_url": f"{request.base_url}room/{game_id}" }
+
+
+# --- ORIGINAL GENERATION ENDPOINT ---
 @app.post("/admin/create-game", dependencies=[Depends(verify_host)])
 async def create_game(request: Request, theme: str, player_count: int, accomplice_count: int = 0, include_drunk: bool = False, include_investigator: bool = False):
     
     accomplice_instruction = f"Ensure EXACTLY {accomplice_count} character(s) have 'is_accomplice': true."
-    drunk_instruction = "Ensure EXACTLY ONE innocent character has 'is_drunk': true. ALL of their clues must be completely FALSE and misleading." if include_drunk else "Ensure NO characters have 'is_drunk': true."
+    drunk_instruction = "Ensure EXACTLY ONE innocent character has 'is_drunk': true. ALL of their clues must be FALSE." if include_drunk else "Ensure NO characters have 'is_drunk': true."
     investigator_instruction = "Ensure EXACTLY ONE innocent character has 'is_investigator': true. Their Round 2 clue MUST be a 50/50 ping stating 'Either [Killer Name] or [Innocent Name] is the killer.'" if include_investigator else "Ensure NO characters have 'is_investigator': true."
 
     prompt = f"""
     Create a highly interactive social deduction murder mystery for {player_count} players. Theme: {theme}.
     Return ONLY a JSON object with this exact structure:
     {{
+        "theme_title": "A catchy 2-4 word title for this mystery",
+        "short_description": "A dark, atmospheric 2-sentence description of the setting and the tension.",
         "master_story": {{
             "background": "• Point 1\\n• Point 2",
             "the_murder": "• Point 1\\n• Point 2",
@@ -53,14 +90,11 @@ async def create_game(request: Request, theme: str, player_count: int, accomplic
                 "name": "Character Name",
                 "public_summary": "A 1-sentence summary of what EVERYONE knows about this person.",
                 "role_description": "• Personality: (How to act)\\n• Connection: (To the victim)\\n• Dark Secret: (Something they are hiding)",
-                "is_killer": false, 
-                "is_accomplice": false,
-                "is_investigator": false,
-                "is_drunk": false,
-                "ghost_clue": "A highly revealing clue they ONLY unlock after they are murdered. It must point toward the killer or an accomplice.",
+                "is_killer": false, "is_accomplice": false, "is_investigator": false, "is_drunk": false,
+                "ghost_clue": "A highly revealing clue they ONLY unlock after they are murdered.",
                 "clues": [
-                    {{"round": 2, "content": "• Gossip or timeline inconsistency about ANOTHER player's secret."}},
-                    {{"round": 3, "content": "• Hard physical evidence relating to the crime scene or the true killer."}}
+                    {{"round": 2, "content": "• Gossip about ANOTHER player's secret."}},
+                    {{"round": 3, "content": "• Hard physical evidence relating to the killer."}}
                 ]
             }}
         ]
@@ -69,15 +103,26 @@ async def create_game(request: Request, theme: str, player_count: int, accomplic
     {accomplice_instruction}
     {drunk_instruction}
     {investigator_instruction}
-    CRITICAL: Role descriptions and master story sections MUST be bulleted using the '•' character.
     """
     
     model = genai.GenerativeModel('gemini-2.5-flash', generation_config={"response_mime_type": "application/json"})
     response = model.generate_content(prompt)
     game_data = json.loads(response.text)
 
+    # 1. Save to Template Repository
+    supabase.table("game_templates").insert({
+        "theme_title": game_data.get("theme_title", f"Mystery: {theme}"),
+        "short_description": game_data.get("short_description", "Trust no one."),
+        "player_count": player_count, "accomplice_count": accomplice_count,
+        "has_drunk": include_drunk, "has_investigator": include_investigator,
+        "master_story": game_data["master_story"], "characters": game_data["characters"]
+    }).execute()
+
+    # 2. Launch the Active Game
     game_insert = supabase.table("games").insert({
-        "theme": theme, "master_story": json.dumps(game_data["master_story"])
+        "theme": theme, "theme_title": game_data.get("theme_title", f"Mystery: {theme}"), 
+        "short_description": game_data.get("short_description", "Trust no one."),
+        "master_story": json.dumps(game_data["master_story"])
     }).execute()
     game_id = game_insert.data[0]["id"]
 
@@ -85,7 +130,8 @@ async def create_game(request: Request, theme: str, player_count: int, accomplic
         player_id = supabase.table("players").insert({
             "game_id": game_id, "access_key": generate_key(), "character_name": char["name"],
             "role_description": char["role_description"], "public_summary": char["public_summary"],
-            "ghost_clue": char["ghost_clue"], "is_killer": char["is_killer"], "is_accomplice": char.get("is_accomplice", False),
+            "ghost_clue": char.get("ghost_clue") or "The spirits are silent... I took my secrets to the grave.",
+            "is_killer": char["is_killer"], "is_accomplice": char.get("is_accomplice", False),
             "is_investigator": char.get("is_investigator", False), "is_drunk": char.get("is_drunk", False)
         }).execute().data[0]["id"]
 
@@ -97,8 +143,7 @@ async def create_game(request: Request, theme: str, player_count: int, accomplic
 @app.post("/admin/release-round/{game_id}/{round_num}", dependencies=[Depends(verify_host)])
 async def release_clues(game_id: str, round_num: int):
     supabase.table("games").update({"current_round": round_num, "status": "started"}).eq("id", game_id).execute()
-    if round_num > 1:
-        supabase.table("clues").update({"is_released": True}).eq("game_id", game_id).eq("round_number", round_num).execute()
+    if round_num > 1: supabase.table("clues").update({"is_released": True}).eq("game_id", game_id).eq("round_number", round_num).execute()
     return {"message": f"Round {round_num} active!"}
 
 @app.post("/admin/end-game/{game_id}", dependencies=[Depends(verify_host)])
@@ -133,21 +178,19 @@ async def get_player_dashboard(access_key: str):
     player = player_res.data[0]
     game_id = player["game_id"]
     
-    game_res = supabase.table("games").select("current_round, status, master_story").eq("id", game_id).execute()
+    game_res = supabase.table("games").select("current_round, status, master_story, theme_title, short_description").eq("id", game_id).execute()
     current_round = game_res.data[0]["current_round"]
     game_status = game_res.data[0]["status"]
+    theme_title = game_res.data[0].get("theme_title", "Secret Mission")
+    short_description = game_res.data[0].get("short_description", "Trust no one.")
     
-    # Catch stringified JSON safely
-    try:
-        master_story = json.loads(game_res.data[0]["master_story"])
-    except:
-        master_story = {"background": "", "the_murder": "", "the_solution": ""}
+    try: master_story = json.loads(game_res.data[0]["master_story"])
+    except: master_story = {"background": "", "the_murder": "", "the_solution": ""}
 
     is_currently_dead = player["is_dead"] and current_round >= player["death_round"]
     clues_res = supabase.table("clues").select("*").eq("player_id", player["id"]).eq("is_released", True).execute()
     all_players = supabase.table("players").select("id, character_name, public_summary, claimed_by_user, is_dead, death_round, is_killer, is_accomplice, is_investigator, is_drunk, voted_for").eq("game_id", game_id).execute()
     
-    # Check if this player received any ghost clues from dead players
     received_ghost_req = supabase.table("players").select("character_name, ghost_clue").eq("game_id", game_id).eq("ghost_clue_recipient", player["character_name"]).execute()
     received_ghost_clues = received_ghost_req.data
 
@@ -174,38 +217,27 @@ async def get_player_dashboard(access_key: str):
     reveal_data = None
     if game_status == "finished":
         killer_name = next((p["character_name"] for p in all_players.data if p["is_killer"]), "Unknown")
-        
         votes = []
         correct_votes = 0
         alive_innocents = 0
         
         for p in all_players.data:
             is_innocent = not p["is_killer"] and not p["is_accomplice"]
-            if is_innocent and not p["is_dead"]:
-                alive_innocents += 1
-                
+            if is_innocent and not p["is_dead"]: alive_innocents += 1
             if p["voted_for"]:
                 is_correct = (p["voted_for"] == killer_name)
-                # Only alive innocents count toward the win condition ratio
-                if is_correct and is_innocent and not p["is_dead"]: 
-                    correct_votes += 1
+                if is_correct and is_innocent and not p["is_dead"]: correct_votes += 1
                 votes.append({"voter": p["character_name"], "player_name": p["claimed_by_user"], "target": p["voted_for"], "is_correct": is_correct})
 
-        # Innocents win if at least 50% of alive innocents voted correctly
         needed_votes = max(1, alive_innocents / 2.0)
         killer_caught = correct_votes >= needed_votes
-
         true_identities = [{"name": p["character_name"], "player": p["claimed_by_user"], "is_killer": p["is_killer"], "is_accomplice": p["is_accomplice"], "is_investigator": p["is_investigator"], "is_drunk": p["is_drunk"]} for p in all_players.data]
         
-        reveal_data = {
-            "master_story": master_story,
-            "true_identities": true_identities,
-            "votes": votes,
-            "killer_caught": killer_caught
-        }
+        reveal_data = {"master_story": master_story, "true_identities": true_identities, "votes": votes, "killer_caught": killer_caught}
 
     return {
         "game_status": game_status, "current_round": current_round, "character_name": player["character_name"],
+        "theme_title": theme_title, "short_description": short_description,
         "active_story": {"background": master_story.get("background", ""), "the_murder": master_story.get("the_murder", "")},
         "role_description": player["role_description"], "ghost_clue": player["ghost_clue"],
         "ghost_clue_recipient": player["ghost_clue_recipient"], "received_ghost_clues": received_ghost_clues,
@@ -247,13 +279,11 @@ async def update_notes(access_key: str, target_character: str, status: str, note
 @app.post("/player/vote/{access_key}")
 async def cast_vote(access_key: str, suspect: str):
     player = supabase.table("players").select("*").eq("access_key", access_key).execute()
-    if player.data[0]["is_dead"]: 
-        raise HTTPException(status_code=403, detail="Eliminated players cannot vote.")
+    if player.data[0]["is_dead"]: raise HTTPException(status_code=403, detail="Eliminated players cannot vote.")
         
     game_id = player.data[0]["game_id"]
     target = supabase.table("players").select("is_dead").eq("game_id", game_id).eq("character_name", suspect).execute()
-    if target.data and target.data[0]["is_dead"]:
-        raise HTTPException(status_code=400, detail="Cannot vote for an eliminated player.")
+    if target.data and target.data[0]["is_dead"]: raise HTTPException(status_code=400, detail="Cannot vote for an eliminated player.")
     
     supabase.table("players").update({"voted_for": suspect}).eq("access_key", access_key).execute()
     return {"message": "Vote locked in!"}

@@ -30,12 +30,10 @@
         .refresh-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #1e1e1e; padding: 10px; text-align: center; border-top: 1px solid #bb86fc; box-sizing: border-box; z-index: 10;}
         .refresh-btn { width: 90%; max-width: 400px; margin: 0 auto; background: transparent; border: 1px solid #03dac6; color: #03dac6; padding: 15px; font-size: 16px; border-radius: 8px;}
         
-        /* Updated Top Action Buttons */
         .top-actions { position: fixed; top: 15px; right: 15px; display: flex; gap: 10px; z-index: 100; }
         .icon-btn { background: #bb86fc; color: black; border-radius: 50%; font-weight: bold; font-size: 20px; border: none; cursor: pointer; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); flex-shrink: 0; padding: 0; margin: 0;}
         .icon-story { background: #03dac6; }
         
-        /* Modals */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; justify-content: center; align-items: center; }
         .modal-content { background: #1e1e1e; padding: 25px; border-radius: 8px; max-width: 90%; width: 400px; border: 1px solid #03dac6; max-height: 80vh; overflow-y: auto; }
         
@@ -99,7 +97,11 @@
             </div>
 
             <div id="waitingScreen" style="display: none; margin-top: 20px;">
-                <h2 style="text-align: center;">Lobby Connected</h2>
+                <div style="text-align: center; margin-bottom: 25px;">
+                    <h2 id="roomTitle" style="color: #03dac6; font-size: 32px; margin-bottom: 5px;">Connecting...</h2>
+                    <p id="roomDesc" style="color: #aaa; font-style: italic; font-size: 16px; margin-top: 0; padding: 0 10px;"></p>
+                </div>
+
                 <div class="box" style="text-align: center;">
                     <p style="margin: 0; font-size: 14px; color: #aaa;">CURRENT MATCHUP</p>
                     <p style="margin: 5px 0 0 0; font-size: 18px;">
@@ -210,11 +212,9 @@
                         
                         const banner = document.getElementById('winnerBanner');
                         if(data.reveal_data.killer_caught) {
-                            banner.innerText = "🏆 INNOCENTS WIN!";
-                            banner.className = "winner-banner win-innocent";
+                            banner.innerText = "🏆 INNOCENTS WIN!"; banner.className = "winner-banner win-innocent";
                         } else {
-                            banner.innerText = "🔪 THE KILLER ESCAPED!";
-                            banner.className = "winner-banner win-killer";
+                            banner.innerText = "🔪 THE KILLER ESCAPED!"; banner.className = "winner-banner win-killer";
                         }
 
                         const votesDiv = document.getElementById('voteResults');
@@ -249,6 +249,11 @@
                     if (data.game_status === 'waiting') {
                         document.getElementById('waitingScreen').style.display = 'block';
                         document.getElementById('activeGame').style.display = 'none';
+                        
+                        // INJECT LOBBY ATMOSPHERE
+                        document.getElementById('roomTitle').innerText = data.theme_title || 'Mystery Match';
+                        document.getElementById('roomDesc').innerText = data.short_description || 'Trust no one.';
+                        
                         document.getElementById('waitChar').innerText = data.character_name;
                         document.getElementById('kCount').innerText = `${data.killers_count} Killer${data.killers_count !== 1 ? 's' : ''}`;
                         document.getElementById('aCount').innerText = `${data.accomplice_count} Accomplice${data.accomplice_count !== 1 ? 's' : ''}`;
@@ -275,7 +280,6 @@
                         document.getElementById('votingSection').style.display = 'block';
                     }
 
-                    // Render Ghost Clues sent to this player
                     if (data.received_ghost_clues && data.received_ghost_clues.length > 0) {
                         document.getElementById('receivedGhostClues').style.display = 'block';
                         const gList = document.getElementById('ghostCluesList');
@@ -328,7 +332,6 @@
                         const deadClass = p.is_publicly_dead ? 'dead' : '';
                         const deadLabel = p.is_publicly_dead ? ' <span style="color:#ff5252;">☠️ (DEAD)</span>' : '';
                         
-                        // Prevent selecting dead players for kills, ghost clues, or final votes!
                         if (!p.is_publicly_dead) { 
                             if(killSelect) killSelect.innerHTML += `<option value="${p.character_name}">${p.character_name} (${p.claimed_by})</option>`; 
                             if(ghostSelect) ghostSelect.innerHTML += `<option value="${p.character_name}">${p.character_name}</option>`; 
@@ -383,11 +386,7 @@
             const suspect = document.getElementById('suspectList').value;
             if(!suspect) return;
             const res = await fetch(`/player/vote/${accessKey}?suspect=${encodeURIComponent(suspect)}`, { method: 'POST' });
-            
-            if (!res.ok) {
-                const err = await res.json();
-                alert(err.detail); // Let the player know if the vote failed
-            }
+            if (!res.ok) { const err = await res.json(); alert(err.detail); }
             fetchData();
         }
 
