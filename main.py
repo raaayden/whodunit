@@ -105,7 +105,7 @@ async def create_game(request: Request, theme: str, player_count: int, accomplic
     {investigator_instruction}
     """
     
-    model = genai.GenerativeModel('gemini-2.5-flash', generation_config={"response_mime_type": "application/json"})
+    model = genai.GenerativeModel('gemini-2.5-flash-lite', generation_config={"response_mime_type": "application/json"})
     response = model.generate_content(prompt)
     game_data = json.loads(response.text)
 
