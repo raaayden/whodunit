@@ -196,7 +196,6 @@
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('content').style.display = 'block';
 
-                    // Populate Story Modal
                     if (data.active_story) {
                         document.getElementById('storyContent').innerHTML = `
                             <strong style="color: #03dac6;">Background:</strong><br>${data.active_story.background}<br><br>
@@ -276,13 +275,14 @@
                         document.getElementById('votingSection').style.display = 'block';
                     }
 
+                    // Render Ghost Clues sent to this player
                     if (data.received_ghost_clues && data.received_ghost_clues.length > 0) {
                         document.getElementById('receivedGhostClues').style.display = 'block';
                         const gList = document.getElementById('ghostCluesList');
                         gList.innerHTML = "";
                         data.received_ghost_clues.forEach(gc => {
                             gList.innerHTML += `<div style="background: rgba(3, 218, 198, 0.1); padding: 10px; border-left: 4px solid #03dac6; margin-bottom: 10px; border-radius: 4px;">
-                                <strong style="color: #03dac6;">From ${gc.character_name}:</strong><br>
+                                <strong style="color: #03dac6;">👻 Message from Beyond (${gc.character_name}):</strong><br>
                                 <span style="color: #ddd; font-style: italic;">"${gc.ghost_clue}"</span>
                             </div>`;
                         });
@@ -319,20 +319,21 @@
 
                     const notebookDiv = document.getElementById('notebookContainer');
                     notebookDiv.innerHTML = "";
-                    killSelect.innerHTML = "<option value=''>-- Select Target --</option>";
-                    voteSelect.innerHTML = "<option value=''>-- Select Suspect --</option>";
-                    ghostSelect.innerHTML = "<option value=''>-- Select Living Player --</option>";
+                    if(killSelect) killSelect.innerHTML = "<option value=''>-- Select Target --</option>";
+                    if(voteSelect) voteSelect.innerHTML = "<option value=''>-- Select Suspect --</option>";
+                    if(ghostSelect) ghostSelect.innerHTML = "<option value=''>-- Select Living Player --</option>";
 
                     data.notebook.forEach((p, index) => {
                         const statusClass = p.my_note.status === 'sus' ? 'sus' : p.my_note.status === 'alright fam' ? 'alright' : '';
                         const deadClass = p.is_publicly_dead ? 'dead' : '';
                         const deadLabel = p.is_publicly_dead ? ' <span style="color:#ff5252;">☠️ (DEAD)</span>' : '';
                         
+                        // Prevent selecting dead players for kills, ghost clues, or final votes!
                         if (!p.is_publicly_dead) { 
-                            killSelect.innerHTML += `<option value="${p.character_name}">${p.character_name} (${p.claimed_by})</option>`; 
-                            ghostSelect.innerHTML += `<option value="${p.character_name}">${p.character_name}</option>`; 
+                            if(killSelect) killSelect.innerHTML += `<option value="${p.character_name}">${p.character_name} (${p.claimed_by})</option>`; 
+                            if(ghostSelect) ghostSelect.innerHTML += `<option value="${p.character_name}">${p.character_name}</option>`; 
+                            if(voteSelect) voteSelect.innerHTML += `<option value="${p.character_name}">${p.character_name}</option>`;
                         }
-                        voteSelect.innerHTML += `<option value="${p.character_name}">${p.character_name}</option>`;
 
                         notebookDiv.innerHTML += `
                             <div class="suspect-card ${statusClass} ${deadClass}">
@@ -349,9 +350,9 @@
                         `;
                     });
 
-                    if(currentKillTarget) killSelect.value = currentKillTarget;
-                    if(currentVoteTarget) voteSelect.value = currentVoteTarget;
-                    if(currentGhostTarget) ghostSelect.value = currentGhostTarget;
+                    if(currentKillTarget && killSelect) killSelect.value = currentKillTarget;
+                    if(currentVoteTarget && voteSelect) voteSelect.value = currentVoteTarget;
+                    if(currentGhostTarget && ghostSelect) ghostSelect.value = currentGhostTarget;
 
                     if (data.is_killer && !data.is_dead) document.getElementById('killerPanel').style.display = 'block';
                     else document.getElementById('killerPanel').style.display = 'none';
@@ -381,7 +382,12 @@
         async function submitVote() {
             const suspect = document.getElementById('suspectList').value;
             if(!suspect) return;
-            await fetch(`/player/vote/${accessKey}?suspect=${encodeURIComponent(suspect)}`, { method: 'POST' });
+            const res = await fetch(`/player/vote/${accessKey}?suspect=${encodeURIComponent(suspect)}`, { method: 'POST' });
+            
+            if (!res.ok) {
+                const err = await res.json();
+                alert(err.detail); // Let the player know if the vote failed
+            }
             fetchData();
         }
 

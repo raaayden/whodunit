@@ -72,7 +72,7 @@ async def create_game(request: Request, theme: str, player_count: int, accomplic
     CRITICAL: Role descriptions and master story sections MUST be bulleted using the '•' character.
     """
     
-    model = genai.GenerativeModel('gemini-2.5-flash-lite', generation_config={"response_mime_type": "application/json"})
+    model = genai.GenerativeModel('gemini-2.5-flash', generation_config={"response_mime_type": "application/json"})
     response = model.generate_content(prompt)
     game_data = json.loads(response.text)
 
@@ -136,7 +136,12 @@ async def get_player_dashboard(access_key: str):
     game_res = supabase.table("games").select("current_round, status, master_story").eq("id", game_id).execute()
     current_round = game_res.data[0]["current_round"]
     game_status = game_res.data[0]["status"]
-    master_story = json.loads(game_res.data[0]["master_story"])
+    
+    # Catch stringified JSON safely
+    try:
+        master_story = json.loads(game_res.data[0]["master_story"])
+    except:
+        master_story = {"background": "", "the_murder": "", "the_solution": ""}
 
     is_currently_dead = player["is_dead"] and current_round >= player["death_round"]
     clues_res = supabase.table("clues").select("*").eq("player_id", player["id"]).eq("is_released", True).execute()
@@ -242,7 +247,13 @@ async def update_notes(access_key: str, target_character: str, status: str, note
 @app.post("/player/vote/{access_key}")
 async def cast_vote(access_key: str, suspect: str):
     player = supabase.table("players").select("*").eq("access_key", access_key).execute()
-    if player.data[0]["is_dead"]: raise HTTPException(status_code=403, detail="Eliminated players cannot vote.")
+    if player.data[0]["is_dead"]: 
+        raise HTTPException(status_code=403, detail="Eliminated players cannot vote.")
+        
+    game_id = player.data[0]["game_id"]
+    target = supabase.table("players").select("is_dead").eq("game_id", game_id).eq("character_name", suspect).execute()
+    if target.data and target.data[0]["is_dead"]:
+        raise HTTPException(status_code=400, detail="Cannot vote for an eliminated player.")
     
     supabase.table("players").update({"voted_for": suspect}).eq("access_key", access_key).execute()
     return {"message": "Vote locked in!"}

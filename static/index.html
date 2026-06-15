@@ -91,14 +91,16 @@
             <div class="card" style="margin-top: 20px;">
                 <h3 style="margin-top: 0; color: #bb86fc;">2. Control Room</h3>
                 <input type="text" id="gameId" placeholder="Active Game ID (UUID)">
-                <select id="roundNum">
-                    <option value="1">Round 1: Roleplay (No Clues)</option>
-                    <option value="2">Round 2: First Clues Released</option>
-                    <option value="3">Round 3: Final Evidence Released</option>
-                </select>
-                <button onclick="releaseClues()">Push Round Update</button>
-                <button onclick="fetchGodMode()" style="background: #03dac6; color: black; margin-top: 15px;">↻ Refresh Roster</button>
-                <button onclick="endGame()" class="btn-danger">🛑 End Game & Reveal Truth</button>
+                
+                <div id="roundControls" style="text-align: center; margin-top: 15px; padding: 15px; background: #2a2a2a; border-radius: 6px; border: 1px solid #444;">
+                    <p style="margin: 0; font-size: 14px; color: #aaa;">Current Round</p>
+                    <p id="currentRoundDisplay" style="font-size: 32px; color: #03dac6; font-weight: bold; margin: 5px 0;">0</p>
+                    
+                    <button id="advanceRoundBtn" onclick="advanceRound()" style="background: #03dac6; color: black; margin-top: 10px;">Advance to Round 1</button>
+                    <button id="revealTruthBtn" onclick="endGame()" class="btn-danger" style="display: none; margin-top: 10px;">🛑 Reveal Truth (End Game)</button>
+                </div>
+                
+                <button onclick="fetchGodMode()" style="background: transparent; border: 1px solid #03dac6; color: #03dac6; margin-top: 15px;">↻ Refresh Roster</button>
             </div>
         </div>
 
@@ -117,6 +119,14 @@
     </div>
 
     <script>
+        // Check for active game on page load (Persistence)
+        window.onload = () => {
+            const savedId = localStorage.getItem("activeGameId");
+            if (savedId) {
+                document.getElementById('gameId').value = savedId;
+            }
+        };
+
         function showToast(msg) {
             const toast = document.getElementById("toast");
             toast.innerText = msg;
@@ -144,9 +154,12 @@
                 const data = await res.json();
                 if(!res.ok) throw new Error(data.detail || "Failed to generate");
 
+                // Save ID to memory so refresh doesn't break
+                localStorage.setItem("activeGameId", data.game_id);
                 document.getElementById('gameId').value = data.game_id;
                 document.getElementById('roomLinkContainer').style.display = 'block';
                 document.getElementById('roomLinkInput').value = data.room_url;
+                
                 await fetchGodMode();
                 showToast("✅ Game Generated Successfully");
             } catch (err) { alert(err); } 
@@ -161,10 +174,14 @@
             showToast("📋 Link Copied to Clipboard!");
         }
 
-        async function releaseClues() {
+        async function advanceRound() {
             const pass = document.getElementById('adminPass').value;
-            await fetch(`/admin/release-round/${document.getElementById('gameId').value}/${document.getElementById('roundNum').value}`, { method: 'POST', headers: { 'x-admin-token': pass }});
-            showToast("🚀 Round Pushed! Player devices updated.");
+            const gameId = document.getElementById('gameId').value;
+            const currentRound = parseInt(document.getElementById('currentRoundDisplay').innerText);
+            const nextRound = currentRound + 1;
+            
+            await fetch(`/admin/release-round/${gameId}/${nextRound}`, { method: 'POST', headers: { 'x-admin-token': pass }});
+            showToast(`🚀 Round ${nextRound} Pushed! Player devices updated.`);
             fetchGodMode();
         }
 
@@ -182,8 +199,30 @@
             const gameId = document.getElementById('gameId').value;
             if(!gameId) return;
 
+            // Remember ID on manual refresh
+            localStorage.setItem("activeGameId", gameId);
+
             const res = await fetch(`/admin/game/${gameId}`, { headers: { 'x-admin-token': pass }});
             const data = await res.json();
+            
+            // Dynamic Button Logic
+            const round = data.game.current_round || 0;
+            document.getElementById('currentRoundDisplay').innerText = round;
+            const advanceBtn = document.getElementById('advanceRoundBtn');
+            const revealBtn = document.getElementById('revealTruthBtn');
+
+            if (data.game.status === 'finished') {
+                advanceBtn.style.display = "none";
+                revealBtn.style.display = "none";
+                document.getElementById('currentRoundDisplay').innerText = "Game Over";
+            } else if (round < 3) {
+                advanceBtn.style.display = "block";
+                revealBtn.style.display = "none";
+                advanceBtn.innerText = `Advance to Round ${round + 1}`;
+            } else {
+                advanceBtn.style.display = "none";
+                revealBtn.style.display = "block";
+            }
             
             const story = JSON.parse(data.game.master_story);
             document.getElementById('truthContent').innerHTML = `
