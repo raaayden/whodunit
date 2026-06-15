@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Game</title>
+    <style>
+        body { background-color: #121212; color: #e0e0e0; font-family: 'Courier New', Courier, monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .box { background: #1e1e1e; padding: 30px; border-radius: 8px; border: 1px solid #bb86fc; text-align: center; max-width: 400px; width: 90%; }
+        input { padding: 15px; width: 100%; box-sizing: border-box; margin: 20px 0; background: #333; color: white; border: 1px solid #555; font-size: 18px; text-align: center;}
+        button { background: #bb86fc; color: black; font-weight: bold; cursor: pointer; border: none; padding: 15px; width: 100%; font-size: 18px; border-radius: 4px;}
+        button:hover { background: #9965f4; }
+        #errorMsg { color: #ff6b6b; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>Enter the Mystery</h2>
+        <p>Enter your real name to be assigned your secret identity.</p>
+        <input type="text" id="playerName" placeholder="Your Real Name" required>
+        <button onclick="joinGame()">Join Room</button>
+        <div id="errorMsg"></div>
+    </div>
+
+    <script>
+        // Extract game_id from the URL (e.g., /room/1234-abcd)
+        const gameId = window.location.pathname.split('/').pop();
+
+        async function joinGame() {
+            const name = document.getElementById('playerName').value;
+            if (!name) return alert("Please enter your name");
+
+            const res = await fetch(`/api/room/${gameId}/join?player_name=${encodeURIComponent(name)}`, { method: 'POST' });
+            const data = await res.json();
+
+            if (res.ok) {
+                // Redirect to the actual game interface with their secure key
+                window.location.href = `/play?key=${data.access_key}`;
+            } else {
+                document.getElementById('errorMsg').innerText = data.detail || "Error joining game.";
+            }
+        }
+    </script>
+</body>
+</html>

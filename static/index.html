@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Host-Mode Dashboard</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; padding: 15px; color: #e0e0e0; margin: 0; }
+        .grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media(min-width: 768px) { .grid { grid-template-columns: 1fr 1fr; } }
+        
+        .card { background: #1e1e1e; padding: 20px; border-radius: 8px; border: 1px solid #333; }
+        
+        input, button, select { padding: 15px; margin: 8px 0; width: 100%; box-sizing: border-box; font-size: 16px; border-radius: 6px; border: 1px solid #555; background: #2a2a2a; color: white;}
+        button { background: #bb86fc; color: black; border: none; cursor: pointer; font-weight: bold;}
+        button:hover { background: #9965f4; }
+        
+        .truth-box { background: #3a0000; padding: 15px; border-left: 4px solid #ff5252; margin-top: 10px; border-radius: 4px; color: #ffb3b3;}
+        
+        .table-container { overflow-x: auto; margin-top: 10px; }
+        table { width: 100%; text-align: left; border-collapse: collapse; min-width: 400px; }
+        th, td { padding: 10px; border-bottom: 1px solid #444; font-size: 14px; }
+        
+        .killer { color: #ff5252; font-weight: bold; }
+        .dead { text-decoration: line-through; color: #666; background-color: #1a1a1a; }
+        .room-link { background: #00332a; padding: 15px; border: 2px dashed #03dac6; text-align: center; font-weight: bold; font-size: 16px; margin-top: 10px; word-break: break-all; color: #03dac6;}
+    </style>
+</head>
+<body>
+    <h1 style="font-size: 24px; color: #bb86fc;">👁️ Host-Mode Dashboard</h1>
+    <input type="password" id="adminPass" placeholder="Admin Password (from .env)" style="max-width: 100%; margin-bottom: 20px;">
+
+    <div class="grid">
+        <div>
+            <div class="card">
+                <h3 style="margin-top: 0; color: #bb86fc;">1. Create a New Game</h3>
+                <input type="text" id="theme" placeholder="Theme (e.g., Spy, Mansion)">
+                <input type="number" id="playerCount" placeholder="Players" value="6">
+                <label style="display: block; margin: 15px 0; font-weight: bold; font-size: 16px;">
+                    <input type="checkbox" id="includeAccomplice" style="width: auto; transform: scale(1.3); margin-right: 10px;"> Include Accomplice?
+                </label>
+                <button onclick="createGame()">Generate Game (~10s)</button>
+                <div id="roomLinkContainer" style="display: none;">
+                    <p style="font-size: 14px; color: #aaa;">Share this link with your friends:</p>
+                    <div id="roomLink" class="room-link"></div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 20px;">
+                <h3 style="margin-top: 0; color: #bb86fc;">2. Control Room</h3>
+                <input type="text" id="gameId" placeholder="Active Game ID (UUID)">
+                <input type="number" id="roundNum" placeholder="Round to Release (1, 2, or 3)">
+                <button onclick="releaseClues()">Start Game / Unlock Round</button>
+                <button onclick="fetchHostMode()" style="background: #03dac6; color: black; margin-top: 15px;">↻ Refresh Roster</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-top: 0; color: #bb86fc;">The Master Truth</h3>
+            <div id="truthContent" class="truth-box">Load a game to see the secret plot...</div>
+
+            <h3 style="margin-top: 30px; color: #03dac6;">Live Player Roster</h3>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Player (Real Name)</th><th>Role</th><th>Voted For</th></tr></thead>
+                    <tbody id="rosterBody"><tr><td colspan="3">No game loaded.</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function createGame() {
+            const pass = document.getElementById('adminPass').value;
+            const theme = document.getElementById('theme').value;
+            const count = document.getElementById('playerCount').value;
+            const accomplice = document.getElementById('includeAccomplice').checked;
+            
+            document.getElementById('truthContent').innerText = "Generating AI plot... Please wait.";
+            
+            const res = await fetch(`/admin/create-game?theme=${theme}&player_count=${count}&include_accomplice=${accomplice}`, { method: 'POST', headers: { 'x-admin-token': pass }});
+            const data = await res.json();
+            
+            document.getElementById('gameId').value = data.game_id;
+            document.getElementById('roomLinkContainer').style.display = 'block';
+            document.getElementById('roomLink').innerText = data.room_url;
+            fetchHostMode();
+        }
+
+        async function releaseClues() {
+            const pass = document.getElementById('adminPass').value;
+            await fetch(`/admin/release-round/${document.getElementById('gameId').value}/${document.getElementById('roundNum').value}`, { method: 'POST', headers: { 'x-admin-token': pass }});
+            alert("Round Released! Game state updated.");
+            fetchHostMode();
+        }
+
+        async function fetchHostMode() {
+            const pass = document.getElementById('adminPass').value;
+            const gameId = document.getElementById('gameId').value;
+            if(!gameId) return;
+
+            const res = await fetch(`/admin/game/${gameId}`, { headers: { 'x-admin-token': pass }});
+            const data = await res.json();
+            
+            const story = JSON.parse(data.game.master_story);
+            document.getElementById('truthContent').innerHTML = `
+                <strong style="color: #ff5252;">Background:</strong> ${story.background}<br><br>
+                <strong style="color: #ff5252;">The Murder:</strong> ${story.the_murder}<br><br>
+                <strong style="color: #ff5252;">The Solution:</strong> ${story.the_solution}
+            `;
+
+            const tbody = document.getElementById('rosterBody');
+            tbody.innerHTML = "";
+            data.players.forEach(p => {
+                let role = "Innocent";
+                if (p.is_killer) role = "🔪 Killer";
+                if (p.is_accomplice) role = "🤝 Accomplice";
+
+                const deadClass = p.is_dead && data.game.current_round >= p.death_round ? 'dead' : '';
+                const realName = p.claimed_by_user ? p.claimed_by_user : "<em>Empty</em>";
+                const vote = p.voted_for ? p.voted_for : "<em>Voting...</em>";
+                
+                tbody.innerHTML += `
+                    <tr class="${deadClass}">
+                        <td><strong>${p.character_name}</strong><br><small style="color: #aaa;">${realName}</small></td>
+                        <td class="${p.is_killer ? 'killer' : ''}">${role}</td>
+                        <td>${vote}</td>
+                    </tr>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>

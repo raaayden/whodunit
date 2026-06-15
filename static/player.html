@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Link</title>
+    <style>
+        body { background-color: #121212; color: #e0e0e0; font-family: 'Courier New', Courier, monospace; margin: 0; padding: 15px; padding-bottom: 80px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1, h2, h3 { color: #bb86fc; margin-top: 0; }
+        .box { background: #1e1e1e; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #333; }
+        
+        .alert-killer { border-left: 4px solid #ff0000; color: #ff6b6b; background: #3a0000; }
+        .alert-accomplice { border-left: 4px solid #ff9800; color: #ffb74d; background: #3e2700; }
+        .alert-dead { text-align: center; border: 2px solid #ff0000; background: #220000; color: white; padding: 30px; font-size: 24px; font-weight: bold; }
+        
+        .suspect-card { background: #2a2a2a; padding: 15px; margin-bottom: 10px; border-radius: 6px; border-left: 4px solid #888; }
+        .suspect-card.sus { border-left-color: #ff5252; }
+        .suspect-card.alright { border-left-color: #4caf50; }
+        .suspect-card.dead { opacity: 0.5; text-decoration: line-through; }
+        
+        select, textarea, button { width: 100%; padding: 12px; margin-top: 5px; box-sizing: border-box; background: #121212; color: white; border: 1px solid #555; border-radius: 4px; font-size: 16px;}
+        button { background: #bb86fc; color: black; font-weight: bold; cursor: pointer; border: none; margin-top: 10px; }
+        button:hover { background: #9965f4; }
+        .action-btn { background: #03dac6; }
+        .kill-btn { background: #ff5252; color: white; }
+        
+        .refresh-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #1e1e1e; padding: 10px; text-align: center; border-top: 1px solid #bb86fc; box-sizing: border-box; z-index: 10;}
+        .refresh-btn { width: 90%; max-width: 400px; margin: 0 auto; background: transparent; border: 1px solid #03dac6; color: #03dac6; padding: 15px; font-size: 16px; border-radius: 8px;}
+        
+        /* Floating Help Button & Modal */
+        .help-btn { position: fixed; top: 15px; right: 15px; background: #bb86fc; color: black; width: 40px; height: 40px; border-radius: 50%; font-weight: bold; font-size: 20px; border: none; z-index: 100; cursor: pointer; padding: 0;}
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; justify-content: center; align-items: center; }
+        .modal-content { background: #1e1e1e; padding: 25px; border-radius: 8px; max-width: 90%; width: 400px; border: 1px solid #03dac6; }
+        .modal-content ul { padding-left: 20px; line-height: 1.5;}
+        
+        ul.clue-list { margin-top: 5px; padding-left: 20px; color: #ddd; }
+        ul.clue-list li { margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+    <button class="help-btn" onclick="toggleModal(true)">?</button>
+
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <h2 style="color: #03dac6;">📝 How to Play</h2>
+            <ul>
+                <li><strong>Innocents:</strong> Speak to others, share (or hide) your clues, and vote for the correct Killer to win.</li>
+                <li><strong>The Killer:</strong> Deflect blame, lie about your clues, and secretly eliminate players using the Assassination panel.</li>
+                <li><strong>The Accomplice:</strong> You win if the Killer wins. Protect them at all costs.</li>
+                <li><strong>Rounds:</strong> The Host will unlock clues in 3 phases. Eliminations happen at the start of a new round.</li>
+                <li><strong>Notebook:</strong> Keep track of who is "Sus" at the bottom of your screen. This is private to you.</li>
+            </ul>
+            <button onclick="toggleModal(false)" style="background: #03dac6; color: black;">Close Guide</button>
+        </div>
+    </div>
+
+    <div class="container" id="app">
+        <div id="loading" style="text-align: center; margin-top: 50px;">Syncing Secure Data...</div>
+        
+        <div id="content" style="display: none;">
+            <div id="deadScreen" style="display: none;" class="box alert-dead">
+                ☠️ YOU HAVE BEEN ELIMINATED ☠️<br>
+                <small style="font-size: 14px; font-weight: normal; display: block; margin-top: 10px;">You may continue to observe, but you cannot speak or vote.</small>
+            </div>
+
+            <div id="waitingScreen" style="display: none; margin-top: 20px;">
+                <h2 style="text-align: center;">Lobby Connected</h2>
+                <div class="box" style="text-align: center;">
+                    <p style="margin: 0; font-size: 14px; color: #aaa;">CURRENT MATCHUP</p>
+                    <p style="margin: 5px 0 0 0; font-size: 18px;">
+                        <span id="kCount" style="color: #ff5252; font-weight: bold;"></span> &nbsp;|&nbsp; 
+                        <span id="aCount" style="color: #ffb74d; font-weight: bold;"></span>
+                    </p>
+                </div>
+                <div style="text-align: center; margin-top: 30px;">
+                    <p style="color: #aaa;">Waiting for Host to start Round 1... (Screen auto-updates)</p>
+                    <p style="font-size: 20px; border: 1px dashed #bb86fc; padding: 15px; border-radius: 8px;">Your Identity:<br><strong id="waitChar" style="color: #bb86fc; font-size: 24px;"></strong></p>
+                </div>
+            </div>
+
+            <div id="activeGame" style="display: none;">
+                <h1 id="charName">Name</h1>
+                <div id="alertsContainer"></div>
+
+                <div class="box">
+                    <h3>Your Secret Identity</h3>
+                    <p id="roleDesc" style="line-height: 1.6;"></p>
+                </div>
+
+                <div id="killerPanel" style="display: none;" class="box">
+                    <h3 style="color: #ff5252;">🔪 Assassination Protocol</h3>
+                    <p style="font-size: 14px; color: #aaa;">Select a target. They will drop dead at the start of the NEXT round.</p>
+                    <select id="killTarget"></select>
+                    <button class="kill-btn" onclick="eliminateTarget()">Eliminate Target</button>
+                    <div id="killConfirm" style="color: #ff5252; font-weight: bold; margin-top: 10px; text-align: center;"></div>
+                </div>
+
+                <div class="box">
+                    <h3>Your Clues</h3>
+                    <div id="cluesContainer"></div>
+                </div>
+
+                <div class="box" style="border-color: #03dac6;">
+                    <h3 style="color: #03dac6;">🕵️ Digital Notebook</h3>
+                    <p style="font-size: 14px; color: #aaa;">Keep track of alliances. Data saves locally.</p>
+                    <div id="notebookContainer"></div>
+                </div>
+
+                <div class="box" id="votingSection">
+                    <h3>Final Accusation</h3>
+                    <select id="suspectList"></select>
+                    <button onclick="submitVote()">Lock In Vote</button>
+                    <div id="voteConfirmed" style="color: #03dac6; font-weight: bold; margin-top: 10px; text-align: center;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="refresh-bar">
+        <button class="refresh-btn" onclick="fetchData()">↻ Force Refresh Sync</button>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const accessKey = urlParams.get('key');
+        let globalData = null;
+
+        function toggleModal(show) {
+            document.getElementById('helpModal').style.display = show ? 'flex' : 'none';
+        }
+
+        function fetchData() {
+            if (!accessKey) return document.getElementById('loading').innerText = "Invalid Link.";
+            
+            fetch(`/player/dashboard/${accessKey}`)
+                .then(r => r.json())
+                .then(data => {
+                    globalData = data;
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('content').style.display = 'block';
+                    
+                    if (data.game_status === 'waiting') {
+                        document.getElementById('waitingScreen').style.display = 'block';
+                        document.getElementById('activeGame').style.display = 'none';
+                        document.getElementById('waitChar').innerText = data.character_name;
+                        document.getElementById('kCount').innerText = `${data.killers_count} Killer${data.killers_count !== 1 ? 's' : ''}`;
+                        document.getElementById('aCount').innerText = `${data.accomplice_count} Accomplice${data.accomplice_count !== 1 ? 's' : ''}`;
+                        return;
+                    }
+
+                    document.getElementById('waitingScreen').style.display = 'none';
+                    document.getElementById('activeGame').style.display = 'block';
+                    
+                    if (data.is_dead) document.getElementById('deadScreen').style.display = 'block';
+
+                    document.getElementById('charName').innerText = data.character_name;
+                    document.getElementById('roleDesc').innerText = data.role_description;
+
+                    let alerts = "";
+                    if (data.is_killer) alerts += `<div class="box alert-killer">⚠️ YOU ARE THE KILLER. Deflect suspicion.</div>`;
+                    if (data.is_accomplice) alerts += `<div class="box alert-accomplice">🤝 YOU ARE THE ACCOMPLICE. Protect the Killer at all costs.</div>`;
+                    document.getElementById('alertsContainer').innerHTML = alerts;
+
+                    // Bullet Point Clue Parser
+                    const cluesDiv = document.getElementById('cluesContainer');
+                    cluesDiv.innerHTML = "";
+                    data.available_clues.forEach(clue => {
+                        let formattedContent = clue.content.split('•').filter(c => c.trim() !== '').map(c => `<li>${c.trim()}</li>`).join('');
+                        cluesDiv.innerHTML += `<div style="background:#2c2c2c; padding:15px; margin-bottom:10px; border-left:4px solid #bb86fc; border-radius:4px;">
+                            <strong>Round ${clue.round_number}:</strong>
+                            <ul class="clue-list">${formattedContent}</ul>
+                        </div>`;
+                    });
+
+                    // Keep dropdown values stable during auto-refresh by saving current selections
+                    const killSelect = document.getElementById('killTarget');
+                    const voteSelect = document.getElementById('suspectList');
+                    const currentKillTarget = killSelect ? killSelect.value : '';
+                    const currentVoteTarget = voteSelect ? voteSelect.value : '';
+
+                    const notebookDiv = document.getElementById('notebookContainer');
+                    notebookDiv.innerHTML = "";
+                    killSelect.innerHTML = "<option value=''>-- Select Target --</option>";
+                    voteSelect.innerHTML = "<option value=''>-- Select Suspect --</option>";
+
+                    data.notebook.forEach((p, index) => {
+                        const statusClass = p.my_note.status === 'sus' ? 'sus' : p.my_note.status === 'alright fam' ? 'alright' : '';
+                        const deadClass = p.is_publicly_dead ? 'dead' : '';
+                        const deadLabel = p.is_publicly_dead ? ' <span style="color:#ff5252;">☠️ (DEAD)</span>' : '';
+                        
+                        if (!p.is_publicly_dead) {
+                            killSelect.innerHTML += `<option value="${p.character_name}">${p.character_name} (${p.claimed_by})</option>`;
+                        }
+                        voteSelect.innerHTML += `<option value="${p.character_name}">${p.character_name}</option>`;
+
+                        notebookDiv.innerHTML += `
+                            <div class="suspect-card ${statusClass} ${deadClass}">
+                                <strong style="font-size:18px;">${p.character_name}</strong>${deadLabel}<br>
+                                <small style="color:#bb86fc;">Played by: ${p.claimed_by}</small>
+                                <p style="font-size:14px; color:#aaa; margin: 10px 0; background:#1e1e1e; padding:10px; border-radius:4px;">${p.public_summary}</p>
+                                
+                                <select id="status_${index}" onchange="saveNote('${p.character_name}', ${index})">
+                                    <option value="neutral" ${p.my_note.status==='neutral'?'selected':''}>Neutral Status</option>
+                                    <option value="sus" ${p.my_note.status==='sus'?'selected':''}>🔴 SUS</option>
+                                    <option value="alright fam" ${p.my_note.status==='alright fam'?'selected':''}>🟢 Alright Fam</option>
+                                </select>
+                                
+                                <textarea id="note_${index}" onblur="saveNote('${p.character_name}', ${index})" placeholder="Jot down notes..." rows="2" style="resize:vertical;">${p.my_note.note_text}</textarea>
+                            </div>
+                        `;
+                    });
+
+                    // Restore dropdown selections
+                    if(currentKillTarget) killSelect.value = currentKillTarget;
+                    if(currentVoteTarget) voteSelect.value = currentVoteTarget;
+
+                    if (data.is_killer && !data.is_dead) document.getElementById('killerPanel').style.display = 'block';
+
+                    if (data.voted_for) {
+                        document.getElementById('suspectList').style.display = 'none';
+                        document.querySelector('#votingSection button').style.display = 'none';
+                        document.getElementById('voteConfirmed').innerText = `You accused: ${data.voted_for}`;
+                    }
+                });
+        }
+
+        async function saveNote(targetChar, index) {
+            const status = document.getElementById(`status_${index}`).value;
+            const text = document.getElementById(`note_${index}`).value;
+            await fetch(`/player/notes/${accessKey}?target_character=${encodeURIComponent(targetChar)}&status=${encodeURIComponent(status)}&note_text=${encodeURIComponent(text)}`, { method: 'POST' });
+            // Let the auto-polling handle the visual refresh so typing isn't interrupted
+        }
+
+        async function eliminateTarget() {
+            const target = document.getElementById('killTarget').value;
+            if(!target) return alert("Select a target first.");
+            const res = await fetch(`/player/eliminate/${accessKey}?target_character=${encodeURIComponent(target)}`, { method: 'POST' });
+            const result = await res.json();
+            document.getElementById('killConfirm').innerText = result.message;
+        }
+
+        async function submitVote() {
+            const suspect = document.getElementById('suspectList').value;
+            if(!suspect) return;
+            await fetch(`/player/vote/${accessKey}?suspect=${encodeURIComponent(suspect)}`, { method: 'POST' });
+            fetchData();
+        }
+
+        // Load initially
+        fetchData();
+        
+        // AUTO-POLLING: Silently fetch game state every 8 seconds
+        setInterval(fetchData, 8000);
+    </script>
+</body>
+</html>
