@@ -36,10 +36,8 @@ async def player_view(): return FileResponse("static/player.html")
 async def create_game(request: Request, theme: str, player_count: int, accomplice_count: int = 0, include_drunk: bool = False, include_investigator: bool = False):
     
     accomplice_instruction = f"Ensure EXACTLY {accomplice_count} character(s) have 'is_accomplice': true."
-    
-    drunk_instruction = "Ensure EXACTLY ONE innocent character has 'is_drunk': true. ALL of their clues must be completely FALSE and misleading. Do NOT explicitly tell them they are the drunk in their role description." if include_drunk else "Ensure NO characters have 'is_drunk': true."
-    
-    investigator_instruction = "Ensure EXACTLY ONE innocent character has 'is_investigator': true. Their Round 2 clue MUST be a 50/50 ping stating 'Either [Killer Name] or [Innocent Name] is the killer.' Their role description should state they are an Investigator." if include_investigator else "Ensure NO characters have 'is_investigator': true."
+    drunk_instruction = "Ensure EXACTLY ONE innocent character has 'is_drunk': true. ALL of their clues must be completely FALSE and misleading." if include_drunk else "Ensure NO characters have 'is_drunk': true."
+    investigator_instruction = "Ensure EXACTLY ONE innocent character has 'is_investigator': true. Their Round 2 clue MUST be a 50/50 ping stating 'Either [Killer Name] or [Innocent Name] is the killer.'" if include_investigator else "Ensure NO characters have 'is_investigator': true."
 
     prompt = f"""
     Create a highly interactive social deduction murder mystery for {player_count} players. Theme: {theme}.
@@ -53,8 +51,8 @@ async def create_game(request: Request, theme: str, player_count: int, accomplic
         "characters": [
             {{
                 "name": "Character Name",
-                "public_summary": "A 1-sentence summary of what EVERYONE in the room knows about this person.",
-                "role_description": "• Personality: (How to act)\\n• Connection: (To the victim)\\n• Dark Secret: (Something they are hiding that makes them look guilty)",
+                "public_summary": "A 1-sentence summary of what EVERYONE knows about this person.",
+                "role_description": "• Personality: (How to act)\\n• Connection: (To the victim)\\n• Dark Secret: (Something they are hiding)",
                 "is_killer": false, 
                 "is_accomplice": false,
                 "is_investigator": false,
@@ -87,15 +85,11 @@ async def create_game(request: Request, theme: str, player_count: int, accomplic
         player_id = supabase.table("players").insert({
             "game_id": game_id, "access_key": generate_key(), "character_name": char["name"],
             "role_description": char["role_description"], "public_summary": char["public_summary"],
-            "ghost_clue": char["ghost_clue"],
-            "is_killer": char["is_killer"], "is_accomplice": char.get("is_accomplice", False),
+            "ghost_clue": char["ghost_clue"], "is_killer": char["is_killer"], "is_accomplice": char.get("is_accomplice", False),
             "is_investigator": char.get("is_investigator", False), "is_drunk": char.get("is_drunk", False)
         }).execute().data[0]["id"]
 
-        clues_to_insert = [
-            {"game_id": game_id, "player_id": player_id, "round_number": c["round"], "content": c["content"]}
-            for c in char["clues"]
-        ]
+        clues_to_insert = [{"game_id": game_id, "player_id": player_id, "round_number": c["round"], "content": c["content"]} for c in char["clues"]]
         supabase.table("clues").insert(clues_to_insert).execute()
 
     return { "message": "Game generated!", "game_id": game_id, "room_url": f"{request.base_url}room/{game_id}" }
@@ -129,7 +123,6 @@ async def join_room(game_id: str, player_name: str):
     
     character = random.choice(unclaimed.data)
     supabase.table("players").update({"claimed_by_user": player_name}).eq("id", character["id"]).execute()
-
     return { "access_key": character["access_key"], "character_name": character["character_name"] }
 
 @app.get("/player/dashboard/{access_key}")
@@ -147,8 +140,7 @@ async def get_player_dashboard(access_key: str):
 
     is_currently_dead = player["is_dead"] and current_round >= player["death_round"]
     clues_res = supabase.table("clues").select("*").eq("player_id", player["id"]).eq("is_released", True).execute()
-    
-    all_players = supabase.table("players").select("id, character_name, public_summary, claimed_by_user, is_dead, death_round, is_killer, is_accomplice, is_investigator, is_drunk").eq("game_id", game_id).execute()
+    all_players = supabase.table("players").select("id, character_name, public_summary, claimed_by_user, is_dead, death_round, is_killer, is_accomplice, is_investigator, is_drunk, voted_for").eq("game_id", game_id).execute()
     
     killers_count = sum(1 for p in all_players.data if p["is_killer"])
     accomplice_count = sum(1 for p in all_players.data if p["is_accomplice"])
@@ -170,18 +162,35 @@ async def get_player_dashboard(access_key: str):
                 "my_note": notes_dict.get(p["character_name"], {"status": "neutral", "note_text": ""})
             })
 
+    # SCOREBOARD LOGIC
     reveal_data = None
     if game_status == "finished":
+        killer_name = next((p["character_name"] for p in all_players.data if p["is_killer"]), "Unknown")
+        
+        votes = []
+        correct_votes = 0
+        for p in all_players.data:
+            if p["voted_for"]:
+                is_correct = (p["voted_for"] == killer_name)
+                # Only count innocents for the 'win' metric
+                if is_correct and not p["is_killer"] and not p["is_accomplice"]: correct_votes += 1
+                votes.append({"voter": p["character_name"], "player_name": p["claimed_by_user"], "target": p["voted_for"], "is_correct": is_correct})
+
         true_identities = [{"name": p["character_name"], "player": p["claimed_by_user"], "is_killer": p["is_killer"], "is_accomplice": p["is_accomplice"], "is_investigator": p["is_investigator"], "is_drunk": p["is_drunk"]} for p in all_players.data]
-        reveal_data = { "master_story": json.loads(master_story_raw), "true_identities": true_identities }
+        
+        reveal_data = {
+            "master_story": json.loads(master_story_raw),
+            "true_identities": true_identities,
+            "votes": votes,
+            "killer_caught": correct_votes > 0 # Simple win condition: If at least 1 innocent got it right, they win.
+        }
 
     return {
         "game_status": game_status, "current_round": current_round, "character_name": player["character_name"],
         "role_description": player["role_description"], "ghost_clue": player["ghost_clue"],
         "is_killer": player["is_killer"], "is_accomplice": player["is_accomplice"], "is_investigator": player["is_investigator"],
         "known_killer": known_killer, "is_dead": is_currently_dead, "voted_for": player["voted_for"], "available_clues": clues_res.data,
-        "notebook": notebook, "killers_count": killers_count, "accomplice_count": accomplice_count,
-        "reveal_data": reveal_data
+        "notebook": notebook, "killers_count": killers_count, "accomplice_count": accomplice_count, "reveal_data": reveal_data
     }
 
 @app.post("/player/eliminate/{killer_access_key}")
@@ -193,22 +202,20 @@ async def eliminate_player(killer_access_key: str, target_character: str):
     game = supabase.table("games").select("current_round").eq("id", game_id).execute()
     next_round = game.data[0]["current_round"] + 1
 
+    # STRICT 1-KILL LIMIT: Un-mark any previously selected target for this upcoming round
+    supabase.table("players").update({"is_dead": False, "death_round": 99}).eq("game_id", game_id).eq("death_round", next_round).execute()
+
+    # Apply the new target
     supabase.table("players").update({"is_dead": True, "death_round": next_round}).eq("game_id", game_id).eq("character_name", target_character).execute()
-    return {"message": f"Target locked. {target_character} will be eliminated when Round {next_round} begins."}
+    return {"message": f"Target locked: {target_character}. They will drop dead at the start of Round {next_round}."}
 
 @app.post("/player/notes/{access_key}")
 async def update_notes(access_key: str, target_character: str, status: str, note_text: str):
     player = supabase.table("players").select("id, game_id").eq("access_key", access_key).execute()
-    owner_id = player.data[0]["id"]
-    game_id = player.data[0]["game_id"]
-
-    existing = supabase.table("player_notes").select("id").eq("owner_player_id", owner_id).eq("target_character", target_character).execute()
-    if existing.data:
-        supabase.table("player_notes").update({"status": status, "note_text": note_text}).eq("id", existing.data[0]["id"]).execute()
-    else:
-        supabase.table("player_notes").insert({
-            "game_id": game_id, "owner_player_id": owner_id, "target_character": target_character, "status": status, "note_text": note_text
-        }).execute()
+    supabase.table("player_notes").upsert({
+        "game_id": player.data[0]["game_id"], "owner_player_id": player.data[0]["id"], 
+        "target_character": target_character, "status": status, "note_text": note_text
+    }, on_conflict="owner_player_id, target_character").execute()
     return {"message": "Note saved"}
 
 @app.post("/player/vote/{access_key}")

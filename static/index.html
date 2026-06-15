@@ -37,9 +37,17 @@
         .copy-btn { width: auto; padding: 10px 15px; margin: 0; background: #03dac6; color: black; border-radius: 4px; font-size: 14px; }
         .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; vertical-align: middle; margin-right: 10px; }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Toast Popup Styles */
+        .toast { visibility: hidden; min-width: 250px; background-color: #03dac6; color: #000; text-align: center; border-radius: 4px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
     </style>
 </head>
 <body>
+    <div id="toast" class="toast">Action Successful</div>
+    
     <h1 style="font-size: 24px; color: #bb86fc;">👁️ God-Mode Dashboard</h1>
     <input type="password" id="adminPass" placeholder="Admin Password (from .env)" style="max-width: 100%; margin-bottom: 20px;">
 
@@ -109,6 +117,13 @@
     </div>
 
     <script>
+        function showToast(msg) {
+            const toast = document.getElementById("toast");
+            toast.innerText = msg;
+            toast.className = "toast show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
         function updateAccompliceLimit() {
             const pCount = document.getElementById('playerCount').value;
             const aCount = document.getElementById('accCount');
@@ -119,18 +134,13 @@
         async function createGame() {
             const btn = document.getElementById('generateBtn');
             const pass = document.getElementById('adminPass').value;
-            const theme = document.getElementById('theme').value;
-            const pCount = document.getElementById('playerCount').value;
-            const aCount = document.getElementById('accCount').value;
-            const drunk = document.getElementById('incDrunk').checked;
-            const inv = document.getElementById('incInvestigator').checked;
             
             btn.disabled = true;
             btn.innerHTML = `<span class="spinner"></span> Generating Roles...`;
             document.getElementById('truthContent').innerHTML = `<span class="spinner" style="border-top-color:#ff5252;"></span> Writing the master plot...`;
             
             try {
-                const res = await fetch(`/admin/create-game?theme=${theme}&player_count=${pCount}&accomplice_count=${aCount}&include_drunk=${drunk}&include_investigator=${inv}`, { method: 'POST', headers: { 'x-admin-token': pass }});
+                const res = await fetch(`/admin/create-game?theme=${document.getElementById('theme').value}&player_count=${document.getElementById('playerCount').value}&accomplice_count=${document.getElementById('accCount').value}&include_drunk=${document.getElementById('incDrunk').checked}&include_investigator=${document.getElementById('incInvestigator').checked}`, { method: 'POST', headers: { 'x-admin-token': pass }});
                 const data = await res.json();
                 if(!res.ok) throw new Error(data.detail || "Failed to generate");
 
@@ -138,6 +148,7 @@
                 document.getElementById('roomLinkContainer').style.display = 'block';
                 document.getElementById('roomLinkInput').value = data.room_url;
                 await fetchGodMode();
+                showToast("✅ Game Generated Successfully");
             } catch (err) { alert(err); } 
             finally { btn.disabled = false; btn.innerText = "Generate Game"; }
         }
@@ -147,13 +158,13 @@
             copyText.select();
             copyText.setSelectionRange(0, 99999);
             navigator.clipboard.writeText(copyText.value);
-            alert("Copied to clipboard!");
+            showToast("📋 Link Copied to Clipboard!");
         }
 
         async function releaseClues() {
             const pass = document.getElementById('adminPass').value;
             await fetch(`/admin/release-round/${document.getElementById('gameId').value}/${document.getElementById('roundNum').value}`, { method: 'POST', headers: { 'x-admin-token': pass }});
-            alert("Round Active! Player devices updated.");
+            showToast("🚀 Round Pushed! Player devices updated.");
             fetchGodMode();
         }
 
@@ -161,7 +172,7 @@
             if(confirm("End the game and show the solution to all players?")) {
                 const pass = document.getElementById('adminPass').value;
                 await fetch(`/admin/end-game/${document.getElementById('gameId').value}`, { method: 'POST', headers: { 'x-admin-token': pass }});
-                alert("Game Ended! The truth is out.");
+                showToast("🛑 Game Ended! Scoreboards released.");
                 fetchGodMode();
             }
         }
@@ -199,6 +210,7 @@
                     </tr>
                 `;
             });
+            showToast("🔄 Roster Refreshed");
         }
     </script>
 </body>

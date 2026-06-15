@@ -33,9 +33,14 @@
         .help-btn { position: fixed; top: 15px; right: 15px; background: #bb86fc; color: black; width: 40px; height: 40px; border-radius: 50%; font-weight: bold; font-size: 20px; border: none; z-index: 100; cursor: pointer; padding: 0;}
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; justify-content: center; align-items: center; }
         .modal-content { background: #1e1e1e; padding: 25px; border-radius: 8px; max-width: 90%; width: 400px; border: 1px solid #03dac6; }
-        .modal-content ul { padding-left: 20px; line-height: 1.5;}
         
         .reveal-box { background: #3a0000; padding: 20px; border: 2px solid #ff5252; border-radius: 8px; margin-bottom: 20px; white-space: pre-wrap; line-height: 1.6;}
+        .winner-banner { text-align: center; padding: 20px; font-size: 28px; font-weight: bold; margin-bottom: 20px; border-radius: 8px; }
+        .win-innocent { background: #03dac6; color: black; }
+        .win-killer { background: #ff5252; color: white; }
+        .vote-item { background: #2a2a2a; padding: 10px; margin-bottom: 5px; border-radius: 4px; border-left: 4px solid #888; }
+        .vote-correct { border-left-color: #03dac6; }
+        .vote-wrong { border-left-color: #ff5252; }
     </style>
 </head>
 <body>
@@ -44,10 +49,10 @@
     <div id="helpModal" class="modal">
         <div class="modal-content">
             <h2 style="color: #03dac6;">📝 How to Play</h2>
-            <ul>
-                <li><strong>Innocents:</strong> Speak to others, share (or hide) your clues, and vote for the correct Killer.</li>
-                <li><strong>The Killer:</strong> Deflect blame, lie about your clues, and secretly eliminate players.</li>
-                <li><strong>Eliminations:</strong> If you die, you cannot speak. However, you will unlock a <em>Ghost Clue</em> which you may silently show to ONE living player to help them.</li>
+            <ul style="padding-left: 20px; line-height: 1.5;">
+                <li><strong>Innocents:</strong> Speak to others, share your clues, and vote for the correct Killer.</li>
+                <li><strong>The Killer:</strong> Deflect blame, lie, and secretly queue 1 player to eliminate per round.</li>
+                <li><strong>Eliminations:</strong> If you die, you unlock a <em>Ghost Clue</em>. Show it silently to ONE living player.</li>
             </ul>
             <button onclick="toggleModal(false)" style="background: #03dac6; color: black;">Close Guide</button>
         </div>
@@ -59,10 +64,17 @@
         <div id="content" style="display: none;">
             
             <div id="finishedScreen" style="display: none;">
-                <h1 style="color: #ff5252; text-align: center; font-size: 32px;">THE TRUTH REVEALED</h1>
+                <div id="winnerBanner" class="winner-banner"></div>
+                
+                <div class="box" style="border-color: #bb86fc;">
+                    <h3 style="color: #bb86fc; margin-top:0;">🗳️ Final Votes Cast</h3>
+                    <div id="voteResults"></div>
+                </div>
+
                 <div class="reveal-box" id="revealTruth"></div>
+                
                 <div class="box" style="border-color: #03dac6;">
-                    <h3 style="color: #03dac6;">True Identities</h3>
+                    <h3 style="color: #03dac6; margin-top:0;">True Identities</h3>
                     <ul id="revealIdentities" style="list-style: none; padding: 0; line-height: 1.8;"></ul>
                 </div>
             </div>
@@ -90,7 +102,7 @@
                     <div class="ghost-clue">
                         <strong style="color: #03dac6;">YOUR GHOST CLUE:</strong><br>
                         <span id="ghostClueText" style="color: #ddd;"></span><br><br>
-                        <em>Rule: You may walk up to ONE living player and silently show them this box on your screen. Choose wisely.</em>
+                        <em>Rule: You may walk up to ONE living player and silently show them this box.</em>
                     </div>
                 </div>
 
@@ -104,9 +116,9 @@
 
                 <div id="killerPanel" style="display: none;" class="box">
                     <h3 style="color: #ff5252;">🔪 Assassination Protocol</h3>
-                    <p style="font-size: 14px; color: #aaa;">Select a target. They will drop dead at the start of the NEXT round.</p>
+                    <p style="font-size: 14px; color: #aaa;">Select ONE target. They will die when the NEXT round begins. You can change your mind until the Host advances the round.</p>
                     <select id="killTarget"></select>
-                    <button class="kill-btn" onclick="eliminateTarget()">Eliminate Target</button>
+                    <button class="kill-btn" onclick="eliminateTarget()">Lock In Target</button>
                     <div id="killConfirm" style="color: #ff5252; font-weight: bold; margin-top: 10px; text-align: center;"></div>
                 </div>
 
@@ -154,9 +166,34 @@
                         document.getElementById('activeGame').style.display = 'none';
                         document.getElementById('finishedScreen').style.display = 'block';
                         
+                        // Render Banner
+                        const banner = document.getElementById('winnerBanner');
+                        if(data.reveal_data.killer_caught) {
+                            banner.innerText = "🏆 INNOCENTS WIN!";
+                            banner.className = "winner-banner win-innocent";
+                        } else {
+                            banner.innerText = "🔪 THE KILLER ESCAPED!";
+                            banner.className = "winner-banner win-killer";
+                        }
+
+                        // Render Votes Scoreboard
+                        const votesDiv = document.getElementById('voteResults');
+                        votesDiv.innerHTML = "";
+                        if(data.reveal_data.votes.length === 0) {
+                            votesDiv.innerHTML = "<em>Nobody cast any votes!</em>";
+                        } else {
+                            data.reveal_data.votes.forEach(v => {
+                                const vClass = v.is_correct ? 'vote-correct' : 'vote-wrong';
+                                const emoji = v.is_correct ? '✅' : '❌';
+                                votesDiv.innerHTML += `<div class="vote-item ${vClass}"><strong>${v.voter}</strong> voted for: <span style="color:#ddd;">${v.target} ${emoji}</span></div>`;
+                            });
+                        }
+
+                        // Render Story
                         const story = data.reveal_data.master_story;
-                        document.getElementById('revealTruth').innerHTML = `<strong>Background:</strong><br>${story.background}<br><br><strong>The Murder:</strong><br>${story.the_murder}<br><br><strong>The Solution:</strong><br>${story.the_solution}`;
+                        document.getElementById('revealTruth').innerHTML = `<strong style="font-size:20px;">The Motive & Murder:</strong><br>${story.the_murder}<br><br><strong style="font-size:20px;">The Solution:</strong><br>${story.the_solution}`;
                         
+                        // Render Identities
                         const idList = document.getElementById('revealIdentities');
                         idList.innerHTML = "";
                         data.reveal_data.true_identities.forEach(p => {
@@ -166,7 +203,7 @@
                             else if (p.is_investigator) role = "<span style='color:#03dac6; font-weight:bold;'>🔍 INVESTIGATOR</span>";
                             else if (p.is_drunk) role = "<span style='color:#ff9800; font-weight:bold;'>🥴 THE DRUNK</span>";
                             
-                            idList.innerHTML += `<li style="border-bottom: 1px solid #333; padding: 5px 0;"><strong>${p.name}</strong> (${p.player}) - ${role}</li>`;
+                            idList.innerHTML += `<li style="border-bottom: 1px solid #333; padding: 8px 0;"><strong>${p.name}</strong> (${p.player})<br>${role}</li>`;
                         });
                         return;
                     }
@@ -192,33 +229,20 @@
                     document.getElementById('roleDesc').innerText = data.role_description;
 
                     let alerts = "";
-                    if (data.is_killer) {
-                        alerts += `<div class="box alert-killer">⚠️ YOU ARE THE KILLER. Deflect suspicion. You do NOT know who your accomplice is.</div>`;
-                    }
-                    if (data.is_accomplice) {
-                        alerts += `<div class="box alert-accomplice">
-                            🤝 YOU ARE THE ACCOMPLICE. Protect the Killer at all costs.<br><br>
-                            <span style="color: #fff; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 4px;">
-                            <strong>SECRET:</strong> The Killer is <u>${data.known_killer}</u>. They do not know you are helping them.
-                            </span>
-                        </div>`;
-                    }
-                    if (data.is_investigator) {
-                        alerts += `<div class="box alert-investigator">🔍 YOU ARE THE INVESTIGATOR. Pay close attention to your Round 2 clue.</div>`;
-                    }
+                    if (data.is_killer) alerts += `<div class="box alert-killer">⚠️ YOU ARE THE KILLER. Deflect suspicion. You do NOT know who your accomplice is.</div>`;
+                    if (data.is_accomplice) alerts += `<div class="box alert-accomplice">🤝 YOU ARE THE ACCOMPLICE. Protect the Killer at all costs.<br><br><span style="color: #fff; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 4px;"><strong>SECRET:</strong> The Killer is <u>${data.known_killer}</u>. They do not know you are helping them.</span></div>`;
+                    if (data.is_investigator) alerts += `<div class="box alert-investigator">🔍 YOU ARE THE INVESTIGATOR. Pay close attention to your Round 2 clue.</div>`;
+                    
                     document.getElementById('alertsContainer').innerHTML = alerts;
 
                     const cluesDiv = document.getElementById('cluesContainer');
                     cluesDiv.innerHTML = "";
                     if(data.available_clues.length === 0) {
-                        cluesDiv.innerHTML = "<em style='color: #888;'>No evidence uncovered yet. Interrogate others.</em>";
+                        cluesDiv.innerHTML = "<em style='color: #888;'>No evidence uncovered yet. Mingle and roleplay.</em>";
                     } else {
                         data.available_clues.forEach(clue => {
                             let formattedContent = clue.content.split('•').filter(c => c.trim() !== '').map(c => `<li>${c.trim()}</li>`).join('');
-                            cluesDiv.innerHTML += `<div style="background:#2c2c2c; padding:15px; margin-bottom:10px; border-left:4px solid #bb86fc; border-radius:4px;">
-                                <strong style="color: #bb86fc;">Round ${clue.round_number}:</strong>
-                                <ul style="margin-top: 5px; padding-left: 20px; color: #ddd; list-style-type: disc;">${formattedContent}</ul>
-                            </div>`;
+                            cluesDiv.innerHTML += `<div style="background:#2c2c2c; padding:15px; margin-bottom:10px; border-left:4px solid #bb86fc; border-radius:4px;"><strong style="color: #bb86fc;">Round ${clue.round_number}:</strong><ul style="margin-top: 5px; padding-left: 20px; color: #ddd; list-style-type: disc;">${formattedContent}</ul></div>`;
                         });
                     }
 
