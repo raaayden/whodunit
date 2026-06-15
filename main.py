@@ -37,32 +37,34 @@ async def create_game(request: Request, theme: str, player_count: int, include_a
     accomplice_instruction = "Ensure EXACTLY one character is the accomplice." if include_accomplice else "Ensure NO characters are the accomplice."
     
     prompt = f"""
-    Create a murder mystery game for {player_count} players. Theme: {theme}.
+    Create a highly interactive social deduction murder mystery for {player_count} players. Theme: {theme}.
     Return ONLY a JSON object with this exact structure:
     {{
         "master_story": {{
             "background": "The overarching plot and setting.",
-            "the_murder": "Exactly how the victim died and why the killer did it.",
-            "the_solution": "How the specific clues in round 3 prove who the killer is."
+            "the_murder": "Exactly how the victim died and the true timeline.",
+            "the_solution": "How the specific clues connect to prove the killer's guilt."
         }},
         "characters": [
             {{
                 "name": "Character Name",
                 "public_summary": "A 1-sentence summary of what EVERYONE in the room knows about this person.",
-                "role_description": "A short, punchy 3-sentence backstory. Keep it concise.",
+                "role_description": "3 sentences max. 1. Their personality/how to act. 2. Their relationship to the victim. 3. A dark secret they are hiding that makes them look guilty, even if they are innocent.",
                 "is_killer": false, 
                 "is_accomplice": {"true" if include_accomplice else "false"},
                 "clues": [
-                    {{"round": 1, "content": "• First detail. • Second detail."}},
-                    {{"round": 2, "content": "• First revealing detail. • Second revealing detail."}},
-                    {{"round": 3, "content": "• First hard evidence. • Second hard evidence."}}
+                    {{"round": 1, "content": "• Gossip or motive regarding ANOTHER specific player's secret."}},
+                    {{"round": 2, "content": "• A witnessed event or timeline inconsistency about ANOTHER player."}},
+                    {{"round": 3, "content": "• Hard physical evidence relating to the crime scene or the true killer."}}
                 ]
             }}
         ]
     }}
     Ensure EXACTLY one character has "is_killer": true.
     {accomplice_instruction}
-    CRITICAL: Clue content MUST use the bullet character (•) to separate details.
+    CRITICAL INSTRUCTIONS: 
+    1. Clue content MUST use the bullet character (•).
+    2. WEB OF SUSPICION: Clues must NOT just point to the killer. Innocent players should have clues that expose other innocent players' dark secrets to cause arguments and false leads.
     """
     
     model = genai.GenerativeModel('gemini-2.5-flash', generation_config={"response_mime_type": "application/json"})
@@ -87,7 +89,6 @@ async def create_game(request: Request, theme: str, player_count: int, include_a
         ]
         supabase.table("clues").insert(clues_to_insert).execute()
 
-    # DYNAMIC URL FIX: Automatically uses your Render domain in production
     return { "message": "Game generated!", "game_id": game_id, "room_url": f"{request.base_url}room/{game_id}" }
 
 @app.post("/admin/release-round/{game_id}/{round_num}", dependencies=[Depends(verify_host)])
@@ -97,7 +98,7 @@ async def release_clues(game_id: str, round_num: int):
     return {"message": f"Round {round_num} released!", "clues_updated": len(data.data)}
 
 @app.get("/admin/game/{game_id}", dependencies=[Depends(verify_host)])
-async def get_god_mode(game_id: str):
+async def get_host_mode(game_id: str):
     game = supabase.table("games").select("*").eq("id", game_id).execute()
     players = supabase.table("players").select("*").eq("game_id", game_id).execute()
     return {"game": game.data[0], "players": players.data}
