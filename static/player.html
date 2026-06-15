@@ -12,7 +12,9 @@
         
         .alert-killer { border-left: 4px solid #ff0000; color: #ff6b6b; background: #3a0000; }
         .alert-accomplice { border-left: 4px solid #ff9800; color: #ffb74d; background: #3e2700; }
-        .alert-dead { text-align: center; border: 2px solid #ff0000; background: #220000; color: white; padding: 30px; font-size: 24px; font-weight: bold; }
+        .alert-investigator { border-left: 4px solid #03dac6; color: #03dac6; background: #002b28; }
+        .alert-dead { border: 2px solid #03dac6; background: #002222; color: white; padding: 20px; font-weight: normal; }
+        .ghost-clue { background: rgba(3, 218, 198, 0.1); padding: 15px; border: 1px dashed #03dac6; margin-top: 15px; border-radius: 4px;}
         
         .suspect-card { background: #2a2a2a; padding: 15px; margin-bottom: 10px; border-radius: 6px; border-left: 4px solid #888; }
         .suspect-card.sus { border-left-color: #ff5252; }
@@ -28,14 +30,12 @@
         .refresh-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #1e1e1e; padding: 10px; text-align: center; border-top: 1px solid #bb86fc; box-sizing: border-box; z-index: 10;}
         .refresh-btn { width: 90%; max-width: 400px; margin: 0 auto; background: transparent; border: 1px solid #03dac6; color: #03dac6; padding: 15px; font-size: 16px; border-radius: 8px;}
         
-        /* Floating Help Button & Modal */
         .help-btn { position: fixed; top: 15px; right: 15px; background: #bb86fc; color: black; width: 40px; height: 40px; border-radius: 50%; font-weight: bold; font-size: 20px; border: none; z-index: 100; cursor: pointer; padding: 0;}
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; justify-content: center; align-items: center; }
         .modal-content { background: #1e1e1e; padding: 25px; border-radius: 8px; max-width: 90%; width: 400px; border: 1px solid #03dac6; }
         .modal-content ul { padding-left: 20px; line-height: 1.5;}
         
-        ul.clue-list { margin-top: 5px; padding-left: 20px; color: #ddd; }
-        ul.clue-list li { margin-bottom: 5px; }
+        .reveal-box { background: #3a0000; padding: 20px; border: 2px solid #ff5252; border-radius: 8px; margin-bottom: 20px; white-space: pre-wrap; line-height: 1.6;}
     </style>
 </head>
 <body>
@@ -45,11 +45,9 @@
         <div class="modal-content">
             <h2 style="color: #03dac6;">📝 How to Play</h2>
             <ul>
-                <li><strong>Innocents:</strong> Speak to others, share (or hide) your clues, and vote for the correct Killer to win.</li>
-                <li><strong>The Killer:</strong> Deflect blame, lie about your clues, and secretly eliminate players using the Assassination panel.</li>
-                <li><strong>The Accomplice:</strong> You win if the Killer wins. Protect them at all costs.</li>
-                <li><strong>Rounds:</strong> The Host will unlock clues in 3 phases. Eliminations happen at the start of a new round.</li>
-                <li><strong>Notebook:</strong> Keep track of who is "Sus" at the bottom of your screen. This is private to you.</li>
+                <li><strong>Innocents:</strong> Speak to others, share (or hide) your clues, and vote for the correct Killer.</li>
+                <li><strong>The Killer:</strong> Deflect blame, lie about your clues, and secretly eliminate players.</li>
+                <li><strong>Eliminations:</strong> If you die, you cannot speak. However, you will unlock a <em>Ghost Clue</em> which you may silently show to ONE living player to help them.</li>
             </ul>
             <button onclick="toggleModal(false)" style="background: #03dac6; color: black;">Close Guide</button>
         </div>
@@ -59,9 +57,14 @@
         <div id="loading" style="text-align: center; margin-top: 50px;">Syncing Secure Data...</div>
         
         <div id="content" style="display: none;">
-            <div id="deadScreen" style="display: none;" class="box alert-dead">
-                ☠️ YOU HAVE BEEN ELIMINATED ☠️<br>
-                <small style="font-size: 14px; font-weight: normal; display: block; margin-top: 10px;">You may continue to observe, but you cannot speak or vote.</small>
+            
+            <div id="finishedScreen" style="display: none;">
+                <h1 style="color: #ff5252; text-align: center; font-size: 32px;">THE TRUTH REVEALED</h1>
+                <div class="reveal-box" id="revealTruth"></div>
+                <div class="box" style="border-color: #03dac6;">
+                    <h3 style="color: #03dac6;">True Identities</h3>
+                    <ul id="revealIdentities" style="list-style: none; padding: 0; line-height: 1.8;"></ul>
+                </div>
             </div>
 
             <div id="waitingScreen" style="display: none; margin-top: 20px;">
@@ -74,18 +77,29 @@
                     </p>
                 </div>
                 <div style="text-align: center; margin-top: 30px;">
-                    <p style="color: #aaa;">Waiting for Host to start Round 1... (Screen auto-updates)</p>
+                    <p style="color: #aaa;">Waiting for Host to start Round 1...</p>
                     <p style="font-size: 20px; border: 1px dashed #bb86fc; padding: 15px; border-radius: 8px;">Your Identity:<br><strong id="waitChar" style="color: #bb86fc; font-size: 24px;"></strong></p>
                 </div>
             </div>
 
             <div id="activeGame" style="display: none;">
+                
+                <div id="deadScreen" style="display: none;" class="box alert-dead">
+                    <h2 style="color: #ff5252; text-align: center; margin-top: 0;">☠️ YOU HAVE BEEN ELIMINATED</h2>
+                    <p style="text-align: center; font-size: 14px;">You can no longer speak aloud. However, the veil has lifted.</p>
+                    <div class="ghost-clue">
+                        <strong style="color: #03dac6;">YOUR GHOST CLUE:</strong><br>
+                        <span id="ghostClueText" style="color: #ddd;"></span><br><br>
+                        <em>Rule: You may walk up to ONE living player and silently show them this box on your screen. Choose wisely.</em>
+                    </div>
+                </div>
+
                 <h1 id="charName">Name</h1>
                 <div id="alertsContainer"></div>
 
                 <div class="box">
                     <h3>Your Secret Identity</h3>
-                    <p id="roleDesc" style="line-height: 1.6;"></p>
+                    <div id="roleDesc" style="line-height: 1.6; white-space: pre-wrap; color: #ccc;"></div>
                 </div>
 
                 <div id="killerPanel" style="display: none;" class="box">
@@ -96,14 +110,13 @@
                     <div id="killConfirm" style="color: #ff5252; font-weight: bold; margin-top: 10px; text-align: center;"></div>
                 </div>
 
-                <div class="box">
-                    <h3>Your Clues</h3>
+                <div class="box" id="cluesBox">
+                    <h3>Uncovered Evidence</h3>
                     <div id="cluesContainer"></div>
                 </div>
 
                 <div class="box" style="border-color: #03dac6;">
                     <h3 style="color: #03dac6;">🕵️ Digital Notebook</h3>
-                    <p style="font-size: 14px; color: #aaa;">Keep track of alliances. Data saves locally.</p>
                     <div id="notebookContainer"></div>
                 </div>
 
@@ -124,11 +137,8 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const accessKey = urlParams.get('key');
-        let globalData = null;
 
-        function toggleModal(show) {
-            document.getElementById('helpModal').style.display = show ? 'flex' : 'none';
-        }
+        function toggleModal(show) { document.getElementById('helpModal').style.display = show ? 'flex' : 'none'; }
 
         function fetchData() {
             if (!accessKey) return document.getElementById('loading').innerText = "Invalid Link.";
@@ -136,9 +146,30 @@
             fetch(`/player/dashboard/${accessKey}`)
                 .then(r => r.json())
                 .then(data => {
-                    globalData = data;
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('content').style.display = 'block';
+
+                    if (data.game_status === 'finished') {
+                        document.getElementById('waitingScreen').style.display = 'none';
+                        document.getElementById('activeGame').style.display = 'none';
+                        document.getElementById('finishedScreen').style.display = 'block';
+                        
+                        const story = data.reveal_data.master_story;
+                        document.getElementById('revealTruth').innerHTML = `<strong>Background:</strong><br>${story.background}<br><br><strong>The Murder:</strong><br>${story.the_murder}<br><br><strong>The Solution:</strong><br>${story.the_solution}`;
+                        
+                        const idList = document.getElementById('revealIdentities');
+                        idList.innerHTML = "";
+                        data.reveal_data.true_identities.forEach(p => {
+                            let role = "Innocent";
+                            if (p.is_killer) role = "<span style='color:#ff5252; font-weight:bold;'>🔪 KILLER</span>";
+                            else if (p.is_accomplice) role = "<span style='color:#ffb74d; font-weight:bold;'>🤝 ACCOMPLICE</span>";
+                            else if (p.is_investigator) role = "<span style='color:#03dac6; font-weight:bold;'>🔍 INVESTIGATOR</span>";
+                            else if (p.is_drunk) role = "<span style='color:#ff9800; font-weight:bold;'>🥴 THE DRUNK</span>";
+                            
+                            idList.innerHTML += `<li style="border-bottom: 1px solid #333; padding: 5px 0;"><strong>${p.name}</strong> (${p.player}) - ${role}</li>`;
+                        });
+                        return;
+                    }
                     
                     if (data.game_status === 'waiting') {
                         document.getElementById('waitingScreen').style.display = 'block';
@@ -152,28 +183,45 @@
                     document.getElementById('waitingScreen').style.display = 'none';
                     document.getElementById('activeGame').style.display = 'block';
                     
-                    if (data.is_dead) document.getElementById('deadScreen').style.display = 'block';
+                    if (data.is_dead) {
+                        document.getElementById('deadScreen').style.display = 'block';
+                        document.getElementById('ghostClueText').innerText = data.ghost_clue;
+                    }
 
                     document.getElementById('charName').innerText = data.character_name;
                     document.getElementById('roleDesc').innerText = data.role_description;
 
                     let alerts = "";
-                    if (data.is_killer) alerts += `<div class="box alert-killer">⚠️ YOU ARE THE KILLER. Deflect suspicion.</div>`;
-                    if (data.is_accomplice) alerts += `<div class="box alert-accomplice">🤝 YOU ARE THE ACCOMPLICE. Protect the Killer at all costs.</div>`;
+                    if (data.is_killer) {
+                        alerts += `<div class="box alert-killer">⚠️ YOU ARE THE KILLER. Deflect suspicion. You do NOT know who your accomplice is.</div>`;
+                    }
+                    if (data.is_accomplice) {
+                        alerts += `<div class="box alert-accomplice">
+                            🤝 YOU ARE THE ACCOMPLICE. Protect the Killer at all costs.<br><br>
+                            <span style="color: #fff; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 4px;">
+                            <strong>SECRET:</strong> The Killer is <u>${data.known_killer}</u>. They do not know you are helping them.
+                            </span>
+                        </div>`;
+                    }
+                    if (data.is_investigator) {
+                        alerts += `<div class="box alert-investigator">🔍 YOU ARE THE INVESTIGATOR. Pay close attention to your Round 2 clue.</div>`;
+                    }
                     document.getElementById('alertsContainer').innerHTML = alerts;
 
-                    // Bullet Point Clue Parser
                     const cluesDiv = document.getElementById('cluesContainer');
                     cluesDiv.innerHTML = "";
-                    data.available_clues.forEach(clue => {
-                        let formattedContent = clue.content.split('•').filter(c => c.trim() !== '').map(c => `<li>${c.trim()}</li>`).join('');
-                        cluesDiv.innerHTML += `<div style="background:#2c2c2c; padding:15px; margin-bottom:10px; border-left:4px solid #bb86fc; border-radius:4px;">
-                            <strong>Round ${clue.round_number}:</strong>
-                            <ul class="clue-list">${formattedContent}</ul>
-                        </div>`;
-                    });
+                    if(data.available_clues.length === 0) {
+                        cluesDiv.innerHTML = "<em style='color: #888;'>No evidence uncovered yet. Interrogate others.</em>";
+                    } else {
+                        data.available_clues.forEach(clue => {
+                            let formattedContent = clue.content.split('•').filter(c => c.trim() !== '').map(c => `<li>${c.trim()}</li>`).join('');
+                            cluesDiv.innerHTML += `<div style="background:#2c2c2c; padding:15px; margin-bottom:10px; border-left:4px solid #bb86fc; border-radius:4px;">
+                                <strong style="color: #bb86fc;">Round ${clue.round_number}:</strong>
+                                <ul style="margin-top: 5px; padding-left: 20px; color: #ddd; list-style-type: disc;">${formattedContent}</ul>
+                            </div>`;
+                        });
+                    }
 
-                    // Keep dropdown values stable during auto-refresh by saving current selections
                     const killSelect = document.getElementById('killTarget');
                     const voteSelect = document.getElementById('suspectList');
                     const currentKillTarget = killSelect ? killSelect.value : '';
@@ -189,9 +237,7 @@
                         const deadClass = p.is_publicly_dead ? 'dead' : '';
                         const deadLabel = p.is_publicly_dead ? ' <span style="color:#ff5252;">☠️ (DEAD)</span>' : '';
                         
-                        if (!p.is_publicly_dead) {
-                            killSelect.innerHTML += `<option value="${p.character_name}">${p.character_name} (${p.claimed_by})</option>`;
-                        }
+                        if (!p.is_publicly_dead) { killSelect.innerHTML += `<option value="${p.character_name}">${p.character_name} (${p.claimed_by})</option>`; }
                         voteSelect.innerHTML += `<option value="${p.character_name}">${p.character_name}</option>`;
 
                         notebookDiv.innerHTML += `
@@ -199,23 +245,21 @@
                                 <strong style="font-size:18px;">${p.character_name}</strong>${deadLabel}<br>
                                 <small style="color:#bb86fc;">Played by: ${p.claimed_by}</small>
                                 <p style="font-size:14px; color:#aaa; margin: 10px 0; background:#1e1e1e; padding:10px; border-radius:4px;">${p.public_summary}</p>
-                                
                                 <select id="status_${index}" onchange="saveNote('${p.character_name}', ${index})">
                                     <option value="neutral" ${p.my_note.status==='neutral'?'selected':''}>Neutral Status</option>
                                     <option value="sus" ${p.my_note.status==='sus'?'selected':''}>🔴 SUS</option>
                                     <option value="alright fam" ${p.my_note.status==='alright fam'?'selected':''}>🟢 Alright Fam</option>
                                 </select>
-                                
                                 <textarea id="note_${index}" onblur="saveNote('${p.character_name}', ${index})" placeholder="Jot down notes..." rows="2" style="resize:vertical;">${p.my_note.note_text}</textarea>
                             </div>
                         `;
                     });
 
-                    // Restore dropdown selections
                     if(currentKillTarget) killSelect.value = currentKillTarget;
                     if(currentVoteTarget) voteSelect.value = currentVoteTarget;
 
                     if (data.is_killer && !data.is_dead) document.getElementById('killerPanel').style.display = 'block';
+                    else document.getElementById('killerPanel').style.display = 'none';
 
                     if (data.voted_for) {
                         document.getElementById('suspectList').style.display = 'none';
@@ -229,7 +273,6 @@
             const status = document.getElementById(`status_${index}`).value;
             const text = document.getElementById(`note_${index}`).value;
             await fetch(`/player/notes/${accessKey}?target_character=${encodeURIComponent(targetChar)}&status=${encodeURIComponent(status)}&note_text=${encodeURIComponent(text)}`, { method: 'POST' });
-            // Let the auto-polling handle the visual refresh so typing isn't interrupted
         }
 
         async function eliminateTarget() {
@@ -247,11 +290,8 @@
             fetchData();
         }
 
-        // Load initially
         fetchData();
-        
-        // AUTO-POLLING: Silently fetch game state every 8 seconds
-        setInterval(fetchData, 8000);
+        setInterval(fetchData, 8000); 
     </script>
 </body>
 </html>
