@@ -76,6 +76,7 @@ async def create_game(request: Request, theme: str, player_count: int, accomplic
 
     prompt = f"""
     Create a highly interactive social deduction murder mystery for {player_count} players. Theme: {theme}.
+    CRITICAL: YOU MUST FILL IN EVERY DETAIL. NEVER USE PLACEHOLDERS LIKE "[Reveal Killer Here]" OR "[Motive Here]".
     Return ONLY a JSON object with this exact structure:
     {{
         "theme_title": "A catchy 2-4 word title for this mystery",
@@ -91,7 +92,7 @@ async def create_game(request: Request, theme: str, player_count: int, accomplic
                 "public_summary": "A 1-sentence summary of what EVERYONE knows about this person.",
                 "role_description": "• Personality: (How to act)\\n• Connection: (To the victim)\\n• Dark Secret: (Something they are hiding)",
                 "is_killer": false, "is_accomplice": false, "is_investigator": false, "is_drunk": false,
-                "ghost_clue": "A highly revealing clue they ONLY unlock after they are murdered.",
+                "ghost_clue": "A highly revealing clue they ONLY unlock after they are murdered. This clue must be about the killer's/accomplice's personality, connection or dark secret.",
                 "clues": [
                     {{"round": 2, "content": "• Gossip about ANOTHER player's secret."}},
                     {{"round": 3, "content": "• Hard physical evidence relating to the killer."}}
