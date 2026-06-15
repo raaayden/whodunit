@@ -6,7 +6,7 @@
     <title>Secure Link</title>
     <style>
         body { background-color: #121212; color: #e0e0e0; font-family: 'Courier New', Courier, monospace; margin: 0; padding: 15px; padding-bottom: 80px; }
-        .container { max-width: 600px; margin: 0 auto; }
+        .container { max-width: 600px; margin: 0 auto; margin-top: 40px; }
         h1, h2, h3 { color: #bb86fc; margin-top: 0; }
         .box { background: #1e1e1e; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #333; }
         
@@ -30,12 +30,17 @@
         .refresh-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #1e1e1e; padding: 10px; text-align: center; border-top: 1px solid #bb86fc; box-sizing: border-box; z-index: 10;}
         .refresh-btn { width: 90%; max-width: 400px; margin: 0 auto; background: transparent; border: 1px solid #03dac6; color: #03dac6; padding: 15px; font-size: 16px; border-radius: 8px;}
         
-        .help-btn { position: fixed; top: 15px; right: 15px; background: #bb86fc; color: black; width: 40px; height: 40px; border-radius: 50%; font-weight: bold; font-size: 20px; border: none; z-index: 100; cursor: pointer; padding: 0;}
+        /* Updated Top Action Buttons */
+        .top-actions { position: fixed; top: 15px; right: 15px; display: flex; gap: 10px; z-index: 100; }
+        .icon-btn { background: #bb86fc; color: black; border-radius: 50%; font-weight: bold; font-size: 20px; border: none; cursor: pointer; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); flex-shrink: 0; padding: 0; margin: 0;}
+        .icon-story { background: #03dac6; }
+        
+        /* Modals */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; justify-content: center; align-items: center; }
-        .modal-content { background: #1e1e1e; padding: 25px; border-radius: 8px; max-width: 90%; width: 400px; border: 1px solid #03dac6; }
+        .modal-content { background: #1e1e1e; padding: 25px; border-radius: 8px; max-width: 90%; width: 400px; border: 1px solid #03dac6; max-height: 80vh; overflow-y: auto; }
         
         .reveal-box { background: #3a0000; padding: 20px; border: 2px solid #ff5252; border-radius: 8px; margin-bottom: 20px; white-space: pre-wrap; line-height: 1.6;}
-        .winner-banner { text-align: center; padding: 20px; font-size: 28px; font-weight: bold; margin-bottom: 20px; border-radius: 8px; }
+        .winner-banner { text-align: center; padding: 20px; font-size: 24px; font-weight: bold; margin-bottom: 20px; border-radius: 8px; }
         .win-innocent { background: #03dac6; color: black; }
         .win-killer { background: #ff5252; color: white; }
         .vote-item { background: #2a2a2a; padding: 10px; margin-bottom: 5px; border-radius: 4px; border-left: 4px solid #888; }
@@ -44,17 +49,31 @@
     </style>
 </head>
 <body>
-    <button class="help-btn" onclick="toggleModal(true)">?</button>
+    
+    <div class="top-actions">
+        <button class="icon-btn icon-story" onclick="toggleModal('storyModal')">📖</button>
+        <button class="icon-btn" onclick="toggleModal('helpModal')">❓</button>
+    </div>
 
     <div id="helpModal" class="modal">
         <div class="modal-content">
-            <h2 style="color: #03dac6;">📝 How to Play</h2>
+            <h2 style="color: #bb86fc; margin-top: 0;">📝 How to Play</h2>
             <ul style="padding-left: 20px; line-height: 1.5;">
-                <li><strong>Innocents:</strong> Speak to others, share your clues, and vote for the correct Killer.</li>
+                <li><strong>Innocents:</strong> Speak to others, share your clues, and vote for the Killer. At least 50% of living Innocents must guess correctly to win.</li>
                 <li><strong>The Killer:</strong> Deflect blame, lie, and secretly queue 1 player to eliminate per round.</li>
-                <li><strong>Eliminations:</strong> If you die, you unlock a <em>Ghost Clue</em>. Show it silently to ONE living player.</li>
+                <li><strong>Eliminations:</strong> If you die, you lose your vote. However, you can send ONE final "Ghost Clue" to a living player's device.</li>
             </ul>
-            <button onclick="toggleModal(false)" style="background: #03dac6; color: black;">Close Guide</button>
+            <button onclick="toggleModal('helpModal', false)" style="background: #bb86fc; color: black;">Close Guide</button>
+        </div>
+    </div>
+
+    <div id="storyModal" class="modal">
+        <div class="modal-content">
+            <h2 style="color: #03dac6; margin-top: 0;">📖 The Story So Far</h2>
+            <div style="line-height: 1.6; color: #ddd; white-space: pre-wrap;" id="storyContent">
+                <em>Loading context...</em>
+            </div>
+            <button onclick="toggleModal('storyModal', false)" style="background: #03dac6; color: black;">Back to Game</button>
         </div>
     </div>
 
@@ -98,12 +117,26 @@
                 
                 <div id="deadScreen" style="display: none;" class="box alert-dead">
                     <h2 style="color: #ff5252; text-align: center; margin-top: 0;">☠️ YOU HAVE BEEN ELIMINATED</h2>
-                    <p style="text-align: center; font-size: 14px;">You can no longer speak aloud. However, the veil has lifted.</p>
+                    <p style="text-align: center; font-size: 14px;">You can no longer speak aloud or vote. However, the veil has lifted.</p>
                     <div class="ghost-clue">
                         <strong style="color: #03dac6;">YOUR GHOST CLUE:</strong><br>
-                        <span id="ghostClueText" style="color: #ddd;"></span><br><br>
-                        <em>Rule: You may walk up to ONE living player and silently show them this box.</em>
+                        <span id="ghostClueText" style="color: #ddd;"></span>
+                        
+                        <div id="ghostClueSender" style="margin-top: 15px; border-top: 1px solid #03dac6; padding-top: 15px;">
+                            <p style="font-size: 14px; margin-top: 0;">Select ONE living player to secretly send this clue to their device:</p>
+                            <select id="ghostTarget"></select>
+                            <button onclick="sendGhostClue()" style="background: #03dac6; color: black;">Send Message from Beyond</button>
+                        </div>
+                        
+                        <div id="ghostClueSent" style="display: none; color: #03dac6; font-weight: bold; margin-top: 15px; text-align: center;">
+                            Message successfully sent to <span id="sentToTarget"></span>.
+                        </div>
                     </div>
+                </div>
+
+                <div id="receivedGhostClues" style="display:none;" class="box">
+                    <h3 style="color: #03dac6; margin-top: 0;">👻 Messages from the Beyond</h3>
+                    <div id="ghostCluesList"></div>
                 </div>
 
                 <h1 id="charName">Name</h1>
@@ -150,7 +183,9 @@
         const urlParams = new URLSearchParams(window.location.search);
         const accessKey = urlParams.get('key');
 
-        function toggleModal(show) { document.getElementById('helpModal').style.display = show ? 'flex' : 'none'; }
+        function toggleModal(modalId, show = true) { 
+            document.getElementById(modalId).style.display = show ? 'flex' : 'none'; 
+        }
 
         function fetchData() {
             if (!accessKey) return document.getElementById('loading').innerText = "Invalid Link.";
@@ -161,12 +196,19 @@
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('content').style.display = 'block';
 
+                    // Populate Story Modal
+                    if (data.active_story) {
+                        document.getElementById('storyContent').innerHTML = `
+                            <strong style="color: #03dac6;">Background:</strong><br>${data.active_story.background}<br><br>
+                            <strong style="color: #03dac6;">The Murder:</strong><br>${data.active_story.the_murder}
+                        `;
+                    }
+
                     if (data.game_status === 'finished') {
                         document.getElementById('waitingScreen').style.display = 'none';
                         document.getElementById('activeGame').style.display = 'none';
                         document.getElementById('finishedScreen').style.display = 'block';
                         
-                        // Render Banner
                         const banner = document.getElementById('winnerBanner');
                         if(data.reveal_data.killer_caught) {
                             banner.innerText = "🏆 INNOCENTS WIN!";
@@ -176,7 +218,6 @@
                             banner.className = "winner-banner win-killer";
                         }
 
-                        // Render Votes Scoreboard
                         const votesDiv = document.getElementById('voteResults');
                         votesDiv.innerHTML = "";
                         if(data.reveal_data.votes.length === 0) {
@@ -189,11 +230,9 @@
                             });
                         }
 
-                        // Render Story
                         const story = data.reveal_data.master_story;
-                        document.getElementById('revealTruth').innerHTML = `<strong style="font-size:20px;">The Motive & Murder:</strong><br>${story.the_murder}<br><br><strong style="font-size:20px;">The Solution:</strong><br>${story.the_solution}`;
+                        document.getElementById('revealTruth').innerHTML = `<strong style="font-size:20px;">The Solution:</strong><br>${story.the_solution}`;
                         
-                        // Render Identities
                         const idList = document.getElementById('revealIdentities');
                         idList.innerHTML = "";
                         data.reveal_data.true_identities.forEach(p => {
@@ -222,7 +261,31 @@
                     
                     if (data.is_dead) {
                         document.getElementById('deadScreen').style.display = 'block';
+                        document.getElementById('votingSection').style.display = 'none';
                         document.getElementById('ghostClueText').innerText = data.ghost_clue;
+                        
+                        if (data.ghost_clue_recipient) {
+                            document.getElementById('ghostClueSender').style.display = 'none';
+                            document.getElementById('ghostClueSent').style.display = 'block';
+                            document.getElementById('sentToTarget').innerText = data.ghost_clue_recipient;
+                        } else {
+                            document.getElementById('ghostClueSender').style.display = 'block';
+                            document.getElementById('ghostClueSent').style.display = 'none';
+                        }
+                    } else {
+                        document.getElementById('votingSection').style.display = 'block';
+                    }
+
+                    if (data.received_ghost_clues && data.received_ghost_clues.length > 0) {
+                        document.getElementById('receivedGhostClues').style.display = 'block';
+                        const gList = document.getElementById('ghostCluesList');
+                        gList.innerHTML = "";
+                        data.received_ghost_clues.forEach(gc => {
+                            gList.innerHTML += `<div style="background: rgba(3, 218, 198, 0.1); padding: 10px; border-left: 4px solid #03dac6; margin-bottom: 10px; border-radius: 4px;">
+                                <strong style="color: #03dac6;">From ${gc.character_name}:</strong><br>
+                                <span style="color: #ddd; font-style: italic;">"${gc.ghost_clue}"</span>
+                            </div>`;
+                        });
                     }
 
                     document.getElementById('charName').innerText = data.character_name;
@@ -230,7 +293,7 @@
 
                     let alerts = "";
                     if (data.is_killer) alerts += `<div class="box alert-killer">⚠️ YOU ARE THE KILLER. Deflect suspicion. You do NOT know who your accomplice is.</div>`;
-                    if (data.is_accomplice) alerts += `<div class="box alert-accomplice">🤝 YOU ARE THE ACCOMPLICE. Protect the Killer at all costs.<br><br><span style="color: #fff; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 4px;"><strong>SECRET:</strong> The Killer is <u>${data.known_killer}</u>. They do not know you are helping them.</span></div>`;
+                    if (data.is_accomplice) alerts += `<div class="box alert-accomplice">🤝 YOU ARE THE ACCOMPLICE. Protect the Killer at all costs.<br><br><span style="color: #fff; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 4px;"><strong>SECRET:</strong> The Killer is <u>${data.known_killer}</u>.</span></div>`;
                     if (data.is_investigator) alerts += `<div class="box alert-investigator">🔍 YOU ARE THE INVESTIGATOR. Pay close attention to your Round 2 clue.</div>`;
                     
                     document.getElementById('alertsContainer').innerHTML = alerts;
@@ -248,20 +311,27 @@
 
                     const killSelect = document.getElementById('killTarget');
                     const voteSelect = document.getElementById('suspectList');
+                    const ghostSelect = document.getElementById('ghostTarget');
+                    
                     const currentKillTarget = killSelect ? killSelect.value : '';
                     const currentVoteTarget = voteSelect ? voteSelect.value : '';
+                    const currentGhostTarget = ghostSelect ? ghostSelect.value : '';
 
                     const notebookDiv = document.getElementById('notebookContainer');
                     notebookDiv.innerHTML = "";
                     killSelect.innerHTML = "<option value=''>-- Select Target --</option>";
                     voteSelect.innerHTML = "<option value=''>-- Select Suspect --</option>";
+                    ghostSelect.innerHTML = "<option value=''>-- Select Living Player --</option>";
 
                     data.notebook.forEach((p, index) => {
                         const statusClass = p.my_note.status === 'sus' ? 'sus' : p.my_note.status === 'alright fam' ? 'alright' : '';
                         const deadClass = p.is_publicly_dead ? 'dead' : '';
                         const deadLabel = p.is_publicly_dead ? ' <span style="color:#ff5252;">☠️ (DEAD)</span>' : '';
                         
-                        if (!p.is_publicly_dead) { killSelect.innerHTML += `<option value="${p.character_name}">${p.character_name} (${p.claimed_by})</option>`; }
+                        if (!p.is_publicly_dead) { 
+                            killSelect.innerHTML += `<option value="${p.character_name}">${p.character_name} (${p.claimed_by})</option>`; 
+                            ghostSelect.innerHTML += `<option value="${p.character_name}">${p.character_name}</option>`; 
+                        }
                         voteSelect.innerHTML += `<option value="${p.character_name}">${p.character_name}</option>`;
 
                         notebookDiv.innerHTML += `
@@ -281,6 +351,7 @@
 
                     if(currentKillTarget) killSelect.value = currentKillTarget;
                     if(currentVoteTarget) voteSelect.value = currentVoteTarget;
+                    if(currentGhostTarget) ghostSelect.value = currentGhostTarget;
 
                     if (data.is_killer && !data.is_dead) document.getElementById('killerPanel').style.display = 'block';
                     else document.getElementById('killerPanel').style.display = 'none';
@@ -311,6 +382,13 @@
             const suspect = document.getElementById('suspectList').value;
             if(!suspect) return;
             await fetch(`/player/vote/${accessKey}?suspect=${encodeURIComponent(suspect)}`, { method: 'POST' });
+            fetchData();
+        }
+
+        async function sendGhostClue() {
+            const target = document.getElementById('ghostTarget').value;
+            if(!target) return alert("Select a living player first.");
+            await fetch(`/player/send-ghost-clue/${accessKey}?target_character=${encodeURIComponent(target)}`, { method: 'POST' });
             fetchData();
         }
 

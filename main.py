@@ -136,12 +136,16 @@ async def get_player_dashboard(access_key: str):
     game_res = supabase.table("games").select("current_round, status, master_story").eq("id", game_id).execute()
     current_round = game_res.data[0]["current_round"]
     game_status = game_res.data[0]["status"]
-    master_story_raw = game_res.data[0]["master_story"]
+    master_story = json.loads(game_res.data[0]["master_story"])
 
     is_currently_dead = player["is_dead"] and current_round >= player["death_round"]
     clues_res = supabase.table("clues").select("*").eq("player_id", player["id"]).eq("is_released", True).execute()
     all_players = supabase.table("players").select("id, character_name, public_summary, claimed_by_user, is_dead, death_round, is_killer, is_accomplice, is_investigator, is_drunk, voted_for").eq("game_id", game_id).execute()
     
+    # Check if this player received any ghost clues from dead players
+    received_ghost_req = supabase.table("players").select("character_name, ghost_clue").eq("game_id", game_id).eq("ghost_clue_recipient", player["character_name"]).execute()
+    received_ghost_clues = received_ghost_req.data
+
     killers_count = sum(1 for p in all_players.data if p["is_killer"])
     accomplice_count = sum(1 for p in all_players.data if p["is_accomplice"])
 
@@ -162,32 +166,44 @@ async def get_player_dashboard(access_key: str):
                 "my_note": notes_dict.get(p["character_name"], {"status": "neutral", "note_text": ""})
             })
 
-    # SCOREBOARD LOGIC
     reveal_data = None
     if game_status == "finished":
         killer_name = next((p["character_name"] for p in all_players.data if p["is_killer"]), "Unknown")
         
         votes = []
         correct_votes = 0
+        alive_innocents = 0
+        
         for p in all_players.data:
+            is_innocent = not p["is_killer"] and not p["is_accomplice"]
+            if is_innocent and not p["is_dead"]:
+                alive_innocents += 1
+                
             if p["voted_for"]:
                 is_correct = (p["voted_for"] == killer_name)
-                # Only count innocents for the 'win' metric
-                if is_correct and not p["is_killer"] and not p["is_accomplice"]: correct_votes += 1
+                # Only alive innocents count toward the win condition ratio
+                if is_correct and is_innocent and not p["is_dead"]: 
+                    correct_votes += 1
                 votes.append({"voter": p["character_name"], "player_name": p["claimed_by_user"], "target": p["voted_for"], "is_correct": is_correct})
+
+        # Innocents win if at least 50% of alive innocents voted correctly
+        needed_votes = max(1, alive_innocents / 2.0)
+        killer_caught = correct_votes >= needed_votes
 
         true_identities = [{"name": p["character_name"], "player": p["claimed_by_user"], "is_killer": p["is_killer"], "is_accomplice": p["is_accomplice"], "is_investigator": p["is_investigator"], "is_drunk": p["is_drunk"]} for p in all_players.data]
         
         reveal_data = {
-            "master_story": json.loads(master_story_raw),
+            "master_story": master_story,
             "true_identities": true_identities,
             "votes": votes,
-            "killer_caught": correct_votes > 0 # Simple win condition: If at least 1 innocent got it right, they win.
+            "killer_caught": killer_caught
         }
 
     return {
         "game_status": game_status, "current_round": current_round, "character_name": player["character_name"],
+        "active_story": {"background": master_story.get("background", ""), "the_murder": master_story.get("the_murder", "")},
         "role_description": player["role_description"], "ghost_clue": player["ghost_clue"],
+        "ghost_clue_recipient": player["ghost_clue_recipient"], "received_ghost_clues": received_ghost_clues,
         "is_killer": player["is_killer"], "is_accomplice": player["is_accomplice"], "is_investigator": player["is_investigator"],
         "known_killer": known_killer, "is_dead": is_currently_dead, "voted_for": player["voted_for"], "available_clues": clues_res.data,
         "notebook": notebook, "killers_count": killers_count, "accomplice_count": accomplice_count, "reveal_data": reveal_data
@@ -202,12 +218,17 @@ async def eliminate_player(killer_access_key: str, target_character: str):
     game = supabase.table("games").select("current_round").eq("id", game_id).execute()
     next_round = game.data[0]["current_round"] + 1
 
-    # STRICT 1-KILL LIMIT: Un-mark any previously selected target for this upcoming round
     supabase.table("players").update({"is_dead": False, "death_round": 99}).eq("game_id", game_id).eq("death_round", next_round).execute()
-
-    # Apply the new target
     supabase.table("players").update({"is_dead": True, "death_round": next_round}).eq("game_id", game_id).eq("character_name", target_character).execute()
     return {"message": f"Target locked: {target_character}. They will drop dead at the start of Round {next_round}."}
+
+@app.post("/player/send-ghost-clue/{access_key}")
+async def send_ghost_clue(access_key: str, target_character: str):
+    player = supabase.table("players").select("*").eq("access_key", access_key).execute()
+    if not player.data[0]["is_dead"]: raise HTTPException(status_code=403, detail="Only eliminated players can send ghost clues.")
+    
+    supabase.table("players").update({"ghost_clue_recipient": target_character}).eq("access_key", access_key).execute()
+    return {"message": f"Message sent to {target_character} from the beyond."}
 
 @app.post("/player/notes/{access_key}")
 async def update_notes(access_key: str, target_character: str, status: str, note_text: str):
@@ -220,5 +241,8 @@ async def update_notes(access_key: str, target_character: str, status: str, note
 
 @app.post("/player/vote/{access_key}")
 async def cast_vote(access_key: str, suspect: str):
+    player = supabase.table("players").select("*").eq("access_key", access_key).execute()
+    if player.data[0]["is_dead"]: raise HTTPException(status_code=403, detail="Eliminated players cannot vote.")
+    
     supabase.table("players").update({"voted_for": suspect}).eq("access_key", access_key).execute()
     return {"message": "Vote locked in!"}
