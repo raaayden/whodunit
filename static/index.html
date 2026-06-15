@@ -24,9 +24,13 @@
         
         .killer { color: #ff5252; font-weight: bold; }
         .dead { text-decoration: line-through; color: #666; background-color: #1a1a1a; }
-        .room-link { background: #00332a; padding: 15px; border: 2px dashed #03dac6; text-align: center; font-weight: bold; font-size: 16px; margin-top: 10px; word-break: break-all; color: #03dac6;}
         
-        /* Spinner animation */
+        /* New Copy Link Styles */
+        .link-wrapper { display: flex; gap: 10px; align-items: center; background: #00332a; padding: 10px; border: 2px dashed #03dac6; border-radius: 6px; margin-top: 10px; }
+        .link-input { flex-grow: 1; background: transparent; border: none; color: #03dac6; font-weight: bold; font-size: 14px; outline: none; padding: 0; margin: 0; }
+        .copy-btn { width: auto; padding: 10px 15px; margin: 0; background: #03dac6; color: black; border-radius: 4px; font-size: 14px; }
+        .copy-btn:hover { background: #01b3a5; }
+        
         .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; vertical-align: middle; margin-right: 10px; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
@@ -45,9 +49,14 @@
                     <input type="checkbox" id="includeAccomplice" style="width: auto; transform: scale(1.3); margin-right: 10px;"> Include Accomplice?
                 </label>
                 <button id="generateBtn" onclick="createGame()">Generate Game</button>
-                <div id="roomLinkContainer" style="display: none;">
-                    <p style="font-size: 14px; color: #aaa;">Share this link with your friends:</p>
-                    <div id="roomLink" class="room-link"></div>
+                
+                <div id="roomLinkContainer" style="display: none; margin-top: 15px;">
+                    <p style="font-size: 14px; color: #aaa; margin-bottom: 5px;">Share this link with your friends:</p>
+                    <div class="link-wrapper">
+                        <input type="text" id="roomLinkInput" class="link-input" readonly>
+                        <button onclick="copyRoomLink()" class="copy-btn">📋 Copy</button>
+                    </div>
+                    <div id="copyAlert" style="display: none; color: #03dac6; font-size: 12px; margin-top: 8px; text-align: center; font-weight: bold;">Copied to clipboard!</div>
                 </div>
             </div>
 
@@ -82,7 +91,6 @@
             const count = document.getElementById('playerCount').value;
             const accomplice = document.getElementById('includeAccomplice').checked;
             
-            // Trigger Loading State
             btn.disabled = true;
             btn.innerHTML = `<span class="spinner"></span> Generating AI Web of Suspicion...`;
             document.getElementById('truthContent').innerHTML = `<span class="spinner" style="border-top-color:#ff5252;"></span> Writing the master plot and assigning secrets... this usually takes 15-20 seconds.`;
@@ -96,16 +104,30 @@
 
                 document.getElementById('gameId').value = data.game_id;
                 document.getElementById('roomLinkContainer').style.display = 'block';
-                document.getElementById('roomLink').innerText = data.room_url;
+                
+                // Set the value of the new input field
+                document.getElementById('roomLinkInput').value = data.room_url;
+                
                 await fetchGodMode();
             } catch (err) {
                 alert(err);
                 document.getElementById('truthContent').innerText = "Failed to generate game. Check admin password or try again.";
             } finally {
-                // Reset Loading State
                 btn.disabled = false;
                 btn.innerText = "Generate Game";
             }
+        }
+
+        // New Clipboard Function
+        function copyRoomLink() {
+            const copyText = document.getElementById("roomLinkInput");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); // For mobile devices
+            navigator.clipboard.writeText(copyText.value);
+
+            const alertBox = document.getElementById("copyAlert");
+            alertBox.style.display = "block";
+            setTimeout(() => { alertBox.style.display = "none"; }, 2000);
         }
 
         async function releaseClues() {
