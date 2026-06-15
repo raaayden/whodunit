@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, Header
+from fastapi import FastAPI, Depends, HTTPException, Header, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from supabase import create_client, Client
@@ -33,7 +33,7 @@ async def lobby_view(game_id: str): return FileResponse("static/room.html")
 async def player_view(): return FileResponse("static/player.html")
 
 @app.post("/admin/create-game", dependencies=[Depends(verify_host)])
-async def create_game(theme: str, player_count: int, include_accomplice: bool = False):
+async def create_game(request: Request, theme: str, player_count: int, include_accomplice: bool = False):
     accomplice_instruction = "Ensure EXACTLY one character is the accomplice." if include_accomplice else "Ensure NO characters are the accomplice."
     
     prompt = f"""
@@ -87,7 +87,8 @@ async def create_game(theme: str, player_count: int, include_accomplice: bool = 
         ]
         supabase.table("clues").insert(clues_to_insert).execute()
 
-    return { "message": "Game generated!", "game_id": game_id, "room_url": f"http://127.0.0.1:8000/room/{game_id}" }
+    # DYNAMIC URL FIX: Automatically uses your Render domain in production
+    return { "message": "Game generated!", "game_id": game_id, "room_url": f"{request.base_url}room/{game_id}" }
 
 @app.post("/admin/release-round/{game_id}/{round_num}", dependencies=[Depends(verify_host)])
 async def release_clues(game_id: str, round_num: int):
@@ -96,7 +97,7 @@ async def release_clues(game_id: str, round_num: int):
     return {"message": f"Round {round_num} released!", "clues_updated": len(data.data)}
 
 @app.get("/admin/game/{game_id}", dependencies=[Depends(verify_host)])
-async def get_host_mode(game_id: str):
+async def get_god_mode(game_id: str):
     game = supabase.table("games").select("*").eq("id", game_id).execute()
     players = supabase.table("players").select("*").eq("game_id", game_id).execute()
     return {"game": game.data[0], "players": players.data}
