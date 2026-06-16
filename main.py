@@ -35,7 +35,7 @@ async def player_view(): return FileResponse("static/player.html")
 # --- NEW TEMPLATE REPOSITORY ENDPOINTS ---
 @app.get("/admin/templates", dependencies=[Depends(verify_host)])
 async def get_templates():
-    templates = supabase.table("game_templates").select("id, theme_title, short_description, player_count, accomplice_count, has_drunk, has_investigator").order("created_at", desc=True).execute()
+    templates = supabase.table("game_templates").select("id, theme, theme_title, short_description, player_count, accomplice_count, has_drunk, has_investigator").order("created_at", desc=True).execute()
     return {"templates": templates.data}
 
 @app.post("/admin/create-from-template/{template_id}", dependencies=[Depends(verify_host)])
@@ -112,6 +112,7 @@ async def create_game(request: Request, theme: str, player_count: int, accomplic
 
     # 1. Save to Template Repository
     supabase.table("game_templates").insert({
+        "theme": theme,
         "theme_title": game_data.get("theme_title", f"Mystery: {theme}"),
         "short_description": game_data.get("short_description", "Trust no one."),
         "player_count": player_count, "accomplice_count": accomplice_count,

@@ -65,7 +65,7 @@
 
                 <div id="viewForge">
                     <h3 style="margin-top: 0; color: #bb86fc;">Generate New Theme</h3>
-                    <input type="text" id="theme" placeholder="Theme">
+                    <input type="text" id="theme" placeholder="Spy, 1920s, High School, Forest, Dark, etc.">
                     <input type="number" id="playerCount" value="6" onchange="updateAccompliceLimit()">
                     <div class="role-option"><label>🤝 Accomplices</label><input type="number" id="accCount" value="0" min="0" max="2"></div>
                     <div class="role-option"><label>🥴 Include "The Drunk"</label><input type="checkbox" id="incDrunk"></div>
@@ -75,6 +75,8 @@
 
                 <div id="viewLibrary" style="display: none;">
                     <h3 style="margin-top: 0; color: #03dac6;">Saved Campaigns</h3>
+                    <button onclick="loadTemplates()" style="background: transparent; border: 1px solid #03dac6; color: #03dac6; margin-bottom: 15px;">↻ Refresh Library</button>
+                    <select id="themeFilter" onchange="applyFilter()" style="margin-bottom: 15px; background: #1e1e1e; border: 1px solid #03dac6; color: #03dac6;"></select>
                     <button onclick="loadTemplates()" style="background: transparent; border: 1px solid #03dac6; color: #03dac6; margin-bottom: 15px;">↻ Refresh Library</button>
                     <div id="templateList" style="max-height: 400px; overflow-y: auto;">
                         <em style="color: #666;">Loading templates...</em>
@@ -100,6 +102,7 @@
                     
                     <button id="advanceRoundBtn" onclick="advanceRound()" style="background: #03dac6; color: black; margin-top: 10px;">Advance to Round 1</button>
                     <button id="revealTruthBtn" onclick="endGame()" class="btn-danger" style="display: none; margin-top: 10px;">🛑 Reveal Truth (End Game)</button>
+                    <button id="closeGameBtn" onclick="closeGame()" style="background: #333; color: white; display: none; margin-top: 10px; border: 1px solid #555;">🗑️ Close Game & Clear Dashboard</button>
                 </div>
                 
                 <button onclick="fetchGodMode()" style="background: transparent; border: 1px solid #03dac6; color: #03dac6; margin-top: 15px;">↻ Refresh Roster</button>
@@ -150,15 +153,24 @@
             const data = await res.json();
             
             const list = document.getElementById('templateList');
+            const filterSelect = document.getElementById('themeFilter');
+            let uniqueCategories = new Set();
+            
             list.innerHTML = "";
+            
             data.templates.forEach(t => {
                 let tags = `👤 ${t.player_count}`;
                 if(t.accomplice_count > 0) tags += ` | 🤝 ${t.accomplice_count}`;
                 if(t.has_drunk) tags += ` | 🥴 Drunk`;
                 if(t.has_investigator) tags += ` | 🔍 Inv.`;
 
+                let rawTheme = (t.theme || "Custom").trim().toLowerCase();
+                let category = rawTheme.split(' ')[0]; 
+                
+                uniqueCategories.add(category);
+
                 list.innerHTML += `
-                    <div class="template-card">
+                    <div class="template-card" data-category="${category}">
                         <strong style="color: #03dac6; font-size: 18px;">${t.theme_title}</strong><br>
                         <small style="color: #aaa;">${tags}</small>
                         <p style="font-size: 14px; margin: 8px 0; color: #ddd;">${t.short_description}</p>
@@ -166,6 +178,14 @@
                     </div>
                 `;
             });
+
+            // Populate the Dropdown Filter
+            filterSelect.innerHTML = '<option value="all">All Categories</option>';
+            uniqueCategories.forEach(cat => {
+                filterSelect.innerHTML += `<option value="${cat}">${cat.charAt(0).toUpperCase() + cat.slice(1)}</option>`;
+            });
+
+            showToast("📚 Template Library Refreshed");
         }
 
         async function spawnTemplate(templateId) {
@@ -240,15 +260,19 @@
             document.getElementById('currentRoundDisplay').innerText = round;
             const advanceBtn = document.getElementById('advanceRoundBtn');
             const revealBtn = document.getElementById('revealTruthBtn');
+            const closeBtn = document.getElementById('closeGameBtn');
 
             if (data.game.status === 'finished') {
                 advanceBtn.style.display = "none"; revealBtn.style.display = "none";
+                closeBtn.style.display = "block"; // Show Close Button
                 document.getElementById('currentRoundDisplay').innerText = "Game Over";
             } else if (round < 3) {
                 advanceBtn.style.display = "block"; revealBtn.style.display = "none";
+                closeBtn.style.display = "none"; // Hide Close Button
                 advanceBtn.innerText = `Advance to Round ${round + 1}`;
             } else {
                 advanceBtn.style.display = "none"; revealBtn.style.display = "block";
+                closeBtn.style.display = "none"; // Hide Close Button
             }
             
             const story = JSON.parse(data.game.master_story);
@@ -268,6 +292,28 @@
                 const deadClass = p.is_dead && data.game.current_round >= p.death_round ? 'dead' : '';
                 tbody.innerHTML += `<tr class="${deadClass}"><td><strong>${p.character_name}</strong><br><small style="color: #aaa;">${p.claimed_by_user || 'Empty'}</small></td><td class="${p.is_killer ? 'killer' : ''}">${role}</td><td>${p.voted_for || 'Voting...'}</td></tr>`;
             });
+
+            showToast("🔄 Roster Refreshed");
+        }
+
+        function applyFilter() {
+            const filterVal = document.getElementById('themeFilter').value;
+            const cards = document.querySelectorAll('.template-card');
+            cards.forEach(card => {
+                if (filterVal === 'all' || card.getAttribute('data-category') === filterVal) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function closeGame() {
+            if(confirm("Close this game and clear your dashboard?")) {
+                localStorage.removeItem("activeGameId");
+                document.getElementById('gameId').value = "";
+                location.reload();
+            }
         }
     </script>
 </body>
