@@ -85,9 +85,10 @@ async def create_game(request: Request, theme: str, player_count: int, accomplic
        - {drunk_instruction}
        - {investigator_instruction}
     3. CLUE DISTRIBUTION RULES:
-       - CRITICAL: A player's clues MUST ONLY be about OTHER players. 
-       - NEVER give a player a clue that describes their own secret, their own actions, or implicates themselves.
-       - The Investigator's Round 2 clue MUST name the actual Killer (if accomplice available then it will be one of them) and an actual Innocent.
+       - INDIRECTNESS: Clues should be subtle. Use physical traits, timeline inconsistencies, missing items, or hidden motives rather than outright stating obvious facts.
+       - INNOCENT CLUES: An innocent player's clues MUST ONLY be about OTHER players. NEVER give an innocent player a clue that implicates themselves.
+       - EVIL CLUES (Killer/Accomplice): The killer and accomplices do NOT get real evidence. Instead, give them "Disinformation Clues". These should be fabricated alibis (e.g., "Tell everyone you were with [Accomplice Name] in the kitchen"), or fake evidence designed to frame a specific innocent player.
+       - THE INVESTIGATOR: The Investigator's Round 3 clue MUST name the actual Killer (or an accomplice) AND an actual Innocent, stating exactly: "Either [Name A] or [Name B] is guilty."
     
     Return ONLY a JSON object with this exact structure:
     {{
@@ -104,10 +105,10 @@ async def create_game(request: Request, theme: str, player_count: int, accomplic
                 "public_summary": "A 1-sentence summary of what EVERYONE knows about this person.",
                 "role_description": "• Personality: (How to act)\\n• Connection: (To the victim)\\n• Dark Secret: (Something they are hiding)",
                 "is_killer": false, "is_accomplice": false, "is_investigator": false, "is_drunk": false,
-                "ghost_clue": "A highly revealing clue they ONLY unlock after they are murdered. This clue must be about the killer's/accomplice's personality, connection or dark secret.",
+                "ghost_clue": "A highly revealing clue they ONLY unlock after they are murdered. This clue must hint at the killer's/accomplice's personality, connection, or dark secret.",
                 "clues": [
-                    {{"round": 2, "content": "• Gossip or observation about ANOTHER SPECIFIC PLAYER'S secret (NEVER about themselves)."}},
-                    {{"round": 3, "content": "• Hard physical evidence relating to the killer (NEVER about themselves)."}}
+                    {{"round": 2, "content": "• If innocent: Indirect gossip/timeline observation about ANOTHER player. If evil: A fake alibi or misdirection to confuse the town."}},
+                    {{"round": 3, "content": "• If innocent: Hard, indirect physical evidence relating to the guilty party. If evil: Fabricated evidence designed to frame an innocent player."}}
                 ]
             }}
         ]
