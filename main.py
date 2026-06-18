@@ -70,13 +70,25 @@ async def create_from_template(request: Request, template_id: str):
 @app.post("/admin/create-game", dependencies=[Depends(verify_host)])
 async def create_game(request: Request, theme: str, player_count: int, accomplice_count: int = 0, include_drunk: bool = False, include_investigator: bool = False):
     
-    accomplice_instruction = f"Ensure EXACTLY {accomplice_count} character(s) have 'is_accomplice': true."
-    drunk_instruction = "Ensure EXACTLY ONE innocent character has 'is_drunk': true. ALL of their clues must be FALSE." if include_drunk else "Ensure NO characters have 'is_drunk': true."
-    investigator_instruction = "Ensure EXACTLY ONE innocent character has 'is_investigator': true. Their Round 2 clue MUST be a 50/50 ping stating 'Either [Killer Name] or [Innocent Name] is the killer.'" if include_investigator else "Ensure NO characters have 'is_investigator': true."
+    accomplice_instruction = f"EXACTLY {accomplice_count} character(s) MUST have 'is_accomplice': true."
+    drunk_instruction = "EXACTLY ONE innocent character MUST have 'is_drunk': true. ALL of their clues must be completely FALSE." if include_drunk else "NO characters may have 'is_drunk': true."
+    investigator_instruction = "EXACTLY ONE innocent character MUST have 'is_investigator': true. Their Round 2 clue MUST say 'Either [Killer Name] or [Innocent Name] is the killer.'" if include_investigator else "NO characters may have 'is_investigator': true."
 
     prompt = f"""
     Create a highly interactive social deduction murder mystery for {player_count} players. Theme: {theme}.
-    CRITICAL: YOU MUST FILL IN EVERY DETAIL. NEVER USE PLACEHOLDERS LIKE "[Reveal Killer Here]" OR "[Motive Here]".
+    
+    --- STRICT GENERATION RULES ---
+    1. NO PLACEHOLDERS: You must fill in every detail with actual story content. Never use "[Reveal Killer Here]", "[Name]", or "[Motive Here]".
+    2. ROLE COUNTS: 
+       - EXACTLY 1 character MUST have "is_killer": true.
+       - {accomplice_instruction}
+       - {drunk_instruction}
+       - {investigator_instruction}
+    3. CLUE DISTRIBUTION RULES:
+       - CRITICAL: A player's clues MUST ONLY be about OTHER players. 
+       - NEVER give a player a clue that describes their own secret, their own actions, or implicates themselves.
+       - The Investigator's Round 2 clue MUST name the actual Killer (if accomplice available then it will be one of them) and an actual Innocent.
+    
     Return ONLY a JSON object with this exact structure:
     {{
         "theme_title": "A catchy 2-4 word title for this mystery",
@@ -94,16 +106,12 @@ async def create_game(request: Request, theme: str, player_count: int, accomplic
                 "is_killer": false, "is_accomplice": false, "is_investigator": false, "is_drunk": false,
                 "ghost_clue": "A highly revealing clue they ONLY unlock after they are murdered. This clue must be about the killer's/accomplice's personality, connection or dark secret.",
                 "clues": [
-                    {{"round": 2, "content": "• Gossip about ANOTHER player's secret."}},
-                    {{"round": 3, "content": "• Hard physical evidence relating to the killer."}}
+                    {{"round": 2, "content": "• Gossip or observation about ANOTHER SPECIFIC PLAYER'S secret (NEVER about themselves)."}},
+                    {{"round": 3, "content": "• Hard physical evidence relating to the killer (NEVER about themselves)."}}
                 ]
             }}
         ]
     }}
-    Ensure EXACTLY one character has "is_killer": true.
-    {accomplice_instruction}
-    {drunk_instruction}
-    {investigator_instruction}
     """
     
     model = genai.GenerativeModel('gemini-2.5-flash-lite', generation_config={"response_mime_type": "application/json"})

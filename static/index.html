@@ -75,7 +75,6 @@
 
                 <div id="viewLibrary" style="display: none;">
                     <h3 style="margin-top: 0; color: #03dac6;">Saved Campaigns</h3>
-                    <button onclick="loadTemplates()" style="background: transparent; border: 1px solid #03dac6; color: #03dac6; margin-bottom: 15px;">↻ Refresh Library</button>
                     <select id="themeFilter" onchange="applyFilter()" style="margin-bottom: 15px; background: #1e1e1e; border: 1px solid #03dac6; color: #03dac6;"></select>
                     <button onclick="loadTemplates()" style="background: transparent; border: 1px solid #03dac6; color: #03dac6; margin-bottom: 15px;">↻ Refresh Library</button>
                     <div id="templateList" style="max-height: 400px; overflow-y: auto;">
@@ -164,13 +163,15 @@
                 if(t.has_drunk) tags += ` | 🥴 Drunk`;
                 if(t.has_investigator) tags += ` | 🔍 Inv.`;
 
-                let rawTheme = (t.theme || "Custom").trim().toLowerCase();
-                let category = rawTheme.split(' ')[0]; 
+                // DYNAMIC Category Logic: Split by comma to extract all keywords
+                let rawTheme = (t.theme || "Custom").toLowerCase();
+                // Split by comma, remove whitespace, and remove empty strings
+                let categories = rawTheme.split(',').map(item => item.trim()).filter(item => item !== "");
                 
-                uniqueCategories.add(category);
+                categories.forEach(cat => uniqueCategories.add(cat));
 
                 list.innerHTML += `
-                    <div class="template-card" data-category="${category}">
+                    <div class="template-card" data-category="${categories.join('|')}">
                         <strong style="color: #03dac6; font-size: 18px;">${t.theme_title}</strong><br>
                         <small style="color: #aaa;">${tags}</small>
                         <p style="font-size: 14px; margin: 8px 0; color: #ddd;">${t.short_description}</p>
@@ -300,7 +301,8 @@
             const filterVal = document.getElementById('themeFilter').value;
             const cards = document.querySelectorAll('.template-card');
             cards.forEach(card => {
-                if (filterVal === 'all' || card.getAttribute('data-category') === filterVal) {
+                const cardCats = card.getAttribute('data-category').split('|');
+                if (filterVal === 'all' || cardCats.includes(filterVal)) {
                     card.style.display = 'block';
                 } else {
                     card.style.display = 'none';
