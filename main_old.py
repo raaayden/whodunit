@@ -35,7 +35,7 @@ async def player_view(): return FileResponse("static/player.html")
 # --- NEW TEMPLATE REPOSITORY ENDPOINTS ---
 @app.get("/admin/templates", dependencies=[Depends(verify_host)])
 async def get_templates():
-    templates = supabase.table("game_templates").select("id, theme, theme_title, short_description, player_count, accomplice_count, has_drunk, has_investigator, has_poisoner, has_paranoid").order("created_at", desc=True).execute()
+    templates = supabase.table("game_templates").select("id, theme, theme_title, short_description, player_count, accomplice_count, has_drunk, has_investigator").order("created_at", desc=True).execute()
     return {"templates": templates.data}
 
 @app.post("/admin/create-from-template/{template_id}", dependencies=[Depends(verify_host)])
@@ -57,11 +57,10 @@ async def create_from_template(request: Request, template_id: str):
             "role_description": char["role_description"], "public_summary": char["public_summary"],
             "ghost_clue": char.get("ghost_clue") or "The spirits are silent... I took my secrets to the grave.",
             "is_killer": char["is_killer"], "is_accomplice": char.get("is_accomplice", False),
-            "is_investigator": char.get("is_investigator", False), "is_drunk": char.get("is_drunk", False),
-            "is_poisoner": char.get("is_poisoner", False), "is_paranoid": char.get("is_paranoid", False)
+            "is_investigator": char.get("is_investigator", False), "is_drunk": char.get("is_drunk", False)
         }).execute().data[0]["id"]
 
-        clues_to_insert = [{"game_id": game_id, "player_id": player_id, "round_number": c["round"], "content": c["content"], "is_poisoned": False} for c in char["clues"]]
+        clues_to_insert = [{"game_id": game_id, "player_id": player_id, "round_number": c["round"], "content": c["content"]} for c in char["clues"]]
         supabase.table("clues").insert(clues_to_insert).execute()
 
     return { "message": "Game spawned from template!", "game_id": game_id, "room_url": f"{request.base_url}room/{game_id}" }
@@ -69,36 +68,27 @@ async def create_from_template(request: Request, template_id: str):
 
 # --- ORIGINAL GENERATION ENDPOINT ---
 @app.post("/admin/create-game", dependencies=[Depends(verify_host)])
-async def create_game(request: Request, theme: str, player_count: int, accomplice_count: int = 0, include_drunk: bool = False, include_investigator: bool = False, include_poisoner: bool = False, include_paranoid: bool = False):
+async def create_game(request: Request, theme: str, player_count: int, accomplice_count: int = 0, include_drunk: bool = False, include_investigator: bool = False):
     
     accomplice_instruction = f"EXACTLY {accomplice_count} character(s) MUST have 'is_accomplice': true."
     drunk_instruction = "EXACTLY ONE innocent character MUST have 'is_drunk': true. ALL of their clues must be completely FALSE." if include_drunk else "NO characters may have 'is_drunk': true."
-    investigator_instruction = "EXACTLY ONE innocent character MUST have 'is_investigator': true. Their Round 2 clue MUST say 'Either [Killer Name] or [Innocent Name] is guilty.'" if include_investigator else "NO characters may have 'is_investigator': true."
-    poisoner_instruction = (
-        f"ONE of the {accomplice_count} accomplice character(s) MUST have 'is_poisoner': true. "
-        "In their role description, add a line: 'Poisoner Ability: Each round you may secretly corrupt one player's evidence.'"
-    ) if include_poisoner and accomplice_count > 0 else "NO characters may have 'is_poisoner': true."
-    paranoid_instruction = (
-        "EXACTLY ONE innocent character MUST have 'is_paranoid': true. "
-        "ALL of their clues must point suspiciously at OTHER INNOCENT players, never the killer. "
-        "In their role description, add: 'Your gut screams that [Name of a specific innocent player] is the killer.'"
-    ) if include_paranoid else "NO characters may have 'is_paranoid': true."
+    investigator_instruction = "EXACTLY ONE innocent character MUST have 'is_investigator': true. Their Round 2 clue MUST say 'Either [Killer Name] or [Innocent Name] is the killer.'" if include_investigator else "NO characters may have 'is_investigator': true."
 
     prompt = f"""
     Create a highly interactive social deduction murder mystery for {player_count} players. Theme: {theme}.
     
     --- STRICT GENERATION RULES ---
-    1. NO PLACEHOLDERS: Fill in every detail. Never use "[Reveal Killer Here]", "[Name]", or "[Motive Here]".
+    1. NO PLACEHOLDERS: You must fill in every detail with actual story content. Never use "[Reveal Killer Here]", "[Name]", or "[Motive Here]".
     2. ROLE COUNTS: 
        - EXACTLY 1 character MUST have "is_killer": true.
        - {accomplice_instruction}
        - {drunk_instruction}
        - {investigator_instruction}
-       - {poisoner_instruction}
-       - {paranoid_instruction}
     3. CLUE DISTRIBUTION RULES:
-       - INNOCENT CLUES: An innocent player's clues MUST ONLY be about OTHER players.
-       - EVIL CLUES (Killer/Accomplice): The killer and accomplices receive "Disinformation Clues" (fabricated alibis or fake evidence to frame an innocent).
+       - INDIRECTNESS: Clues should be subtle. Use physical traits, timeline inconsistencies, missing items, or hidden motives rather than outright stating obvious facts.
+       - INNOCENT CLUES: An innocent player's clues MUST ONLY be about OTHER players. NEVER give an innocent player a clue that implicates themselves.
+       - EVIL CLUES (Killer/Accomplice): The killer and accomplices do NOT get real evidence. Instead, give them "Disinformation Clues". These should be fabricated alibis (e.g., "Tell everyone you were with [Accomplice Name] in the kitchen"), or fake evidence designed to frame a specific innocent player.
+       - THE INVESTIGATOR: The Investigator's Round 3 clue MUST name the actual Killer (or an accomplice) AND an actual Innocent, stating exactly: "Either [Name A] or [Name B] is guilty."
     
     Return ONLY a JSON object with this exact structure:
     {{
@@ -107,22 +97,18 @@ async def create_game(request: Request, theme: str, player_count: int, accomplic
         "master_story": {{
             "background": "• Point 1\\n• Point 2",
             "the_murder": "• Point 1\\n• Point 2",
-            "the_solution": "• Point 1\\n• Point 2",
-            "public_clues": [
-                {{"round": 2, "content": "A public piece of evidence revealed to EVERYONE at Round 2."}},
-                {{"round": 3, "content": "A final public piece of evidence revealed to EVERYONE at Round 3."}}
-            ]
+            "the_solution": "• Point 1\\n• Point 2"
         }},
         "characters": [
             {{
                 "name": "Character Name",
                 "public_summary": "A 1-sentence summary of what EVERYONE knows about this person.",
                 "role_description": "• Personality: (How to act)\\n• Connection: (To the victim)\\n• Dark Secret: (Something they are hiding)",
-                "is_killer": false, "is_accomplice": false, "is_investigator": false, "is_drunk": false, "is_poisoner": false, "is_paranoid": false,
-                "ghost_clue": "A highly revealing clue they ONLY unlock after they are murdered.",
+                "is_killer": false, "is_accomplice": false, "is_investigator": false, "is_drunk": false,
+                "ghost_clue": "A highly revealing clue they ONLY unlock after they are murdered. This clue must hint at the killer's/accomplice's personality, connection, or dark secret.",
                 "clues": [
-                    {{"round": 2, "content": "• If innocent: Indirect observation about ANOTHER player. If evil: A fake alibi."}},
-                    {{"round": 3, "content": "• If innocent: Hard physical evidence. If evil: Fabricated evidence to frame an innocent."}}
+                    {{"round": 2, "content": "• If innocent: Indirect gossip/timeline observation about ANOTHER player. If evil: A fake alibi or misdirection to confuse the town."}},
+                    {{"round": 3, "content": "• If innocent: Hard, indirect physical evidence relating to the guilty party. If evil: Fabricated evidence designed to frame an innocent player."}}
                 ]
             }}
         ]
@@ -140,7 +126,6 @@ async def create_game(request: Request, theme: str, player_count: int, accomplic
         "short_description": game_data.get("short_description", "Trust no one."),
         "player_count": player_count, "accomplice_count": accomplice_count,
         "has_drunk": include_drunk, "has_investigator": include_investigator,
-        "has_poisoner": include_poisoner, "has_paranoid": include_paranoid,
         "master_story": game_data["master_story"], "characters": game_data["characters"]
     }).execute()
 
@@ -158,11 +143,10 @@ async def create_game(request: Request, theme: str, player_count: int, accomplic
             "role_description": char["role_description"], "public_summary": char["public_summary"],
             "ghost_clue": char.get("ghost_clue") or "The spirits are silent... I took my secrets to the grave.",
             "is_killer": char["is_killer"], "is_accomplice": char.get("is_accomplice", False),
-            "is_investigator": char.get("is_investigator", False), "is_drunk": char.get("is_drunk", False),
-            "is_poisoner": char.get("is_poisoner", False), "is_paranoid": char.get("is_paranoid", False)
+            "is_investigator": char.get("is_investigator", False), "is_drunk": char.get("is_drunk", False)
         }).execute().data[0]["id"]
 
-        clues_to_insert = [{"game_id": game_id, "player_id": player_id, "round_number": c["round"], "content": c["content"], "is_poisoned": False} for c in char["clues"]]
+        clues_to_insert = [{"game_id": game_id, "player_id": player_id, "round_number": c["round"], "content": c["content"]} for c in char["clues"]]
         supabase.table("clues").insert(clues_to_insert).execute()
 
     return { "message": "Game generated!", "game_id": game_id, "room_url": f"{request.base_url}room/{game_id}" }
@@ -170,62 +154,8 @@ async def create_game(request: Request, theme: str, player_count: int, accomplic
 @app.post("/admin/release-round/{game_id}/{round_num}", dependencies=[Depends(verify_host)])
 async def release_clues(game_id: str, round_num: int):
     supabase.table("games").update({"current_round": round_num, "status": "started"}).eq("id", game_id).execute()
-    if round_num > 1:
-        # Before releasing clues, corrupt any clue that was poisoned this round
-        # Find the poisoner's current target for this round
-        poisoner_res = supabase.table("players").select("poison_target").eq("game_id", game_id).eq("is_poisoner", True).execute()
-        if poisoner_res.data and poisoner_res.data[0].get("poison_target"):
-            target_name = poisoner_res.data[0]["poison_target"]
-            # Find target player
-            target_res = supabase.table("players").select("id").eq("game_id", game_id).eq("character_name", target_name).execute()
-            if target_res.data:
-                target_id = target_res.data[0]["id"]
-                # Fetch the clue for this round
-                clue_res = supabase.table("clues").select("id, content").eq("player_id", target_id).eq("round_number", round_num).execute()
-                if clue_res.data:
-                    clue = clue_res.data[0]
-                    # Use Gemini to rewrite the clue as plausible-but-false
-                    model = genai.GenerativeModel('gemini-2.5-flash-lite', generation_config={"response_mime_type": "application/json"})
-                    poison_prompt = f"""
-                    You are corrupting evidence in a murder mystery game. The poisoner has tampered with this clue.
-                    Original clue: "{clue['content']}"
-                    Rewrite it as a plausible-sounding but completely false version that points suspicion at an INNOCENT player.
-                    Keep the same style and length. Return ONLY: {{"content": "the rewritten false clue"}}
-                    """
-                    try:
-                        poison_response = model.generate_content(poison_prompt)
-                        poisoned_content = json.loads(poison_response.text).get("content", clue["content"])
-                        supabase.table("clues").update({"content": poisoned_content, "is_poisoned": True}).eq("id", clue["id"]).execute()
-                    except Exception:
-                        # If AI fails, mark it poisoned but leave content — silent failure is fine
-                        supabase.table("clues").update({"is_poisoned": True}).eq("id", clue["id"]).execute()
-            # Clear the poison target after applying it (fresh choice each round)
-            supabase.table("players").update({"poison_target": None}).eq("game_id", game_id).eq("is_poisoner", True).execute()
-
-        supabase.table("clues").update({"is_released": True}).eq("game_id", game_id).eq("round_number", round_num).execute()
+    if round_num > 1: supabase.table("clues").update({"is_released": True}).eq("game_id", game_id).eq("round_number", round_num).execute()
     return {"message": f"Round {round_num} active!"}
-
-
-@app.post("/player/poison/{access_key}")
-async def poison_player(access_key: str, target_character: str):
-    """Poisoner secretly selects a target whose next round clue will be corrupted."""
-    player = supabase.table("players").select("*").eq("access_key", access_key).execute()
-    if not player.data:
-        raise HTTPException(status_code=404, detail="Invalid access key.")
-    p = player.data[0]
-    if not p.get("is_poisoner"):
-        raise HTTPException(status_code=403, detail="Only the Poisoner can use this ability.")
-    if p.get("is_dead"):
-        raise HTTPException(status_code=403, detail="Eliminated players cannot use abilities.")
-
-    # Validate target exists in same game
-    game_id = p["game_id"]
-    target = supabase.table("players").select("id, character_name").eq("game_id", game_id).eq("character_name", target_character).execute()
-    if not target.data:
-        raise HTTPException(status_code=404, detail="Target character not found.")
-
-    supabase.table("players").update({"poison_target": target_character}).eq("access_key", access_key).execute()
-    return {"message": f"Poison locked in. {target_character}'s next clue will be corrupted when the round releases."}
 
 @app.post("/admin/end-game/{game_id}", dependencies=[Depends(verify_host)])
 async def end_game(game_id: str):
@@ -270,7 +200,7 @@ async def get_player_dashboard(access_key: str):
 
     is_currently_dead = player["is_dead"] and current_round >= player["death_round"]
     clues_res = supabase.table("clues").select("*").eq("player_id", player["id"]).eq("is_released", True).execute()
-    all_players = supabase.table("players").select("id, character_name, public_summary, claimed_by_user, is_dead, death_round, is_killer, is_accomplice, is_investigator, is_drunk, is_poisoner, is_paranoid, voted_for").eq("game_id", game_id).execute()
+    all_players = supabase.table("players").select("id, character_name, public_summary, claimed_by_user, is_dead, death_round, is_killer, is_accomplice, is_investigator, is_drunk, voted_for").eq("game_id", game_id).execute()
     
     received_ghost_req = supabase.table("players").select("character_name, ghost_clue").eq("game_id", game_id).eq("ghost_clue_recipient", player["character_name"]).execute()
     received_ghost_clues = received_ghost_req.data
@@ -319,21 +249,12 @@ async def get_player_dashboard(access_key: str):
     return {
         "game_status": game_status, "current_round": current_round, "character_name": player["character_name"],
         "theme_title": theme_title, "short_description": short_description,
-        "active_story": {
-            "background": master_story.get("background", ""),
-            "the_murder": master_story.get("the_murder", ""),
-            "public_clues": master_story.get("public_clues", [])
-        },
+        "active_story": {"background": master_story.get("background", ""), "the_murder": master_story.get("the_murder", "")},
         "role_description": player["role_description"], "ghost_clue": player["ghost_clue"],
         "ghost_clue_recipient": player["ghost_clue_recipient"], "received_ghost_clues": received_ghost_clues,
-        "is_killer": player["is_killer"], "is_accomplice": player["is_accomplice"],
-        "is_investigator": player["is_investigator"], "is_drunk": player.get("is_drunk", False),
-        "is_poisoner": player.get("is_poisoner", False), "is_paranoid": player.get("is_paranoid", False),
-        "poison_target": player.get("poison_target"),
-        "known_killer": known_killer, "is_dead": is_currently_dead, "voted_for": player["voted_for"],
-        "available_clues": clues_res.data,
-        "notebook": notebook, "killers_count": killers_count, "accomplice_count": accomplice_count,
-        "reveal_data": reveal_data
+        "is_killer": player["is_killer"], "is_accomplice": player["is_accomplice"], "is_investigator": player["is_investigator"],
+        "known_killer": known_killer, "is_dead": is_currently_dead, "voted_for": player["voted_for"], "available_clues": clues_res.data,
+        "notebook": notebook, "killers_count": killers_count, "accomplice_count": accomplice_count, "reveal_data": reveal_data
     }
 
 @app.post("/player/eliminate/{killer_access_key}")

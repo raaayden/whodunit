@@ -157,19 +157,6 @@
                     <div id="killConfirm" style="color: #ff5252; font-weight: bold; margin-top: 10px; text-align: center;"></div>
                 </div>
 
-                <div id="poisonerPanel" style="display: none;" class="box" style="border-color: #7b1fa2;">
-                    <h3 style="color: #ce93d8; margin-top: 0;">☠️ Poison Protocol</h3>
-                    <p style="font-size: 14px; color: #aaa;">Select ONE player to corrupt. Their next round clue will become false — they won't know it. You can change your pick until the Host releases the next round.</p>
-                    <select id="poisonTarget"></select>
-                    <button onclick="poisonPlayer()" style="background: #7b1fa2; color: white;">Lock In Poison Target</button>
-                    <div id="poisonConfirm" style="color: #ce93d8; font-weight: bold; margin-top: 10px; text-align: center;"></div>
-                </div>
-
-                <div class="box" id="publicCluesBox" style="display: none; border-color: #ffb74d; background: #2a1b00;">
-                    <h3 style="color: #ffb74d; margin-top: 0;">📢 Public Announcements</h3>
-                    <div id="publicCluesContainer" style="color: #ddd;"></div>
-                </div>
-
                 <div class="box" id="cluesBox">
                     <h3>Uncovered Evidence</h3>
                     <div id="cluesContainer"></div>
@@ -310,10 +297,8 @@
 
                     let alerts = "";
                     if (data.is_killer) alerts += `<div class="box alert-killer">⚠️ YOU ARE THE KILLER. Deflect suspicion. You do NOT know who your accomplice is.</div>`;
-                    if (data.is_accomplice && !data.is_poisoner) alerts += `<div class="box alert-accomplice">🤝 YOU ARE THE ACCOMPLICE. Protect the Killer at all costs.<br><br><span style="color: #fff; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 4px;"><strong>SECRET:</strong> The Killer is <u>${data.known_killer}</u>.</span></div>`;
-                    if (data.is_poisoner) alerts += `<div class="box alert-accomplice">☠️ YOU ARE THE POISONER. Protect the Killer and corrupt the evidence.<br><br><span style="color: #fff; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 4px;"><strong>SECRET:</strong> The Killer is <u>${data.known_killer}</u>.</span></div>`;
+                    if (data.is_accomplice) alerts += `<div class="box alert-accomplice">🤝 YOU ARE THE ACCOMPLICE. Protect the Killer at all costs.<br><br><span style="color: #fff; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 4px;"><strong>SECRET:</strong> The Killer is <u>${data.known_killer}</u>.</span></div>`;
                     if (data.is_investigator) alerts += `<div class="box alert-investigator">🔍 YOU ARE THE INVESTIGATOR. Pay close attention to your Round 2 clue.</div>`;
-                    if (data.is_paranoid) alerts += `<div class="box alert-investigator" style="border-left-color: #ff9800; color: #ffb74d; background: #3e2700;">🧠 YOUR INSTINCTS: Something feels very wrong about one of the guests. Trust your gut when it speaks to you.</div>`;
                     
                     document.getElementById('alertsContainer').innerHTML = alerts;
 
@@ -331,19 +316,16 @@
                     const killSelect = document.getElementById('killTarget');
                     const voteSelect = document.getElementById('suspectList');
                     const ghostSelect = document.getElementById('ghostTarget');
-                    const poisonSelect = document.getElementById('poisonTarget');
                     
                     const currentKillTarget = killSelect ? killSelect.value : '';
                     const currentVoteTarget = voteSelect ? voteSelect.value : '';
                     const currentGhostTarget = ghostSelect ? ghostSelect.value : '';
-                    const currentPoisonTarget = poisonSelect ? poisonSelect.value : '';
 
                     const notebookDiv = document.getElementById('notebookContainer');
                     notebookDiv.innerHTML = "";
                     if(killSelect) killSelect.innerHTML = "<option value=''>-- Select Target --</option>";
                     if(voteSelect) voteSelect.innerHTML = "<option value=''>-- Select Suspect --</option>";
                     if(ghostSelect) ghostSelect.innerHTML = "<option value=''>-- Select Living Player --</option>";
-                    if(poisonSelect) poisonSelect.innerHTML = "<option value=''>-- Select Target --</option>";
 
                     data.notebook.forEach((p, index) => {
                         const statusClass = p.my_note.status === 'sus' ? 'sus' : p.my_note.status === 'alright fam' ? 'alright' : '';
@@ -354,7 +336,6 @@
                             if(killSelect) killSelect.innerHTML += `<option value="${p.character_name}">${p.character_name} (${p.claimed_by})</option>`; 
                             if(ghostSelect) ghostSelect.innerHTML += `<option value="${p.character_name}">${p.character_name}</option>`; 
                             if(voteSelect) voteSelect.innerHTML += `<option value="${p.character_name}">${p.character_name}</option>`;
-                            if(poisonSelect) poisonSelect.innerHTML += `<option value="${p.character_name}">${p.character_name}</option>`;
                         }
 
                         notebookDiv.innerHTML += `
@@ -375,33 +356,9 @@
                     if(currentKillTarget && killSelect) killSelect.value = currentKillTarget;
                     if(currentVoteTarget && voteSelect) voteSelect.value = currentVoteTarget;
                     if(currentGhostTarget && ghostSelect) ghostSelect.value = currentGhostTarget;
-                    if(currentPoisonTarget && poisonSelect) poisonSelect.value = currentPoisonTarget;
 
                     if (data.is_killer && !data.is_dead) document.getElementById('killerPanel').style.display = 'block';
                     else document.getElementById('killerPanel').style.display = 'none';
-
-                    if (data.is_poisoner && !data.is_dead) {
-                        document.getElementById('poisonerPanel').style.display = 'block';
-                        if (data.poison_target) {
-                            document.getElementById('poisonConfirm').innerText = `☠️ Poison locked in: ${data.poison_target}. Will corrupt on next round release.`;
-                        }
-                    } else {
-                        document.getElementById('poisonerPanel').style.display = 'none';
-                    }
-
-                    // Public clues — show only those whose round has been reached
-                    const pCluesBox = document.getElementById('publicCluesBox');
-                    const pCluesDiv = document.getElementById('publicCluesContainer');
-                    pCluesDiv.innerHTML = "";
-                    const activePublicClues = (data.active_story.public_clues || []).filter(c => c.round <= data.current_round);
-                    if (activePublicClues.length > 0 && data.current_round > 1) {
-                        pCluesBox.style.display = 'block';
-                        activePublicClues.forEach(c => {
-                            pCluesDiv.innerHTML += `<div style="margin-bottom:10px;"><strong style="color: #ffb74d;">Round ${c.round} Alert:</strong><br><span>${c.content}</span></div>`;
-                        });
-                    } else {
-                        pCluesBox.style.display = 'none';
-                    }
 
                     if (data.voted_for) {
                         document.getElementById('suspectList').style.display = 'none';
@@ -415,15 +372,6 @@
             const status = document.getElementById(`status_${index}`).value;
             const text = document.getElementById(`note_${index}`).value;
             await fetch(`/player/notes/${accessKey}?target_character=${encodeURIComponent(targetChar)}&status=${encodeURIComponent(status)}&note_text=${encodeURIComponent(text)}`, { method: 'POST' });
-        }
-
-        async function poisonPlayer() {
-            const target = document.getElementById('poisonTarget').value;
-            if (!target) return alert("Select a target first.");
-            const res = await fetch(`/player/poison/${accessKey}?target_character=${encodeURIComponent(target)}`, { method: 'POST' });
-            const result = await res.json();
-            if (!res.ok) { alert(result.detail); return; }
-            document.getElementById('poisonConfirm').innerText = `☠️ ${result.message}`;
         }
 
         async function eliminateTarget() {
