@@ -83,7 +83,7 @@ async def create_from_template(request: Request, template_id: str):
             "game_id": game_id,
             "player_id": player_id,
             "round_number": c["round"],
-            "content": c["true_content"],
+            "content": c.get("true_content") or c.get("content", ""),
             "poisoned_content": c.get("poisoned_content", ""),
             "is_poisoned": False,
             "is_released": False,
