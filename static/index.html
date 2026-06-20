@@ -70,6 +70,8 @@
                     <div class="role-option"><label>🤝 Accomplices</label><input type="number" id="accCount" value="0" min="0" max="2"></div>
                     <div class="role-option"><label>🥴 Include "The Drunk"</label><input type="checkbox" id="incDrunk"></div>
                     <div class="role-option"><label>🔍 Include "The Investigator"</label><input type="checkbox" id="incInvestigator"></div>
+                    <div class="role-option"><label>☠️ Make an Accomplice "The Poisoner"</label><input type="checkbox" id="incPoisoner"></div>
+                    <div class="role-option"><label>🧠 Include "The Paranoid"</label><input type="checkbox" id="incParanoid"></div>
                     <button id="generateBtn" onclick="createGame()">Generate & Play</button>
                 </div>
 
@@ -163,15 +165,13 @@
                 if(t.has_drunk) tags += ` | 🥴 Drunk`;
                 if(t.has_investigator) tags += ` | 🔍 Inv.`;
 
-                // DYNAMIC Category Logic: Split by comma to extract all keywords
-                let rawTheme = (t.theme || "Custom").toLowerCase();
-                // Split by comma, remove whitespace, and remove empty strings
-                let categories = rawTheme.split(',').map(item => item.trim()).filter(item => item !== "");
+                let rawTheme = (t.theme || "Custom").trim().toLowerCase();
+                let category = rawTheme.split(' ')[0]; 
                 
-                categories.forEach(cat => uniqueCategories.add(cat));
+                uniqueCategories.add(category);
 
                 list.innerHTML += `
-                    <div class="template-card" data-category="${categories.join('|')}">
+                    <div class="template-card" data-category="${category}">
                         <strong style="color: #03dac6; font-size: 18px;">${t.theme_title}</strong><br>
                         <small style="color: #aaa;">${tags}</small>
                         <p style="font-size: 14px; margin: 8px 0; color: #ddd;">${t.short_description}</p>
@@ -213,7 +213,7 @@
             const pass = document.getElementById('adminPass').value;
             btn.disabled = true; btn.innerHTML = `<span class="spinner"></span> Generating Roles...`;
             try {
-                const res = await fetch(`/admin/create-game?theme=${document.getElementById('theme').value}&player_count=${document.getElementById('playerCount').value}&accomplice_count=${document.getElementById('accCount').value}&include_drunk=${document.getElementById('incDrunk').checked}&include_investigator=${document.getElementById('incInvestigator').checked}`, { method: 'POST', headers: { 'x-admin-token': pass }});
+                const res = await fetch(`/admin/create-game?theme=${document.getElementById('theme').value}&player_count=${document.getElementById('playerCount').value}&accomplice_count=${document.getElementById('accCount').value}&include_drunk=${document.getElementById('incDrunk').checked}&include_investigator=${document.getElementById('incInvestigator').checked}&include_poisoner=${document.getElementById('incPoisoner').checked}&include_paranoid=${document.getElementById('incParanoid').checked}`, { method: 'POST', headers: { 'x-admin-token': pass }});
                 const data = await res.json();
                 localStorage.setItem("activeGameId", data.game_id);
                 document.getElementById('gameId').value = data.game_id;
@@ -301,8 +301,7 @@
             const filterVal = document.getElementById('themeFilter').value;
             const cards = document.querySelectorAll('.template-card');
             cards.forEach(card => {
-                const cardCats = card.getAttribute('data-category').split('|');
-                if (filterVal === 'all' || cardCats.includes(filterVal)) {
+                if (filterVal === 'all' || card.getAttribute('data-category') === filterVal) {
                     card.style.display = 'block';
                 } else {
                     card.style.display = 'none';
