@@ -2,7 +2,8 @@ from fastapi import FastAPI, Depends, HTTPException, Header, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from supabase import create_client, Client
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 import random
 import string
 import json
@@ -10,7 +11,8 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+gemini = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+GEMINI_MODEL = "gemini-2.5-flash-lite"
 
 app = FastAPI()
 supabase: Client = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
@@ -130,7 +132,10 @@ async def create_game(
 
     --- STRICT RULES ---
     1. NO PLACEHOLDERS. Fill every detail. Never write "[Name]", "[Killer]", "[Motive]" etc.
-    2. ROLE COUNTS:
+    2. TOTAL CHARACTERS: You MUST generate EXACTLY {player_count} characters — no more, no fewer.
+       Special roles (drunk, investigator, paranoid, poisoner) are assigned TO existing characters
+       within the {player_count} total. They do NOT add extra characters.
+    3. ROLE COUNTS:
        - EXACTLY 1 character must have "is_killer": true.
        - {accomplice_instruction}
        - {drunk_instruction}
@@ -180,11 +185,11 @@ async def create_game(
     }}
     """
 
-    model = genai.GenerativeModel(
-        'gemini-2.5-flash-lite',
-        generation_config={"response_mime_type": "application/json"}
+    response  = gemini.models.generate_content(
+        model=GEMINI_MODEL,
+        contents=prompt,
+        config=types.GenerateContentConfig(response_mime_type="application/json"),
     )
-    response  = model.generate_content(prompt)
     game_data = json.loads(response.text)
 
     # 1. Save template
@@ -372,8 +377,10 @@ async def end_game(game_id: str):
 
     recap_text = ""
     try:
-        model      = genai.GenerativeModel('gemini-2.5-flash-lite')
-        recap_resp = model.generate_content(recap_prompt)
+        recap_resp = gemini.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=recap_prompt,
+        )
         recap_text = recap_resp.text.strip()
     except Exception:
         recap_text = (
