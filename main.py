@@ -360,7 +360,7 @@ async def end_game(game_id: str):
 
     recap_prompt = f"""
     Write a short noir-style post-game story recap for a murder mystery called "{theme_title}".
-    Write exactly 3 paragraphs. Be atmospheric and dramatic. Use character names only, not player names.
+    Write exactly 1 paragraph. Be atmospheric and dramatic. Use character names only with player names in parentheses.
     Do not use markdown, headers, or bullet points. Plain prose only.
 
     Facts to weave in naturally:
