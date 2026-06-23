@@ -3,42 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Join Game</title>
+    <title>Whodunit — Enter the Mystery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #121212; color: #e0e0e0; font-family: 'Courier New', Courier, monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .box { background: #1e1e1e; padding: 30px; border-radius: 8px; border: 1px solid #bb86fc; text-align: center; max-width: 400px; width: 90%; }
-        input { padding: 15px; width: 100%; box-sizing: border-box; margin: 20px 0; background: #333; color: white; border: 1px solid #555; font-size: 18px; text-align: center;}
-        button { background: #bb86fc; color: black; font-weight: bold; cursor: pointer; border: none; padding: 15px; width: 100%; font-size: 18px; border-radius: 4px;}
-        button:hover { background: #9965f4; }
-        #errorMsg { color: #ff6b6b; margin-top: 15px; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #0d0d0f; --surface: #16161a; --surface2: #1e1e24;
+            --border: #2a2a32; --border2: #383844;
+            --text: #e8e8f0; --muted: #6b6b80;
+            --accent: #9d7cff; --success: #4dd89e; --danger: #ff5c5c;
+            --sans: 'DM Sans', sans-serif; --mono: 'DM Mono', monospace;
+        }
+        body {
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .card {
+            width: 100%;
+            max-width: 400px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 36px 32px;
+            text-align: center;
+        }
+        .logo {
+            font-family: var(--mono);
+            font-size: 12px;
+            letter-spacing: 0.12em;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 28px;
+        }
+        .logo span { color: var(--accent); }
+        h1 {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+        .subtitle {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+        .field-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-align: left;
+            margin-bottom: 7px;
+        }
+        input[type="text"] {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            color: var(--text);
+            padding: 12px 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: var(--sans);
+            outline: none;
+            transition: border-color 0.15s;
+            text-align: center;
+        }
+        input[type="text"]:focus { border-color: var(--accent); }
+        .btn {
+            width: 100%;
+            padding: 13px;
+            margin-top: 14px;
+            background: var(--accent);
+            color: #0d0d0f;
+            font-family: var(--sans);
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn:hover:not(:disabled) { background: #b89aff; }
+        .btn:disabled { background: var(--border2); color: var(--muted); cursor: not-allowed; }
+        .error {
+            margin-top: 14px;
+            padding: 10px 14px;
+            background: rgba(255,92,92,0.08);
+            border: 1px solid rgba(255,92,92,0.25);
+            border-radius: 7px;
+            color: var(--danger);
+            font-size: 13px;
+            display: none;
+        }
+        .spinner {
+            width: 15px; height: 15px;
+            border: 2px solid rgba(0,0,0,0.15);
+            border-top-color: #0d0d0f;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 26px 0;
+        }
+        .hint {
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+        .hint strong { color: var(--text); }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h2>Enter the Mystery</h2>
-        <p>Enter your real name to be assigned your secret identity.</p>
-        <input type="text" id="playerName" placeholder="Your Real Name" required>
-        <button onclick="joinGame()">Join Room</button>
-        <div id="errorMsg"></div>
+    <div class="card">
+        <div class="logo">🕵️ <span>Whodunit</span></div>
+        <h1>Enter the Mystery</h1>
+        <p class="subtitle">Enter your real name to be assigned your secret identity. Don't share it with anyone.</p>
+
+        <label class="field-label">Your name</label>
+        <input type="text" id="playerName" placeholder="First name is fine" autocomplete="off" maxlength="30"
+               onkeydown="if(event.key==='Enter') joinGame()">
+
+        <button class="btn" id="joinBtn" onclick="joinGame()">
+            Join the Room
+        </button>
+
+        <div class="error" id="errorMsg"></div>
+
+        <hr class="divider">
+
+        <p class="hint">
+            <strong>How it works:</strong> you'll get a secret character with a role only you can see.
+            Talk to other players in person, gather clues each round, and vote for who you think is the killer.
+        </p>
     </div>
 
     <script>
-        // Extract game_id from the URL (e.g., /room/1234-abcd)
         const gameId = window.location.pathname.split('/').pop();
 
         async function joinGame() {
-            const name = document.getElementById('playerName').value;
-            if (!name) return alert("Please enter your name");
+            const name = document.getElementById('playerName').value.trim();
+            const btn  = document.getElementById('joinBtn');
+            const err  = document.getElementById('errorMsg');
 
-            const res = await fetch(`/api/room/${gameId}/join?player_name=${encodeURIComponent(name)}`, { method: 'POST' });
-            const data = await res.json();
+            if (!name) { showError('Please enter your name.'); return; }
 
-            if (res.ok) {
-                // Redirect to the actual game interface with their secure key
-                window.location.href = `/play?key=${data.access_key}`;
-            } else {
-                document.getElementById('errorMsg').innerText = data.detail || "Error joining game.";
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Joining…';
+            err.style.display = 'none';
+
+            try {
+                const res  = await fetch(`/api/room/${gameId}/join?player_name=${encodeURIComponent(name)}`, { method: 'POST' });
+                const data = await res.json();
+                if (res.ok) {
+                    window.location.href = `/play?key=${data.access_key}`;
+                } else {
+                    showError(data.detail || 'Could not join. The room may be full or already started.');
+                    btn.disabled = false;
+                    btn.innerHTML = 'Join the Room';
+                }
+            } catch {
+                showError('Connection error. Please try again.');
+                btn.disabled = false;
+                btn.innerHTML = 'Join the Room';
             }
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorMsg');
+            el.innerText = msg;
+            el.style.display = 'block';
         }
     </script>
 </body>
