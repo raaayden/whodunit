@@ -3,319 +3,596 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>God-Mode Dashboard</title>
+    <title>Whodunit — Host Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; background: #121212; padding: 15px; color: #e0e0e0; margin: 0; }
-        .grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
-        @media(min-width: 768px) { .grid { grid-template-columns: 1fr 1fr; } }
-        
-        .card { background: #1e1e1e; padding: 20px; border-radius: 8px; border: 1px solid #333; }
-        input, button, select { padding: 12px; margin: 8px 0; width: 100%; box-sizing: border-box; font-size: 16px; border-radius: 6px; border: 1px solid #555; background: #2a2a2a; color: white;}
-        button { background: #bb86fc; color: black; border: none; cursor: pointer; font-weight: bold;}
-        button:hover:not(:disabled) { background: #9965f4; }
-        button:disabled { background: #555; cursor: not-allowed; color: #aaa; }
-        .btn-danger { background: #ff5252; color: white; margin-top: 20px; }
-        .btn-danger:hover:not(:disabled) { background: #ff1744; }
-        .btn-round { background: #03dac6; color: black; }
-        
-        .truth-box { background: #3a0000; padding: 15px; border-left: 4px solid #ff5252; margin-top: 10px; border-radius: 4px; color: #ffb3b3; white-space: pre-wrap; line-height: 1.5;}
-        .table-container { overflow-x: auto; margin-top: 10px; }
-        table { width: 100%; text-align: left; border-collapse: collapse; min-width: 400px; }
-        th, td { padding: 10px; border-bottom: 1px solid #444; font-size: 14px; }
-        
-        .killer { color: #ff5252; font-weight: bold; }
-        .dead { text-decoration: line-through; color: #666; background-color: #1a1a1a; }
-        
-        .role-option { display: flex; justify-content: space-between; align-items: center; background: #2a2a2a; padding: 10px; border-radius: 6px; margin-bottom: 8px; border: 1px solid #444;}
-        .role-option label { font-weight: bold; font-size: 14px;}
-        .role-option input[type="checkbox"] { width: auto; transform: scale(1.3); }
-        .role-option input[type="number"] { width: 60px; padding: 5px; text-align: center; margin: 0; }
-        
-        .link-wrapper { display: flex; gap: 10px; align-items: center; background: #00332a; padding: 10px; border: 2px dashed #03dac6; border-radius: 6px; margin-top: 10px; }
-        .link-input { flex-grow: 1; background: transparent; border: none; color: #03dac6; font-weight: bold; font-size: 14px; outline: none; padding: 0; margin: 0; }
-        .copy-btn { width: auto; padding: 10px 15px; margin: 0; background: #03dac6; color: black; border-radius: 4px; font-size: 14px; }
-        .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; vertical-align: middle; margin-right: 10px; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:       #0d0d0f;
+            --surface:  #16161a;
+            --surface2: #1e1e24;
+            --border:   #2a2a32;
+            --border2:  #383844;
+            --text:     #e8e8f0;
+            --muted:    #6b6b80;
+            --accent:   #9d7cff;
+            --accent2:  #6db8ff;
+            --danger:   #ff5c5c;
+            --success:  #4dd89e;
+            --warn:     #ffb347;
+            --mono:     'DM Mono', monospace;
+            --sans:     'DM Sans', sans-serif;
+            --radius:   10px;
+        }
+
+        body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; line-height: 1.5; }
+
+        /* Header */
+        .app-header { display: flex; align-items: center; gap: 14px; padding: 16px 24px; border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 0; z-index: 100; }
+        .app-header h1 { font-family: var(--mono); font-size: 14px; font-weight: 500; color: var(--accent); letter-spacing: 0.05em; }
+        .header-badge { font-family: var(--mono); font-size: 10px; background: rgba(157,124,255,0.1); color: var(--accent); border: 1px solid rgba(157,124,255,0.2); padding: 2px 8px; border-radius: 4px; letter-spacing: 0.08em; }
+        .header-spacer { flex: 1; }
+        .auth-field { font-family: var(--mono); font-size: 13px; background: var(--surface2); border: 1px solid var(--border2); color: var(--text); padding: 7px 12px; border-radius: 6px; width: 210px; outline: none; transition: border-color 0.15s; }
+        .auth-field:focus { border-color: var(--accent); }
+
+        /* Layout */
+        .main-layout { display: grid; grid-template-columns: 370px 1fr; height: calc(100vh - 57px); }
+
+        /* Left panel */
+        .left-panel { border-right: 1px solid var(--border); overflow-y: auto; display: flex; flex-direction: column; }
+        .panel-tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 0; z-index: 10; }
+        .panel-tab { flex: 1; padding: 12px; font-family: var(--sans); font-size: 13px; font-weight: 500; border: none; cursor: pointer; background: transparent; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.15s; }
+        .panel-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .panel-tab:hover:not(.active) { color: var(--text); }
+        .panel-body { padding: 20px; flex: 1; }
+
+        /* Form */
+        .field-label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; margin-top: 16px; }
+        .field-label:first-child { margin-top: 0; }
+        input[type="text"], input[type="number"], input[type="password"], select { width: 100%; background: var(--surface2); border: 1px solid var(--border2); color: var(--text); padding: 9px 12px; border-radius: 7px; font-size: 14px; font-family: var(--sans); outline: none; transition: border-color 0.15s; }
+        input:focus, select:focus { border-color: var(--accent); }
+        input[type="number"] { -moz-appearance: textfield; }
+
+        /* Role builder */
+        .roles-section { margin-top: 18px; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+        .roles-header { padding: 10px 14px; background: var(--surface2); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
+        .role-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--border); transition: background 0.1s; }
+        .role-row:last-child { border-bottom: none; }
+        .role-row:hover:not(.role-row-fixed) { background: rgba(255,255,255,0.02); }
+        .role-row-fixed { opacity: 0.45; }
+        .role-left { display: flex; align-items: center; gap: 10px; }
+        .role-icon { font-size: 17px; line-height: 1; }
+        .role-name { font-weight: 600; font-size: 13px; }
+        .role-desc { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+        /* Stepper */
+        .stepper { display: flex; align-items: center; border: 1px solid var(--border2); border-radius: 6px; overflow: hidden; }
+        .stepper-btn { width: 30px; height: 30px; background: var(--surface2); border: none; color: var(--text); font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.1s; user-select: none; }
+        .stepper-btn:hover { background: var(--border2); }
+        .stepper-val { width: 32px; text-align: center; font-family: var(--mono); font-size: 14px; color: var(--text); background: var(--surface); border: none; border-left: 1px solid var(--border2); border-right: 1px solid var(--border2); height: 30px; pointer-events: none; }
+
+        /* Suboptions (Poisoner under Accomplice) */
+        .role-subopts { display: none; border-bottom: 1px solid var(--border); background: rgba(157,124,255,0.03); }
+        .role-subopts.visible { display: block; }
+        .subopt-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px 10px 44px; border-top: 1px solid var(--border); }
+        .subopt-name { font-size: 13px; font-weight: 500; }
+        .subopt-desc { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+        /* Toggle */
+        .toggle { position: relative; width: 38px; height: 21px; flex-shrink: 0; }
+        .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+        .toggle-track { position: absolute; inset: 0; background: var(--border2); border-radius: 11px; cursor: pointer; transition: background 0.2s; }
+        .toggle input:checked + .toggle-track { background: var(--accent); }
+        .toggle-thumb { position: absolute; width: 15px; height: 15px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.2s; pointer-events: none; }
+        .toggle input:checked ~ .toggle-thumb { transform: translateX(17px); }
+
+        /* Buttons */
+        .btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 11px 16px; font-family: var(--sans); font-size: 14px; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; transition: all 0.15s; margin-top: 16px; }
+        .btn-primary { background: var(--accent); color: #0d0d0f; }
+        .btn-primary:hover:not(:disabled) { background: #b89aff; }
+        .btn-primary:disabled { background: var(--border2); color: var(--muted); cursor: not-allowed; }
+
+        /* Room link */
+        .room-link-box { display: none; margin-top: 14px; background: rgba(77,216,158,0.05); border: 1px solid rgba(77,216,158,0.2); border-radius: 8px; padding: 12px 14px; }
+        .room-link-label { font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--success); margin-bottom: 7px; }
+        .room-link-row { display: flex; gap: 8px; }
+        .room-link-input { flex: 1; background: transparent; border: none; color: var(--success); font-family: var(--mono); font-size: 11px; outline: none; min-width: 0; }
+        .copy-btn { background: rgba(77,216,158,0.12); border: 1px solid rgba(77,216,158,0.25); color: var(--success); font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 5px; cursor: pointer; white-space: nowrap; transition: background 0.15s; }
+        .copy-btn:hover { background: rgba(77,216,158,0.22); }
+
+        /* Template library */
+        .template-filter { margin-bottom: 14px; }
+        .template-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+        .template-card:hover { border-color: var(--border2); }
+        .tc-title { font-weight: 600; font-size: 14px; color: var(--accent2); margin-bottom: 3px; }
+        .tc-desc { font-size: 12px; color: var(--muted); margin-bottom: 10px; line-height: 1.4; }
+        .tc-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+        .tag { font-size: 11px; padding: 2px 7px; border-radius: 4px; background: var(--surface); border: 1px solid var(--border2); color: var(--muted); }
+        .tag-killer { border-color: rgba(255,92,92,0.35); color: var(--danger); background: rgba(255,92,92,0.05); }
+        .tag-accomplice { border-color: rgba(255,179,71,0.35); color: var(--warn); background: rgba(255,179,71,0.05); }
+        .tag-special { border-color: rgba(157,124,255,0.35); color: var(--accent); background: rgba(157,124,255,0.05); }
+        .spawn-btn { width: 100%; background: var(--surface); border: 1px solid var(--border2); color: var(--text); font-size: 12px; font-weight: 600; padding: 7px 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s; font-family: var(--sans); }
+        .spawn-btn:hover { background: var(--accent); color: #0d0d0f; border-color: var(--accent); }
+
+        /* Right panel */
+        .right-panel { overflow-y: auto; display: flex; flex-direction: column; }
+        .right-header { padding: 14px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; background: var(--surface); position: sticky; top: 0; z-index: 10; flex-wrap: wrap; }
+        .game-id-field { font-family: var(--mono); font-size: 12px; background: var(--surface2); border: 1px solid var(--border2); color: var(--muted); padding: 7px 11px; border-radius: 6px; width: 260px; outline: none; }
+        .game-id-field:focus { border-color: var(--accent); color: var(--text); }
+        .refresh-btn { background: transparent; border: 1px solid var(--border2); color: var(--muted); padding: 7px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-family: var(--sans); transition: all 0.15s; }
+        .refresh-btn:hover { color: var(--text); border-color: var(--text); }
+        .round-control { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+        .round-label { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+        .round-num { font-size: 18px; font-weight: 600; color: var(--accent2); margin: 0 4px; }
+        .ctrl-btn { padding: 7px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; font-family: var(--sans); transition: all 0.15s; white-space: nowrap; }
+        .ctrl-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .ctrl-advance { background: var(--success); color: #0d0d0f; }
+        .ctrl-advance:hover:not(:disabled) { background: #6fedb3; }
+        .ctrl-end { background: transparent; border: 1px solid var(--danger); color: var(--danger); }
+        .ctrl-end:hover:not(:disabled) { background: rgba(255,92,92,0.08); }
+        .ctrl-close { background: transparent; border: 1px solid var(--border2); color: var(--muted); }
+        .ctrl-close:hover { border-color: var(--danger); color: var(--danger); }
+
+        /* Right body */
+        .right-body { padding: 20px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-content: start; }
+
+        /* Info cards */
+        .info-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+        .info-card.full { grid-column: 1 / -1; }
+        .card-header { padding: 11px 16px; border-bottom: 1px solid var(--border); font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 7px; }
+        .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border2); }
+        .dot.live { background: var(--success); box-shadow: 0 0 5px var(--success); }
+        .card-body { padding: 16px; }
+
+        /* Story */
+        .story-title { font-size: 17px; font-weight: 600; color: var(--accent); margin-bottom: 2px; }
+        .story-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+        .story-block + .story-block { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+        .story-block-label { font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+        .story-block-text { font-size: 13px; line-height: 1.65; color: var(--text); white-space: pre-wrap; }
+
+        /* Roster */
+        .roster-table { width: 100%; border-collapse: collapse; }
+        .roster-table th { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 9px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+        .roster-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+        .roster-table tr:last-child td { border-bottom: none; }
+        .roster-table tr.is-dead td { opacity: 0.38; }
+        .char-name { font-weight: 600; }
+        .player-name { font-size: 11px; color: var(--muted); margin-top: 2px; }
+        .role-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
+        .rp-killer       { background: rgba(255,92,92,0.1);   color: var(--danger);  border: 1px solid rgba(255,92,92,0.25);  }
+        .rp-accomplice   { background: rgba(255,179,71,0.1);  color: var(--warn);    border: 1px solid rgba(255,179,71,0.25); }
+        .rp-poisoner     { background: rgba(157,124,255,0.1); color: var(--accent);  border: 1px solid rgba(157,124,255,0.25);}
+        .rp-investigator { background: rgba(109,184,255,0.1); color: var(--accent2); border: 1px solid rgba(109,184,255,0.25);}
+        .rp-drunk        { background: rgba(255,179,71,0.07); color: var(--warn);    border: 1px solid rgba(255,179,71,0.18); }
+        .rp-paranoid     { background: rgba(157,124,255,0.07);color: var(--accent);  border: 1px solid rgba(157,124,255,0.18);}
+        .rp-innocent     { background: var(--surface2); color: var(--muted); border: 1px solid var(--border2); }
+        .vote-cell { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+        .vote-cell.cast { color: var(--accent2); }
+
+        /* Toast */
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(60px); background: var(--surface); border: 1px solid var(--border2); color: var(--text); font-size: 13px; font-weight: 500; padding: 10px 18px; border-radius: 8px; z-index: 9999; box-shadow: 0 8px 24px rgba(0,0,0,0.4); transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), opacity 0.22s; opacity: 0; white-space: nowrap; }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        /* Spinner */
+        .spinner { width: 13px; height: 13px; border: 2px solid rgba(0,0,0,0.15); border-top-color: #0d0d0f; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .toast { visibility: hidden; min-width: 250px; background-color: #03dac6; color: #000; text-align: center; border-radius: 4px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        .toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
-        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+        .empty-state { color: var(--muted); font-size: 13px; text-align: center; padding: 28px 0; }
 
-        /* Tabs */
-        .tab-btn { flex: 1; padding: 10px; border: none; font-weight: bold; cursor: pointer; border-radius: 6px; }
-        .tab-active { background: #bb86fc; color: black; }
-        .tab-inactive { background: #2a2a2a; color: #aaa; border: 1px solid #444; }
-        .template-card { background: #2a2a2a; padding: 15px; border-radius: 6px; margin-bottom: 10px; border-left: 4px solid #03dac6; }
+        @media (max-width: 900px) {
+            .main-layout { grid-template-columns: 1fr; height: auto; }
+            .right-body { grid-template-columns: 1fr; }
+            .info-card.full { grid-column: 1; }
+            .round-control { margin-left: 0; flex-wrap: wrap; }
+        }
     </style>
 </head>
 <body>
-    <div id="toast" class="toast">Action Successful</div>
-    
-    <h1 style="font-size: 24px; color: #bb86fc;">👁️ God-Mode Dashboard</h1>
-    <input type="password" id="adminPass" placeholder="Admin Password (from .env)" style="max-width: 100%; margin-bottom: 20px;">
 
-    <div class="grid">
-        <div>
-            <div class="card">
-                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                    <button id="btnForge" class="tab-btn tab-active" onclick="switchTab('forge')">✨ AI Forge</button>
-                    <button id="btnLibrary" class="tab-btn tab-inactive" onclick="switchTab('library')">📚 Template Library</button>
+<div id="toast" class="toast"></div>
+
+<header class="app-header">
+    <h1>🕵️ WHODUNIT</h1>
+    <span class="header-badge">HOST DASHBOARD</span>
+    <div class="header-spacer"></div>
+    <input type="password" id="adminPass" class="auth-field" placeholder="Admin password" oninput="onPassInput()">
+</header>
+
+<div class="main-layout">
+
+    <!-- Left panel -->
+    <aside class="left-panel">
+        <div class="panel-tabs">
+            <button class="panel-tab active" id="btnForge" onclick="switchTab('forge')">✨ AI Forge</button>
+            <button class="panel-tab" id="btnLibrary" onclick="switchTab('library')">📚 Library</button>
+        </div>
+
+        <!-- Forge -->
+        <div class="panel-body" id="viewForge">
+            <label class="field-label">Theme</label>
+            <input type="text" id="theme" placeholder="e.g. 1920s speakeasy, corporate retreat…">
+
+            <label class="field-label">Players</label>
+            <input type="number" id="playerCount" value="6" min="3" max="20" onchange="updateAccompliceLimit()">
+
+            <div class="roles-section">
+                <div class="roles-header">Role Configuration</div>
+
+                <!-- Killer — fixed -->
+                <div class="role-row role-row-fixed">
+                    <div class="role-left">
+                        <span class="role-icon">🔪</span>
+                        <div><div class="role-name">Killer</div><div class="role-desc">Always included</div></div>
+                    </div>
+                    <span class="tag tag-killer">×1 fixed</span>
                 </div>
 
-                <div id="viewForge">
-                    <h3 style="margin-top: 0; color: #bb86fc;">Generate New Theme</h3>
-                    <input type="text" id="theme" placeholder="Spy, 1920s, High School, Forest, Dark, etc.">
-                    <input type="number" id="playerCount" value="6" onchange="updateAccompliceLimit()">
-                    <div class="role-option"><label>🤝 Accomplices</label><input type="number" id="accCount" value="0" min="0" max="2"></div>
-                    <div class="role-option"><label>🥴 Include "The Drunk"</label><input type="checkbox" id="incDrunk"></div>
-                    <div class="role-option"><label>🔍 Include "The Investigator"</label><input type="checkbox" id="incInvestigator"></div>
-                    <div class="role-option"><label>☠️ Make an Accomplice "The Poisoner"</label><input type="checkbox" id="incPoisoner"></div>
-                    <div class="role-option"><label>🧠 Include "The Paranoid"</label><input type="checkbox" id="incParanoid"></div>
-                    <button id="generateBtn" onclick="createGame()">Generate & Play</button>
-                </div>
-
-                <div id="viewLibrary" style="display: none;">
-                    <h3 style="margin-top: 0; color: #03dac6;">Saved Campaigns</h3>
-                    <select id="themeFilter" onchange="applyFilter()" style="margin-bottom: 15px; background: #1e1e1e; border: 1px solid #03dac6; color: #03dac6;"></select>
-                    <button onclick="loadTemplates()" style="background: transparent; border: 1px solid #03dac6; color: #03dac6; margin-bottom: 15px;">↻ Refresh Library</button>
-                    <div id="templateList" style="max-height: 400px; overflow-y: auto;">
-                        <em style="color: #666;">Loading templates...</em>
+                <!-- Accomplice + stepper -->
+                <div class="role-row">
+                    <div class="role-left">
+                        <span class="role-icon">🤝</span>
+                        <div><div class="role-name">Accomplice</div><div class="role-desc">Knows the killer's identity</div></div>
+                    </div>
+                    <div class="stepper">
+                        <button class="stepper-btn" onclick="stepAcc(-1)">−</button>
+                        <input class="stepper-val" id="accCount" type="text" value="0" readonly>
+                        <button class="stepper-btn" onclick="stepAcc(1)">+</button>
                     </div>
                 </div>
 
-                <div id="roomLinkContainer" style="display: none; margin-top: 15px; border-top: 1px solid #333; padding-top: 15px;">
-                    <p style="font-size: 14px; color: #aaa; margin-bottom: 5px;">Share this link with your friends:</p>
-                    <div class="link-wrapper">
-                        <input type="text" id="roomLinkInput" class="link-input" readonly>
-                        <button onclick="copyRoomLink()" class="copy-btn">📋 Copy</button>
+                <!-- Poisoner — sub-option of accomplice -->
+                <div class="role-subopts" id="poisonerSubopt">
+                    <div class="subopt-row">
+                        <div>
+                            <div class="subopt-name">☠️ Poisoner</div>
+                            <div class="subopt-desc">One accomplice corrupts a player's clues each round</div>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="incPoisoner">
+                            <div class="toggle-track"></div>
+                            <div class="toggle-thumb"></div>
+                        </label>
                     </div>
+                </div>
+
+                <!-- Innocent special roles -->
+                <div class="role-row">
+                    <div class="role-left">
+                        <span class="role-icon">🔎</span>
+                        <div><div class="role-name">Investigator</div><div class="role-desc">Gets a 50/50 ping in Round 2</div></div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="incInvestigator">
+                        <div class="toggle-track"></div>
+                        <div class="toggle-thumb"></div>
+                    </label>
+                </div>
+
+                <div class="role-row">
+                    <div class="role-left">
+                        <span class="role-icon">🍺</span>
+                        <div><div class="role-name">Drunk</div><div class="role-desc">Receives false clues, doesn't know it</div></div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="incDrunk">
+                        <div class="toggle-track"></div>
+                        <div class="toggle-thumb"></div>
+                    </label>
+                </div>
+
+                <div class="role-row">
+                    <div class="role-left">
+                        <span class="role-icon">🧠</span>
+                        <div><div class="role-name">Paranoid</div><div class="role-desc">Sincerely believes the wrong person is guilty</div></div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="incParanoid">
+                        <div class="toggle-track"></div>
+                        <div class="toggle-thumb"></div>
+                    </label>
                 </div>
             </div>
 
-            <div class="card" style="margin-top: 20px;">
-                <h3 style="margin-top: 0; color: #bb86fc;">2. Control Room</h3>
-                <input type="text" id="gameId" placeholder="Active Game ID">
-                
-                <div id="roundControls" style="text-align: center; margin-top: 15px; padding: 15px; background: #2a2a2a; border-radius: 6px; border: 1px solid #444;">
-                    <p style="margin: 0; font-size: 14px; color: #aaa;">Current Round</p>
-                    <p id="currentRoundDisplay" style="font-size: 32px; color: #03dac6; font-weight: bold; margin: 5px 0;">0</p>
-                    
-                    <button id="advanceRoundBtn" onclick="advanceRound()" style="background: #03dac6; color: black; margin-top: 10px;">Advance to Round 1</button>
-                    <button id="revealTruthBtn" onclick="endGame()" class="btn-danger" style="display: none; margin-top: 10px;">🛑 Reveal Truth (End Game)</button>
-                    <button id="closeGameBtn" onclick="closeGame()" style="background: #333; color: white; display: none; margin-top: 10px; border: 1px solid #555;">🗑️ Close Game & Clear Dashboard</button>
+            <button class="btn btn-primary" id="generateBtn" onclick="createGame()">Generate Mystery</button>
+
+            <div class="room-link-box" id="roomLinkContainer">
+                <div class="room-link-label">Room ready — share with players</div>
+                <div class="room-link-row">
+                    <input type="text" id="roomLinkInput" class="room-link-input" readonly>
+                    <button class="copy-btn" onclick="copyRoomLink()">Copy</button>
                 </div>
-                
-                <button onclick="fetchGodMode()" style="background: transparent; border: 1px solid #03dac6; color: #03dac6; margin-top: 15px;">↻ Refresh Roster</button>
             </div>
         </div>
 
-        <div class="card">
-            <h3 style="margin-top: 0; color: #bb86fc;">The Master Truth</h3>
-            <div id="truthContent" class="truth-box">Load a game to see the secret plot...</div>
+        <!-- Library -->
+        <div class="panel-body" id="viewLibrary" style="display:none;">
+            <select id="themeFilter" class="template-filter" onchange="applyFilter()"></select>
+            <div id="templateList"><p class="empty-state">Enter your password to load templates.</p></div>
+        </div>
+    </aside>
 
-            <h3 style="margin-top: 30px; color: #03dac6;">Live Player Roster</h3>
-            <div class="table-container">
-                <table>
-                    <thead><tr><th>Player (Real Name)</th><th>Role</th><th>Voted For</th></tr></thead>
-                    <tbody id="rosterBody"><tr><td colspan="3">No game loaded.</td></tr></tbody>
+    <!-- Right panel -->
+    <main class="right-panel">
+        <div class="right-header">
+            <input type="text" id="gameId" class="game-id-field" placeholder="Game ID — auto-filled on generate">
+            <button class="refresh-btn" onclick="fetchGodMode()">↻ Refresh</button>
+            <div class="round-control">
+                <span class="round-label">Round</span>
+                <span class="round-num" id="currentRoundDisplay">—</span>
+                <button id="advanceRoundBtn" class="ctrl-btn ctrl-advance" onclick="advanceRound()" style="display:none;">Advance to Round 1</button>
+                <button id="revealTruthBtn"  class="ctrl-btn ctrl-end"     onclick="endGame()"     style="display:none;">End Game</button>
+                <button id="closeGameBtn"    class="ctrl-btn ctrl-close"   onclick="closeGame()"   style="display:none;">Clear</button>
+            </div>
+        </div>
+
+        <div class="right-body">
+            <div class="info-card full">
+                <div class="card-header"><div class="dot" id="storyDot"></div>Master Plot</div>
+                <div class="card-body" id="truthContent">
+                    <p class="empty-state">Generate or load a game to see the secret plot.</p>
+                </div>
+            </div>
+
+            <div class="info-card full">
+                <div class="card-header"><div class="dot live"></div>Live Roster</div>
+                <table class="roster-table">
+                    <thead><tr><th>Character / Player</th><th>Role</th><th>Voted for</th></tr></thead>
+                    <tbody id="rosterBody">
+                        <tr><td colspan="3" class="empty-state">No game loaded.</td></tr>
+                    </tbody>
                 </table>
             </div>
         </div>
-    </div>
+    </main>
+</div>
 
-    <script>
-        window.onload = () => {
-            const savedId = localStorage.getItem("activeGameId");
-            if (savedId) { document.getElementById('gameId').value = savedId; fetchGodMode(); }
-            loadTemplates();
-        };
+<script>
+    window.onload = () => {
+        const saved = localStorage.getItem("activeGameId");
+        if (saved) { document.getElementById('gameId').value = saved; fetchGodMode(); }
+    };
 
-        function showToast(msg) {
-            const toast = document.getElementById("toast");
-            toast.innerText = msg;
-            toast.className = "toast show";
-            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
-        }
+    function onPassInput() {
+        if (!document.getElementById('btnLibrary').classList.contains('active')) return;
+        loadTemplates();
+    }
 
-        function switchTab(tab) {
-            document.getElementById('viewForge').style.display = tab === 'forge' ? 'block' : 'none';
-            document.getElementById('viewLibrary').style.display = tab === 'library' ? 'block' : 'none';
-            document.getElementById('btnForge').className = tab === 'forge' ? 'tab-btn tab-active' : 'tab-btn tab-inactive';
-            document.getElementById('btnLibrary').className = tab === 'library' ? 'tab-btn tab-active' : 'tab-btn tab-inactive';
-            if(tab === 'library') loadTemplates();
-        }
+    function switchTab(tab) {
+        const forge = tab === 'forge';
+        document.getElementById('viewForge').style.display   = forge ? 'block' : 'none';
+        document.getElementById('viewLibrary').style.display = forge ? 'none'  : 'block';
+        document.getElementById('btnForge').classList.toggle('active', forge);
+        document.getElementById('btnLibrary').classList.toggle('active', !forge);
+        if (!forge) loadTemplates();
+    }
 
-        async function loadTemplates() {
-            const pass = document.getElementById('adminPass').value;
-            if(!pass) return;
-            const res = await fetch('/admin/templates', { headers: { 'x-admin-token': pass }});
-            if(!res.ok) return;
+    function stepAcc(delta) {
+        const el  = document.getElementById('accCount');
+        const max = parseInt(document.getElementById('playerCount').value) > 6 ? 2 : 1;
+        const val = Math.min(max, Math.max(0, parseInt(el.value) + delta));
+        el.value  = val;
+        document.getElementById('poisonerSubopt').classList.toggle('visible', val > 0);
+        if (val === 0) document.getElementById('incPoisoner').checked = false;
+    }
+
+    function updateAccompliceLimit() {
+        const max = parseInt(document.getElementById('playerCount').value) > 6 ? 2 : 1;
+        const el  = document.getElementById('accCount');
+        if (parseInt(el.value) > max) { el.value = max; stepAcc(0); }
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    async function createGame() {
+        const btn  = document.getElementById('generateBtn');
+        const pass = document.getElementById('adminPass').value;
+        if (!pass) { showToast('⚠️ Enter your admin password first'); return; }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Generating…';
+
+        const p = new URLSearchParams({
+            theme:                document.getElementById('theme').value,
+            player_count:         document.getElementById('playerCount').value,
+            accomplice_count:     document.getElementById('accCount').value,
+            include_drunk:        document.getElementById('incDrunk').checked,
+            include_investigator: document.getElementById('incInvestigator').checked,
+            include_poisoner:     document.getElementById('incPoisoner').checked,
+            include_paranoid:     document.getElementById('incParanoid').checked,
+        });
+
+        try {
+            const res  = await fetch(`/admin/create-game?${p}`, { method: 'POST', headers: { 'x-admin-token': pass } });
             const data = await res.json();
-            
-            const list = document.getElementById('templateList');
-            const filterSelect = document.getElementById('themeFilter');
-            let uniqueCategories = new Set();
-            
-            list.innerHTML = "";
-            
-            data.templates.forEach(t => {
-                let tags = `👤 ${t.player_count}`;
-                if(t.accomplice_count > 0) tags += ` | 🤝 ${t.accomplice_count}`;
-                if(t.has_drunk) tags += ` | 🥴 Drunk`;
-                if(t.has_investigator) tags += ` | 🔍 Inv.`;
-
-                let rawTheme = (t.theme || "Custom").trim().toLowerCase();
-                let category = rawTheme.split(' ')[0]; 
-                
-                uniqueCategories.add(category);
-
-                list.innerHTML += `
-                    <div class="template-card" data-category="${category}">
-                        <strong style="color: #03dac6; font-size: 18px;">${t.theme_title}</strong><br>
-                        <small style="color: #aaa;">${tags}</small>
-                        <p style="font-size: 14px; margin: 8px 0; color: #ddd;">${t.short_description}</p>
-                        <button onclick="spawnTemplate('${t.id}')" style="background: #03dac6; color: black; padding: 8px; font-size: 14px;">▶️ Spawn Instantly</button>
-                    </div>
-                `;
-            });
-
-            // Populate the Dropdown Filter
-            filterSelect.innerHTML = '<option value="all">All Categories</option>';
-            uniqueCategories.forEach(cat => {
-                filterSelect.innerHTML += `<option value="${cat}">${cat.charAt(0).toUpperCase() + cat.slice(1)}</option>`;
-            });
-
-            showToast("📚 Template Library Refreshed");
-        }
-
-        async function spawnTemplate(templateId) {
-            const pass = document.getElementById('adminPass').value;
-            const res = await fetch(`/admin/create-from-template/${templateId}`, { method: 'POST', headers: { 'x-admin-token': pass }});
-            const data = await res.json();
-            
+            if (!res.ok) throw new Error(data.detail || 'Generation failed');
             localStorage.setItem("activeGameId", data.game_id);
             document.getElementById('gameId').value = data.game_id;
             document.getElementById('roomLinkContainer').style.display = 'block';
             document.getElementById('roomLinkInput').value = data.room_url;
             await fetchGodMode();
-            showToast("✅ Template Spawned Instantly!");
+            showToast('✅ Mystery generated');
+        } catch (e) {
+            showToast(`❌ ${e.message}`);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Generate Mystery';
+        }
+    }
+
+    function copyRoomLink() {
+        navigator.clipboard.writeText(document.getElementById('roomLinkInput').value);
+        showToast('📋 Link copied');
+    }
+
+    async function loadTemplates() {
+        const pass = document.getElementById('adminPass').value;
+        if (!pass) return;
+        const res = await fetch('/admin/templates', { headers: { 'x-admin-token': pass } });
+        if (!res.ok) return;
+        const data = await res.json();
+
+        const list = document.getElementById('templateList');
+        const filter = document.getElementById('themeFilter');
+        let cats = new Set();
+        list.innerHTML = '';
+
+        if (!data.templates.length) {
+            list.innerHTML = '<p class="empty-state">No templates yet. Generate one first.</p>';
+            return;
         }
 
-        function updateAccompliceLimit() {
-            const pCount = document.getElementById('playerCount').value;
-            const aCount = document.getElementById('accCount');
-            if (pCount > 6) { aCount.max = 2; } else { aCount.max = 1; if(aCount.value > 1) aCount.value = 1; }
+        data.templates.forEach(t => {
+            const cat = (t.theme || 'custom').trim().toLowerCase().split(' ')[0];
+            cats.add(cat);
+
+            const tags = [];
+            tags.push(`<span class="tag tag-killer">🔪 ×1</span>`);
+            if (t.accomplice_count > 0) tags.push(`<span class="tag tag-accomplice">🤝 ×${t.accomplice_count}</span>`);
+            if (t.has_poisoner)     tags.push(`<span class="tag tag-special">☠️ Poisoner</span>`);
+            if (t.has_investigator) tags.push(`<span class="tag tag-special">🔎 Investigator</span>`);
+            if (t.has_drunk)        tags.push(`<span class="tag tag-special">🍺 Drunk</span>`);
+            if (t.has_paranoid)     tags.push(`<span class="tag tag-special">🧠 Paranoid</span>`);
+            tags.push(`<span class="tag">👤 ${t.player_count}p</span>`);
+
+            list.innerHTML += `
+                <div class="template-card" data-category="${cat}">
+                    <div class="tc-title">${t.theme_title}</div>
+                    <div class="tc-desc">${t.short_description}</div>
+                    <div class="tc-tags">${tags.join('')}</div>
+                    <button class="spawn-btn" onclick="spawnTemplate('${t.id}')">▶ Spawn game</button>
+                </div>`;
+        });
+
+        filter.innerHTML = '<option value="all">All themes</option>';
+        cats.forEach(c => filter.innerHTML += `<option value="${c}">${c.charAt(0).toUpperCase()+c.slice(1)}</option>`);
+    }
+
+    function applyFilter() {
+        const val = document.getElementById('themeFilter').value;
+        document.querySelectorAll('.template-card').forEach(c => {
+            c.style.display = (val === 'all' || c.dataset.category === val) ? 'block' : 'none';
+        });
+    }
+
+    async function spawnTemplate(id) {
+        const pass = document.getElementById('adminPass').value;
+        const res  = await fetch(`/admin/create-from-template/${id}`, { method: 'POST', headers: { 'x-admin-token': pass } });
+        const data = await res.json();
+        localStorage.setItem("activeGameId", data.game_id);
+        document.getElementById('gameId').value = data.game_id;
+        document.getElementById('roomLinkContainer').style.display = 'block';
+        document.getElementById('roomLinkInput').value = data.room_url;
+        switchTab('forge');
+        await fetchGodMode();
+        showToast('⚡ Template spawned');
+    }
+
+    async function advanceRound() {
+        const pass    = document.getElementById('adminPass').value;
+        const gameId  = document.getElementById('gameId').value;
+        const current = parseInt(document.getElementById('currentRoundDisplay').innerText) || 0;
+        const btn     = document.getElementById('advanceRoundBtn');
+        btn.disabled  = true;
+        const res = await fetch(`/admin/release-round/${gameId}/${current+1}`, { method: 'POST', headers: { 'x-admin-token': pass } });
+        btn.disabled = false;
+        if (res.ok) { showToast(`🚀 Round ${current+1} released`); fetchGodMode(); }
+    }
+
+    async function endGame() {
+        if (!confirm('End the game and reveal all identities to players?')) return;
+        const pass   = document.getElementById('adminPass').value;
+        const gameId = document.getElementById('gameId').value;
+        const btn    = document.getElementById('revealTruthBtn');
+        btn.disabled = true; btn.innerText = 'Generating recap…';
+        await fetch(`/admin/end-game/${gameId}`, { method: 'POST', headers: { 'x-admin-token': pass } });
+        btn.disabled = false; btn.innerText = 'End Game';
+        showToast('🛑 Game ended — results visible to all players');
+        fetchGodMode();
+    }
+
+    function closeGame() {
+        if (!confirm('Clear this game from your dashboard?')) return;
+        localStorage.removeItem("activeGameId");
+        document.getElementById('gameId').value = '';
+        location.reload();
+    }
+
+    async function fetchGodMode() {
+        const pass   = document.getElementById('adminPass').value;
+        const gameId = document.getElementById('gameId').value;
+        if (!gameId || !pass) return;
+        localStorage.setItem("activeGameId", gameId);
+
+        const res = await fetch(`/admin/game/${gameId}`, { headers: { 'x-admin-token': pass } });
+        if (!res.ok) { showToast('❌ Could not load game'); return; }
+        const data = await res.json();
+
+        const round    = data.game.current_round || 0;
+        const finished = data.game.status === 'finished';
+
+        document.getElementById('currentRoundDisplay').innerText = finished ? '✓' : (round || '—');
+
+        const advBtn   = document.getElementById('advanceRoundBtn');
+        const endBtn   = document.getElementById('revealTruthBtn');
+        const closeBtn = document.getElementById('closeGameBtn');
+
+        if (finished) {
+            advBtn.style.display = 'none'; endBtn.style.display = 'none'; closeBtn.style.display = 'block';
+        } else if (round < 3) {
+            advBtn.style.display = 'block'; endBtn.style.display = 'none'; closeBtn.style.display = 'none';
+            advBtn.innerText = `Advance to Round ${round + 1}`;
+        } else {
+            advBtn.style.display = 'none'; endBtn.style.display = 'block'; closeBtn.style.display = 'none';
         }
 
-        async function createGame() {
-            const btn = document.getElementById('generateBtn');
-            const pass = document.getElementById('adminPass').value;
-            btn.disabled = true; btn.innerHTML = `<span class="spinner"></span> Generating Roles...`;
-            try {
-                const res = await fetch(`/admin/create-game?theme=${document.getElementById('theme').value}&player_count=${document.getElementById('playerCount').value}&accomplice_count=${document.getElementById('accCount').value}&include_drunk=${document.getElementById('incDrunk').checked}&include_investigator=${document.getElementById('incInvestigator').checked}&include_poisoner=${document.getElementById('incPoisoner').checked}&include_paranoid=${document.getElementById('incParanoid').checked}`, { method: 'POST', headers: { 'x-admin-token': pass }});
-                const data = await res.json();
-                localStorage.setItem("activeGameId", data.game_id);
-                document.getElementById('gameId').value = data.game_id;
-                document.getElementById('roomLinkContainer').style.display = 'block';
-                document.getElementById('roomLinkInput').value = data.room_url;
-                await fetchGodMode();
-                showToast("✅ Game Generated Successfully");
-            } catch (err) { alert(err); } finally { btn.disabled = false; btn.innerText = "Generate & Play"; }
-        }
+        let story = {};
+        try { story = JSON.parse(data.game.master_story); } catch {}
+        document.getElementById('storyDot').classList.toggle('live', !finished);
+        document.getElementById('truthContent').innerHTML = `
+            <div class="story-title">${data.game.theme_title || 'Mystery'}</div>
+            <div class="story-subtitle">${data.game.short_description || ''}</div>
+            <div class="story-block">
+                <div class="story-block-label">Background</div>
+                <div class="story-block-text">${story.background || '—'}</div>
+            </div>
+            <div class="story-block">
+                <div class="story-block-label">The Murder</div>
+                <div class="story-block-text">${story.the_murder || '—'}</div>
+            </div>
+            <div class="story-block">
+                <div class="story-block-label">The Solution</div>
+                <div class="story-block-text">${story.the_solution || '—'}</div>
+            </div>`;
 
-        function copyRoomLink() {
-            const copyText = document.getElementById("roomLinkInput");
-            copyText.select(); navigator.clipboard.writeText(copyText.value);
-            showToast("📋 Link Copied to Clipboard!");
-        }
+        const tbody = document.getElementById('rosterBody');
+        tbody.innerHTML = '';
+        data.players.forEach(p => {
+            const dead = p.is_dead && data.game.current_round >= p.death_round;
+            let pill = '';
+            if      (p.is_killer)       pill = `<span class="role-pill rp-killer">🔪 Killer</span>`;
+            else if (p.is_poisoner)     pill = `<span class="role-pill rp-poisoner">☠️ Poisoner</span>`;
+            else if (p.is_accomplice)   pill = `<span class="role-pill rp-accomplice">🤝 Accomplice</span>`;
+            else if (p.is_investigator) pill = `<span class="role-pill rp-investigator">🔎 Investigator</span>`;
+            else if (p.is_drunk)        pill = `<span class="role-pill rp-drunk">🍺 Drunk</span>`;
+            else if (p.is_paranoid)     pill = `<span class="role-pill rp-paranoid">🧠 Paranoid</span>`;
+            else                        pill = `<span class="role-pill rp-innocent">😇 Innocent</span>`;
 
-        async function advanceRound() {
-            const pass = document.getElementById('adminPass').value;
-            const gameId = document.getElementById('gameId').value;
-            const currentRound = parseInt(document.getElementById('currentRoundDisplay').innerText);
-            await fetch(`/admin/release-round/${gameId}/${currentRound + 1}`, { method: 'POST', headers: { 'x-admin-token': pass }});
-            showToast(`🚀 Round ${currentRound + 1} Pushed! Player devices updated.`);
-            fetchGodMode();
-        }
-
-        async function endGame() {
-            if(confirm("End the game and show the solution to all players?")) {
-                const pass = document.getElementById('adminPass').value;
-                await fetch(`/admin/end-game/${document.getElementById('gameId').value}`, { method: 'POST', headers: { 'x-admin-token': pass }});
-                showToast("🛑 Game Ended! Scoreboards released.");
-                fetchGodMode();
-            }
-        }
-
-        async function fetchGodMode() {
-            const pass = document.getElementById('adminPass').value;
-            const gameId = document.getElementById('gameId').value;
-            if(!gameId) return;
-            localStorage.setItem("activeGameId", gameId);
-
-            const res = await fetch(`/admin/game/${gameId}`, { headers: { 'x-admin-token': pass }});
-            const data = await res.json();
-            
-            const round = data.game.current_round || 0;
-            document.getElementById('currentRoundDisplay').innerText = round;
-            const advanceBtn = document.getElementById('advanceRoundBtn');
-            const revealBtn = document.getElementById('revealTruthBtn');
-            const closeBtn = document.getElementById('closeGameBtn');
-
-            if (data.game.status === 'finished') {
-                advanceBtn.style.display = "none"; revealBtn.style.display = "none";
-                closeBtn.style.display = "block"; // Show Close Button
-                document.getElementById('currentRoundDisplay').innerText = "Game Over";
-            } else if (round < 3) {
-                advanceBtn.style.display = "block"; revealBtn.style.display = "none";
-                closeBtn.style.display = "none"; // Hide Close Button
-                advanceBtn.innerText = `Advance to Round ${round + 1}`;
-            } else {
-                advanceBtn.style.display = "none"; revealBtn.style.display = "block";
-                closeBtn.style.display = "none"; // Hide Close Button
-            }
-            
-            const story = JSON.parse(data.game.master_story);
-            document.getElementById('truthContent').innerHTML = `
-                <strong style="color: #03dac6; font-size: 18px;">${data.game.theme_title || 'Mystery'}</strong><br>
-                <em style="color: #aaa;">${data.game.short_description || ''}</em><br><br>
-                <strong style="color: #ff5252;">Background:</strong><br>${story.background}<br><br>
-                <strong style="color: #ff5252;">The Murder:</strong><br>${story.the_murder}<br><br>
-                <strong style="color: #ff5252;">The Solution:</strong><br>${story.the_solution}
-            `;
-
-            const tbody = document.getElementById('rosterBody');
-            tbody.innerHTML = "";
-            data.players.forEach(p => {
-                let role = "Innocent";
-                if (p.is_killer) role = "🔪 Killer"; else if (p.is_accomplice) role = "🤝 Accomplice"; else if (p.is_investigator) role = "🔍 Investigator"; else if (p.is_drunk) role = "🥴 Drunk (False Clues)";
-                const deadClass = p.is_dead && data.game.current_round >= p.death_round ? 'dead' : '';
-                tbody.innerHTML += `<tr class="${deadClass}"><td><strong>${p.character_name}</strong><br><small style="color: #aaa;">${p.claimed_by_user || 'Empty'}</small></td><td class="${p.is_killer ? 'killer' : ''}">${role}</td><td>${p.voted_for || 'Voting...'}</td></tr>`;
-            });
-
-            showToast("🔄 Roster Refreshed");
-        }
-
-        function applyFilter() {
-            const filterVal = document.getElementById('themeFilter').value;
-            const cards = document.querySelectorAll('.template-card');
-            cards.forEach(card => {
-                if (filterVal === 'all' || card.getAttribute('data-category') === filterVal) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        }
-
-        function closeGame() {
-            if(confirm("Close this game and clear your dashboard?")) {
-                localStorage.removeItem("activeGameId");
-                document.getElementById('gameId').value = "";
-                location.reload();
-            }
-        }
-    </script>
+            tbody.innerHTML += `
+                <tr class="${dead ? 'is-dead' : ''}">
+                    <td><div class="char-name">${p.character_name}${dead ? ' 💀' : ''}</div><div class="player-name">${p.claimed_by_user || '<em style="color:var(--border2)">Empty</em>'}</div></td>
+                    <td>${pill}</td>
+                    <td><span class="vote-cell ${p.voted_for ? 'cast' : ''}">${p.voted_for || '—'}</span></td>
+                </tr>`;
+        });
+    }
+</script>
 </body>
 </html>
