@@ -13,702 +13,803 @@
             --border: #2a2a32; --border2: #383844;
             --text: #e8e8f0; --muted: #6b6b80;
             --accent: #9d7cff; --accent2: #6db8ff;
-            --danger: #ff5c5c; --success: #4dd89e;
-            --warn: #ffb347; --teal: #2dd4bf;
+            --danger: #ff5c5c; --success: #4dd89e; --warn: #ffb347;
             --sans: 'DM Sans', sans-serif; --mono: 'DM Mono', monospace;
+            --radius: 10px;
         }
-        body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; line-height: 1.5; padding-bottom: 80px; }
+        body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 100px; font-size: 14px; line-height: 1.5; }
 
-        /* Header */
-        .top-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 0; z-index: 50; }
-        .top-bar-left { display: flex; flex-direction: column; }
-        .game-title { font-family: var(--mono); font-size: 12px; color: var(--accent); letter-spacing: 0.06em; }
-        .char-label { font-size: 16px; font-weight: 600; color: var(--text); margin-top: 1px; }
-        .sync-status { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+        /* ── Top bar ── */
+        .top-bar { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--border); }
+        .top-bar-title { font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: 0.06em; flex: 1; }
+        .top-bar-title span { color: var(--accent); }
+        .icon-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border2); background: var(--surface2); color: var(--text); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
+        .icon-btn:hover { border-color: var(--accent); }
 
-        /* Layout */
-        .page { max-width: 520px; margin: 0 auto; padding: 16px; }
+        /* ── Container ── */
+        .container { max-width: 540px; margin: 0 auto; padding: 16px; }
 
-        /* Cards */
-        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
-        .card-title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+        /* ── Cards ── */
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+        .card-header { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 7px; }
+        .card-body { padding: 16px; }
+        .card-body-flush { padding: 0; }
 
-        /* Alert banners */
-        .alert { border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; border-left: 3px solid; }
-        .alert-killer   { background: rgba(255,92,92,0.07);   border-color: var(--danger);  color: var(--danger); }
-        .alert-evil     { background: rgba(255,179,71,0.07);  border-color: var(--warn);    color: var(--warn); }
-        .alert-special  { background: rgba(109,184,255,0.07); border-color: var(--accent2); color: var(--accent2); }
-        .alert-paranoid { background: rgba(255,179,71,0.07);  border-color: var(--warn);    color: var(--warn); }
-        .alert-dead     { background: rgba(255,92,92,0.05);   border-color: var(--danger);  color: var(--text); }
-        .alert-fool     { background: rgba(255,92,92,0.07);   border-color: var(--danger);  color: var(--danger); }
-        .alert-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
-        .alert-body { font-size: 13px; line-height: 1.5; opacity: 0.9; }
-        .secret-pill { display: inline-block; margin-top: 8px; padding: 5px 10px; background: rgba(0,0,0,0.3); border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--text); border: 1px solid rgba(255,255,255,0.08); }
+        /* ── Alert banners ── */
+        .alert { border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px; border-left: 3px solid; }
+        .alert-killer   { background: rgba(255,92,92,0.07);  border-color: var(--danger);  color: #ffb3b3; }
+        .alert-accomplice { background: rgba(255,179,71,0.07); border-color: var(--warn);    color: #ffd49d; }
+        .alert-investigator { background: rgba(109,184,255,0.07); border-color: var(--accent2); color: var(--accent2); }
+        .alert-paranoid { background: rgba(157,124,255,0.07); border-color: var(--accent); color: #c9b3ff; }
+        .alert-title { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+        .alert-secret { display: inline-block; margin-top: 8px; background: rgba(0,0,0,0.3); padding: 6px 10px; border-radius: 6px; font-size: 13px; }
+        .alert-secret u { color: var(--text); }
 
-        /* Role sheet */
-        .role-text { font-size: 13px; line-height: 1.7; color: #ccc; white-space: pre-wrap; }
+        /* ── Dead screen ── */
+        .dead-card { background: rgba(3,218,198,0.04); border: 1px solid rgba(3,218,198,0.2); border-radius: var(--radius); padding: 20px 16px; margin-bottom: 12px; text-align: center; }
+        .dead-title { font-size: 18px; font-weight: 700; color: var(--danger); margin-bottom: 6px; }
+        .dead-sub { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+        .ghost-box { background: rgba(77,216,158,0.05); border: 1px dashed rgba(77,216,158,0.3); border-radius: 8px; padding: 14px; text-align: left; margin-top: 4px; }
+        .ghost-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--success); margin-bottom: 6px; }
+        .ghost-text { font-size: 14px; color: var(--text); line-height: 1.6; font-style: italic; }
 
-        /* Clue items */
-        .clue-item { padding: 10px 12px; background: var(--surface2); border-radius: 8px; margin-bottom: 8px; border-left: 3px solid var(--accent); font-size: 13px; line-height: 1.5; }
-        .clue-item:last-child { margin-bottom: 0; }
-        .clue-round { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.07em; }
-        .clue-empty { color: var(--muted); font-size: 13px; font-style: italic; }
+        /* ── Role sheet ── */
+        .role-sheet { font-size: 13px; line-height: 1.8; color: #ccc; white-space: pre-wrap; }
 
-        /* Public clue */
-        .public-clue { padding: 12px 14px; background: rgba(255,179,71,0.06); border: 1px solid rgba(255,179,71,0.2); border-radius: 8px; margin-bottom: 8px; }
-        .public-clue-label { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--warn); margin-bottom: 4px; }
-        .public-clue-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+        /* ── Clues ── */
+        .clue-item { padding: 12px 14px; border-bottom: 1px solid var(--border); display: flex; gap: 12px; }
+        .clue-item:last-child { border-bottom: none; }
+        .clue-round { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: 0.06em; color: var(--accent); background: rgba(157,124,255,0.1); border: 1px solid rgba(157,124,255,0.2); padding: 2px 7px; border-radius: 4px; white-space: nowrap; align-self: flex-start; margin-top: 2px; }
+        .clue-text { font-size: 13px; color: var(--text); line-height: 1.6; }
+        .clue-empty { padding: 20px; text-align: center; color: var(--muted); font-size: 13px; }
 
-        /* Ghost clue */
-        .ghost-item { padding: 10px 12px; background: rgba(45,212,191,0.05); border-left: 3px solid var(--teal); border-radius: 8px; margin-bottom: 8px; font-size: 13px; line-height: 1.5; }
-        .ghost-from { font-size: 11px; color: var(--teal); font-weight: 600; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.06em; }
+        /* ── Public clues ── */
+        .pub-clue-item { padding: 12px 14px; border-bottom: 1px solid var(--border); display: flex; gap: 12px; }
+        .pub-clue-item:last-child { border-bottom: none; }
+        .pub-clue-round { font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--warn); background: rgba(255,179,71,0.1); border: 1px solid rgba(255,179,71,0.2); padding: 2px 7px; border-radius: 4px; white-space: nowrap; align-self: flex-start; margin-top: 2px; }
 
-        /* Notebook */
-        .notebook-entry { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
-        .notebook-entry:last-child { border-bottom: none; }
-        .nb-info { flex: 1; min-width: 0; }
-        .nb-name { font-weight: 600; font-size: 13px; }
-        .nb-desc { font-size: 11px; color: var(--muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .nb-dead { opacity: 0.4; }
-        .nb-status { display: flex; gap: 5px; flex-shrink: 0; }
-        .status-btn { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border2); background: var(--surface2); cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
-        .status-btn:hover { border-color: var(--border); background: var(--border2); }
-        .status-btn.active-sus     { background: rgba(255,92,92,0.15);  border-color: var(--danger); }
-        .status-btn.active-alright { background: rgba(77,216,158,0.15); border-color: var(--success); }
+        /* ── Ghost received ── */
+        .ghost-received-item { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+        .ghost-received-item:last-child { border-bottom: none; }
+        .ghost-from { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; color: var(--success); margin-bottom: 4px; }
+        .ghost-msg { font-size: 13px; color: var(--text); font-style: italic; }
 
-        /* Action panels (killer, poisoner, spy, exile) */
-        .action-panel { border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; border: 1px solid; }
-        .panel-killer   { border-color: rgba(255,92,92,0.3);   background: rgba(255,92,92,0.04); }
-        .panel-poisoner { border-color: rgba(157,124,255,0.3); background: rgba(157,124,255,0.04); }
-        .panel-spy      { border-color: rgba(109,184,255,0.3); background: rgba(109,184,255,0.04); }
-        .panel-exile    { border-color: rgba(255,179,71,0.3);  background: rgba(255,179,71,0.04); }
-        .panel-ghost    { border-color: rgba(45,212,191,0.3);  background: rgba(45,212,191,0.04); }
-        .panel-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
-        .panel-killer   .panel-title { color: var(--danger);  }
-        .panel-poisoner .panel-title { color: var(--accent);  }
-        .panel-spy      .panel-title { color: var(--accent2); }
-        .panel-exile    .panel-title { color: var(--warn);    }
-        .panel-ghost    .panel-title { color: var(--teal);    }
-        .panel-desc { font-size: 12px; color: var(--muted); margin-bottom: 12px; line-height: 1.5; }
+        /* ── Notebook ── */
+        .notebook-card { border-bottom: 1px solid var(--border); }
+        .notebook-card:last-child { border-bottom: none; }
+        .notebook-header { padding: 12px 16px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.1s; user-select: none; }
+        .notebook-header:hover { background: rgba(255,255,255,0.02); }
+        .nb-status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border2); flex-shrink: 0; transition: background 0.2s; }
+        .nb-status-dot.sus { background: var(--danger); }
+        .nb-status-dot.alright { background: var(--success); }
+        .nb-name { font-weight: 600; font-size: 14px; flex: 1; }
+        .nb-player { font-size: 11px; color: var(--muted); }
+        .nb-dead { font-size: 11px; color: var(--danger); font-weight: 600; }
+        .nb-expand { color: var(--muted); font-size: 12px; transition: transform 0.2s; }
+        .nb-expand.open { transform: rotate(180deg); }
+        .notebook-body { display: none; padding: 0 16px 14px; }
+        .notebook-body.open { display: block; }
+        .nb-summary { font-size: 13px; color: var(--muted); margin-bottom: 12px; line-height: 1.5; }
+        .nb-controls { display: flex; gap: 8px; margin-bottom: 10px; }
+        .nb-status-btn { flex: 1; padding: 7px; border-radius: 6px; border: 1px solid var(--border2); background: var(--surface2); color: var(--muted); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: var(--sans); }
+        .nb-status-btn:hover { border-color: var(--border2); color: var(--text); }
+        .nb-status-btn.active-sus { background: rgba(255,92,92,0.12); border-color: rgba(255,92,92,0.4); color: var(--danger); }
+        .nb-status-btn.active-alright { background: rgba(77,216,158,0.12); border-color: rgba(77,216,158,0.4); color: var(--success); }
+        .nb-note { width: 100%; background: var(--surface2); border: 1px solid var(--border2); color: var(--text); padding: 9px 11px; border-radius: 7px; font-size: 13px; font-family: var(--sans); resize: vertical; min-height: 60px; outline: none; line-height: 1.5; }
+        .nb-note:focus { border-color: var(--accent); }
 
-        /* Select */
-        select { width: 100%; background: var(--surface2); border: 1px solid var(--border2); color: var(--text); padding: 9px 12px; border-radius: 7px; font-size: 14px; font-family: var(--sans); outline: none; margin-bottom: 10px; }
+        /* ── Action panels ── */
+        .action-panel { background: var(--surface2); border-radius: 8px; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border2); }
+        .action-panel.killer-panel { border-color: rgba(255,92,92,0.3); background: rgba(255,92,92,0.04); }
+        .action-panel.poison-panel { border-color: rgba(157,124,255,0.3); background: rgba(157,124,255,0.04); }
+        .action-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+        .action-desc { font-size: 12px; color: var(--muted); margin-bottom: 12px; line-height: 1.5; }
+        .action-confirm { font-size: 12px; font-weight: 600; margin-top: 10px; min-height: 18px; }
+
+        /* ── Selects & buttons ── */
+        select { width: 100%; background: var(--surface); border: 1px solid var(--border2); color: var(--text); padding: 10px 12px; border-radius: 7px; font-size: 14px; font-family: var(--sans); outline: none; margin-bottom: 10px; }
         select:focus { border-color: var(--accent); }
+        .btn { width: 100%; padding: 11px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; font-family: var(--sans); cursor: pointer; transition: all 0.15s; }
+        .btn-accent  { background: var(--accent);  color: #0d0d0f; }
+        .btn-accent:hover  { background: #b89aff; }
+        .btn-success { background: var(--success); color: #0d0d0f; }
+        .btn-success:hover { background: #6fedb3; }
+        .btn-danger  { background: var(--danger);  color: white; }
+        .btn-danger:hover  { background: #ff7a7a; }
+        .btn-purple  { background: rgba(157,124,255,0.15); border: 1px solid rgba(157,124,255,0.4); color: var(--accent); }
+        .btn-purple:hover  { background: rgba(157,124,255,0.25); }
+        .btn-teal    { background: rgba(77,216,158,0.12); border: 1px solid rgba(77,216,158,0.35); color: var(--success); }
+        .btn-teal:hover { background: rgba(77,216,158,0.22); }
+        .btn-ghost-send { background: rgba(77,216,158,0.1); border: 1px solid rgba(77,216,158,0.3); color: var(--success); }
 
-        /* Buttons */
-        .btn { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 10px 14px; font-family: var(--sans); font-size: 13px; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; transition: all 0.15s; }
-        .btn-killer   { background: rgba(255,92,92,0.15);   color: var(--danger);  border: 1px solid rgba(255,92,92,0.3); }
-        .btn-killer:hover   { background: rgba(255,92,92,0.25); }
-        .btn-poisoner { background: rgba(157,124,255,0.15); color: var(--accent);  border: 1px solid rgba(157,124,255,0.3); }
-        .btn-poisoner:hover { background: rgba(157,124,255,0.25); }
-        .btn-spy      { background: rgba(109,184,255,0.15); color: var(--accent2); border: 1px solid rgba(109,184,255,0.3); }
-        .btn-spy:hover      { background: rgba(109,184,255,0.25); }
-        .btn-exile    { background: rgba(255,179,71,0.15);  color: var(--warn);    border: 1px solid rgba(255,179,71,0.3); }
-        .btn-exile:hover    { background: rgba(255,179,71,0.25); }
-        .btn-ghost    { background: rgba(45,212,191,0.15);  color: var(--teal);    border: 1px solid rgba(45,212,191,0.3); }
-        .btn-ghost:hover    { background: rgba(45,212,191,0.25); }
-        .btn-vote     { background: var(--accent); color: #0d0d0f; }
-        .btn-vote:hover     { background: #b89aff; }
-        .btn-vote:disabled  { background: var(--border2); color: var(--muted); cursor: not-allowed; }
-        .confirm-msg { font-size: 12px; font-weight: 600; margin-top: 8px; text-align: center; }
+        /* ── Waiting screen ── */
+        .waiting-hero { text-align: center; padding: 32px 16px 20px; }
+        .waiting-title { font-size: 26px; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+        .waiting-desc { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+        .identity-box { border: 1px dashed rgba(157,124,255,0.4); border-radius: var(--radius); padding: 20px; text-align: center; background: rgba(157,124,255,0.04); margin-bottom: 12px; }
+        .identity-label { font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+        .identity-name { font-size: 24px; font-weight: 700; color: var(--accent); }
+        .matchup-row { display: flex; gap: 8px; margin-bottom: 12px; }
+        .matchup-pill { flex: 1; text-align: center; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; }
+        .matchup-killer { background: rgba(255,92,92,0.1); color: var(--danger); border: 1px solid rgba(255,92,92,0.25); }
+        .matchup-accomplice { background: rgba(255,179,71,0.1); color: var(--warn); border: 1px solid rgba(255,179,71,0.25); }
+        .waiting-hint { font-size: 12px; color: var(--muted); text-align: center; padding: 8px; }
 
-        /* Exile tally */
-        .exile-tally { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-top: 8px; }
-        .exile-bar { height: 4px; background: var(--border2); border-radius: 2px; margin-top: 6px; overflow: hidden; }
-        .exile-bar-fill { height: 100%; background: var(--warn); border-radius: 2px; transition: width 0.3s; }
-
-        /* Waiting screen */
-        .waiting-card { text-align: center; padding: 40px 24px; }
-        .waiting-icon { font-size: 40px; margin-bottom: 16px; }
-        .waiting-title { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
-        .waiting-desc { font-size: 13px; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
-        .waiting-char { display: inline-block; padding: 10px 20px; background: rgba(157,124,255,0.1); border: 1px solid rgba(157,124,255,0.25); border-radius: 8px; font-weight: 600; font-size: 15px; color: var(--accent); margin-bottom: 20px; }
-        .waiting-stats { display: flex; gap: 10px; justify-content: center; }
-        .stat-pill { padding: 5px 12px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; font-size: 12px; color: var(--muted); }
-
-        /* Story section */
-        .story-block + .story-block { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
-        .story-label { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
-        .story-text { font-size: 13px; line-height: 1.65; color: var(--text); white-space: pre-wrap; }
-
-        /* Finished screen */
-        .winner-banner { text-align: center; padding: 20px; border-radius: 12px; margin-bottom: 16px; font-size: 20px; font-weight: 700; }
-        .win-innocent { background: rgba(77,216,158,0.1); border: 1px solid rgba(77,216,158,0.3); color: var(--success); }
-        .win-killer   { background: rgba(255,92,92,0.1);  border: 1px solid rgba(255,92,92,0.3);  color: var(--danger); }
-
-        .recap-card { background: rgba(157,124,255,0.04); border: 1px solid rgba(157,124,255,0.2); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
-        .recap-text { font-size: 13px; line-height: 1.85; color: #ccc; font-style: italic; white-space: pre-wrap; }
-
-        .vote-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+        /* ── Finished screen ── */
+        .winner-banner { text-align: center; padding: 24px; font-size: 22px; font-weight: 700; border-radius: var(--radius); margin-bottom: 12px; }
+        .win-innocent { background: rgba(77,216,158,0.12); color: var(--success); border: 1px solid rgba(77,216,158,0.3); }
+        .win-killer   { background: rgba(255,92,92,0.12);  color: var(--danger);  border: 1px solid rgba(255,92,92,0.3);  }
+        .vote-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 13px; }
         .vote-row:last-child { border-bottom: none; }
-        .vote-tick { font-size: 15px; flex-shrink: 0; }
-        .vote-voter { font-weight: 600; flex: 1; }
-        .vote-target { color: var(--muted); }
-
-        .identity-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+        .vote-row .voter { font-weight: 600; flex: 1; }
+        .vote-row .target { color: var(--muted); }
+        .vote-row .verdict { font-size: 14px; }
+        .identity-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 13px; }
         .identity-row:last-child { border-bottom: none; }
-        .id-name { font-weight: 600; flex: 1; }
-        .id-player { font-size: 11px; color: var(--muted); margin-top: 1px; }
+        .identity-row .iname { font-weight: 600; flex: 1; }
+        .identity-row .iplayer { font-size: 11px; color: var(--muted); }
         .role-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
-        .rp-killer       { background: rgba(255,92,92,0.1);   color: var(--danger);  border: 1px solid rgba(255,92,92,0.25); }
+        .rp-killer       { background: rgba(255,92,92,0.1);   color: var(--danger);  border: 1px solid rgba(255,92,92,0.25);  }
         .rp-accomplice   { background: rgba(255,179,71,0.1);  color: var(--warn);    border: 1px solid rgba(255,179,71,0.25); }
-        .rp-poisoner     { background: rgba(157,124,255,0.1); color: var(--accent);  border: 1px solid rgba(157,124,255,0.25); }
-        .rp-investigator { background: rgba(109,184,255,0.1); color: var(--accent2); border: 1px solid rgba(109,184,255,0.25); }
-        .rp-drunk        { background: rgba(255,179,71,0.07); color: var(--warn);    border: 1px solid rgba(255,179,71,0.18); }
-        .rp-paranoid     { background: rgba(157,124,255,0.07);color: var(--accent);  border: 1px solid rgba(157,124,255,0.18); }
-        .rp-spy          { background: rgba(109,184,255,0.07);color: var(--accent2); border: 1px solid rgba(109,184,255,0.18); }
-        .rp-fool         { background: rgba(255,92,92,0.07);  color: var(--danger);  border: 1px solid rgba(255,92,92,0.18); }
+        .rp-poisoner     { background: rgba(157,124,255,0.1); color: var(--accent);  border: 1px solid rgba(157,124,255,0.25);}
+        .rp-investigator { background: rgba(109,184,255,0.1); color: var(--accent2); border: 1px solid rgba(109,184,255,0.25);}
+        .rp-drunk        { background: rgba(255,179,71,0.07); color: var(--warn);    border: 1px solid rgba(255,179,71,0.2); }
+        .rp-paranoid     { background: rgba(157,124,255,0.07);color: var(--accent);  border: 1px solid rgba(157,124,255,0.2);}
         .rp-innocent     { background: var(--surface2); color: var(--muted); border: 1px solid var(--border2); }
+        .solution-text { font-size: 13px; line-height: 1.7; color: var(--text); white-space: pre-wrap; }
+        .recap-text { font-size: 13px; line-height: 1.8; color: #ccc; white-space: pre-wrap; font-style: italic; }
 
-        /* Sync bar */
-        .sync-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; z-index: 50; }
-        .sync-bar-left { font-family: var(--mono); font-size: 11px; color: var(--muted); }
-        .sync-btn { background: transparent; border: 1px solid var(--border2); color: var(--muted); padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--sans); transition: all 0.15s; }
-        .sync-btn:hover { color: var(--text); border-color: var(--text); }
-        .progress-bar { height: 2px; background: var(--border); border-radius: 1px; margin-top: 4px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--accent); border-radius: 1px; transition: width 1s linear; }
+        /* ── Bottom refresh bar ── */
+        .refresh-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 10px 16px; display: flex; align-items: center; justify-content: center; z-index: 50; }
+        .refresh-btn { background: transparent; border: 1px solid var(--border2); color: var(--muted); font-size: 13px; font-family: var(--sans); padding: 9px 24px; border-radius: 7px; cursor: pointer; transition: all 0.15s; }
+        .refresh-btn:hover { color: var(--text); border-color: var(--text); }
+        .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); margin-right: 10px; box-shadow: 0 0 5px var(--success); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-        .loading { text-align: center; padding: 60px 24px; color: var(--muted); font-size: 14px; }
+        /* ── Modal ── */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; justify-content: center; align-items: flex-end; padding: 16px; }
+        .modal.open { display: flex; }
+        .modal-sheet { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; width: 100%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
+        .modal-header { padding: 16px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--surface); }
+        .modal-title { font-weight: 600; font-size: 15px; }
+        .modal-close { background: var(--surface2); border: 1px solid var(--border2); color: var(--muted); width: 28px; height: 28px; border-radius: 6px; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .modal-body { padding: 16px 18px; font-size: 13px; line-height: 1.7; color: #ccc; }
+        .modal-body strong { color: var(--text); }
+        .modal-body li { margin-bottom: 8px; }
+        .modal-body ul { padding-left: 18px; }
+
+        .loading-screen { text-align: center; padding: 80px 20px; color: var(--muted); font-size: 14px; }
     </style>
 </head>
 <body>
 
 <!-- Top bar -->
 <div class="top-bar">
-    <div class="top-bar-left">
-        <span class="game-title" id="topGameTitle">🕵️ WHODUNIT</span>
-        <span class="char-label" id="topCharName">—</span>
-    </div>
-    <span class="sync-status" id="syncStatus">Connecting…</span>
+    <div class="top-bar-title">🕵️ <span>Whodunit</span></div>
+    <button class="icon-btn" onclick="openModal('storyModal')" title="Story so far">📖</button>
+    <button class="icon-btn" onclick="openModal('helpModal')" title="How to play">❓</button>
 </div>
 
-<div class="page">
-    <div id="loadingView" class="loading">Loading your identity…</div>
-    <div id="mainView" style="display:none;"></div>
+<!-- Story modal -->
+<div id="storyModal" class="modal" onclick="closeModalOutside(event,'storyModal')">
+    <div class="modal-sheet">
+        <div class="modal-header">
+            <span class="modal-title">📖 The Story So Far</span>
+            <button class="modal-close" onclick="closeModal('storyModal')">✕</button>
+        </div>
+        <div class="modal-body" id="storyContent"><em style="color:var(--muted)">Loading…</em></div>
+    </div>
 </div>
 
-<!-- Sync bar -->
-<div class="sync-bar">
-    <div class="sync-bar-left">
-        <div id="syncLabel">Auto-sync in <span id="syncCountdown">180</span>s</div>
-        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:100%"></div></div>
+<!-- Help modal -->
+<div id="helpModal" class="modal" onclick="closeModalOutside(event,'helpModal')">
+    <div class="modal-sheet">
+        <div class="modal-header">
+            <span class="modal-title">❓ How to Play</span>
+            <button class="modal-close" onclick="closeModal('helpModal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <ul>
+                <li><strong>Innocents</strong> — share clues, argue your case, and vote for who you think the killer is. At least half of living innocents must vote correctly to win.</li>
+                <li><strong>Killer</strong> — blend in, deflect suspicion, and secretly queue one player to eliminate each round.</li>
+                <li><strong>Accomplice</strong> — you know the killer's identity. Protect them, spread false leads.</li>
+                <li><strong>Poisoner</strong> — each round, pick one player on your device. Their next clue will be silently corrupted.</li>
+                <li><strong>Investigator</strong> — your Round 2 clue gives you a 50/50 ping: one of two named players is the killer.</li>
+                <li><strong>Drunk</strong> — you think you're innocent, but all your clues are false.</li>
+                <li><strong>Paranoid</strong> — your gut points at a specific person. Trust it completely (even if it's wrong).</li>
+                <li><strong>Eliminated?</strong> — you can still talk, but lose your vote. Send one ghost clue to a living player's device.</li>
+            </ul>
+        </div>
     </div>
-    <button class="sync-btn" onclick="fetchData()">↻ Sync now</button>
+</div>
+
+<!-- Main app -->
+<div class="container" id="app">
+    <div class="loading-screen" id="loadingScreen">Syncing your identity…</div>
+
+    <div id="content" style="display:none;">
+
+        <!-- ── WAITING ── -->
+        <div id="waitingScreen" style="display:none;">
+            <div class="waiting-hero">
+                <div class="waiting-title" id="roomTitle">Loading…</div>
+                <div class="waiting-desc" id="roomDesc"></div>
+                <div class="identity-box">
+                    <div class="identity-label">Your Secret Identity</div>
+                    <div class="identity-name" id="waitChar">—</div>
+                </div>
+                <div class="matchup-row">
+                    <div class="matchup-pill matchup-killer" id="kCount"></div>
+                    <div class="matchup-pill matchup-accomplice" id="aCount"></div>
+                </div>
+                <div class="waiting-hint">Waiting for the host to start Round 1…</div>
+            </div>
+        </div>
+
+        <!-- ── FINISHED ── -->
+        <div id="finishedScreen" style="display:none;">
+            <div id="winnerBanner" class="winner-banner"></div>
+
+            <div class="card" id="recapCard" style="display:none;">
+                <div class="card-header">📖 The Story of What Really Happened</div>
+                <div class="card-body"><p id="recapText" class="recap-text"></p></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">🔍 The Solution</div>
+                <div class="card-body"><p id="revealTruth" class="solution-text"></p></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">🗳️ Final Votes</div>
+                <div class="card-body-flush" id="voteResults"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">🎭 True Identities</div>
+                <div class="card-body-flush" id="revealIdentities"></div>
+            </div>
+        </div>
+
+        <!-- ── ACTIVE GAME ── -->
+        <div id="activeGame" style="display:none;">
+
+            <!-- Dead screen -->
+            <div id="deadScreen" style="display:none;">
+                <div class="dead-card">
+                    <div class="dead-title">☠️ You have been eliminated</div>
+                    <div class="dead-sub">You can still talk in person, but you've lost your vote.<br>Send one final ghost clue to a living player's device.</div>
+                    <div class="ghost-box">
+                        <div class="ghost-label">Your Ghost Clue</div>
+                        <div class="ghost-text" id="ghostClueText"></div>
+                        <div id="ghostClueSender" style="margin-top:14px;">
+                            <select id="ghostTarget" style="margin-bottom:10px;"></select>
+                            <button class="btn btn-ghost-send" onclick="sendGhostClue()">Send from beyond</button>
+                        </div>
+                        <div id="ghostClueSent" style="display:none; margin-top:12px; color:var(--success); font-size:13px; font-weight:600; text-align:center;">
+                            ✓ Sent to <span id="sentToTarget"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ghost clues received -->
+            <div id="receivedGhostClues" style="display:none;" class="card">
+                <div class="card-header">👻 Messages from Beyond</div>
+                <div class="card-body-flush" id="ghostCluesList"></div>
+            </div>
+
+            <!-- Character + alerts -->
+            <div style="margin-bottom:12px;">
+                <h1 id="charName" style="font-size:22px; font-weight:700; color:var(--accent); margin-bottom:10px;"></h1>
+                <div id="alertsContainer"></div>
+            </div>
+
+            <!-- Role sheet -->
+            <div class="card">
+                <div class="card-header">🎭 Your Secret Identity</div>
+                <div class="card-body"><div id="roleDesc" class="role-sheet"></div></div>
+            </div>
+
+            <!-- Killer action panel -->
+            <div id="killerPanel" style="display:none;" class="action-panel killer-panel">
+                <div class="action-label" style="color:var(--danger);">🔪 Assassination Protocol</div>
+                <div class="action-desc">Pick one target. They die when the host releases the next round. You can change your pick until then.</div>
+                <select id="killTarget"></select>
+                <button class="btn btn-danger" onclick="eliminateTarget()">Lock in target</button>
+                <div class="action-confirm" style="color:var(--danger);" id="killConfirm"></div>
+            </div>
+
+            <!-- Poisoner action panel -->
+            <div id="poisonerPanel" style="display:none;" class="action-panel poison-panel">
+                <div class="action-label" style="color:var(--accent);">☠️ Poison Protocol</div>
+                <div class="action-desc">Pick one player. Their next round clue will be silently corrupted — they won't know. Resets each round.</div>
+                <select id="poisonTarget"></select>
+                <button class="btn btn-purple" onclick="poisonPlayer()">Lock in poison target</button>
+                <div class="action-confirm" style="color:var(--accent);" id="poisonConfirm"></div>
+            </div>
+
+            <!-- Spy action panel -->
+            <div id="spyPanel" style="display:none;" class="action-panel" style="border-color:rgba(109,184,255,0.3); background:rgba(109,184,255,0.04);">
+                <div class="action-label" style="color:var(--accent2);">🕵️ Spy Ability — One Use</div>
+                <div class="action-desc">Select a player to investigate. You will learn their true role privately. Cannot be undone.</div>
+                <select id="spyTarget"></select>
+                <button class="btn" style="background:rgba(109,184,255,0.15);border:1px solid rgba(109,184,255,0.4);color:var(--accent2);" onclick="spyPeek()">Investigate</button>
+                <div class="action-confirm" style="color:var(--accent2);" id="spyConfirm"></div>
+            </div>
+
+            <!-- Exile vote panel (Round 2 only) -->
+            <div id="exilePanel" style="display:none;" class="action-panel" style="border-color:rgba(255,179,71,0.3); background:rgba(255,179,71,0.04);">
+                <div class="action-label" style="color:var(--warn);">⚖️ Exile Vote</div>
+                <div class="action-desc">Nominate someone for exile before the final round. If the majority of living players agree, they are removed — publicly. Exiling an innocent helps the killer.</div>
+                <select id="exileTarget"></select>
+                <button class="btn" style="background:rgba(255,179,71,0.12);border:1px solid rgba(255,179,71,0.35);color:var(--warn);" onclick="nominateExile()">Cast exile vote</button>
+                <div class="action-confirm" style="color:var(--warn);" id="exileConfirm"></div>
+                <div id="exileTally" style="font-size:12px;color:var(--muted);margin-top:8px;font-family:var(--mono);"></div>
+            </div>
+
+            <!-- Public clues -->
+            <div class="card" id="publicCluesBox" style="display:none;">
+                <div class="card-header">📢 Public Announcements</div>
+                <div class="card-body-flush" id="publicCluesContainer"></div>
+            </div>
+
+            <!-- Private clues -->
+            <div class="card">
+                <div class="card-header">🔍 Your Evidence</div>
+                <div class="card-body-flush" id="cluesContainer">
+                    <div class="clue-empty">No evidence yet. Mingle and roleplay.</div>
+                </div>
+            </div>
+
+            <!-- Notebook -->
+            <div class="card">
+                <div class="card-header">📓 Digital Notebook</div>
+                <div id="notebookContainer"></div>
+            </div>
+
+            <!-- Voting -->
+            <div class="card" id="votingSection">
+                <div class="card-header">🗳️ Final Accusation</div>
+                <div class="card-body">
+                    <select id="suspectList"></select>
+                    <button class="btn btn-accent" onclick="submitVote()">Lock in vote</button>
+                    <div id="voteConfirmed" style="color:var(--success); font-size:13px; font-weight:600; margin-top:10px; text-align:center;"></div>
+                </div>
+            </div>
+
+        </div><!-- /activeGame -->
+    </div><!-- /content -->
+</div><!-- /container -->
+
+<!-- Refresh bar -->
+<div class="refresh-bar">
+    <div class="sync-dot"></div>
+    <span id="syncCountdown" style="font-size:12px; color:var(--muted); flex:1;">Auto-sync in 180s</span>
+    <button class="refresh-btn" onclick="fetchData()">↻ Sync now</button>
 </div>
 
 <script>
-const urlParams  = new URLSearchParams(window.location.search);
-const accessKey  = urlParams.get('key');
-const SYNC_SECS  = 180; // 3 minutes
-let countdown    = SYNC_SECS;
-let syncTimer    = null;
-let countdownInt = null;
+    const urlParams = new URLSearchParams(window.location.search);
+    const accessKey = urlParams.get('key');
 
-// ── Auto-sync ──────────────────────────────────────────────────────────────
-function startAutoSync() {
-    clearInterval(syncTimer);
-    clearInterval(countdownInt);
-    countdown = SYNC_SECS;
+    function openModal(id)  { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    function closeModalOutside(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
 
-    syncTimer = setInterval(() => {
-        fetchData();
-    }, SYNC_SECS * 1000);
+    function fetchData() {
+        if (!accessKey) { document.getElementById('loadingScreen').innerText = 'Invalid link.'; return; }
 
-    countdownInt = setInterval(() => {
-        countdown = Math.max(0, countdown - 1);
-        document.getElementById('syncCountdown').innerText = countdown;
-        document.getElementById('progressFill').style.width = ((countdown / SYNC_SECS) * 100) + '%';
-        if (countdown === 0) countdown = SYNC_SECS;
-    }, 1000);
-}
+        fetch(`/player/dashboard/${accessKey}`)
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('loadingScreen').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
 
-// ── Main fetch ─────────────────────────────────────────────────────────────
-async function fetchData() {
-    if (!accessKey) {
-        document.getElementById('loadingView').innerText = 'Invalid link. Check your access key.';
-        return;
+                // Story modal
+                if (data.active_story) {
+                    const pub = (data.active_story.public_clues || [])
+                        .filter(c => c.round <= data.current_round)
+                        .map(c => `<div style="margin-top:10px; padding:10px; background:rgba(255,179,71,0.07); border-left:3px solid var(--warn); border-radius:4px; font-size:13px; color:#ffd49d;"><strong style="font-size:11px; letter-spacing:0.07em; text-transform:uppercase; color:var(--warn);">Round ${c.round} — Public</strong><br>${c.content}</div>`)
+                        .join('');
+                    document.getElementById('storyContent').innerHTML =
+                        `<strong style="color:var(--accent2);">Background</strong><br>${data.active_story.background}<br><br>` +
+                        `<strong style="color:var(--accent2);">The Murder</strong><br>${data.active_story.the_murder}` +
+                        (pub ? `<br><br><strong style="color:var(--warn);">Public Evidence</strong>${pub}` : '');
+                }
+
+                // ── FINISHED ──────────────────────────────────────────────
+                if (data.game_status === 'finished') {
+                    document.getElementById('waitingScreen').style.display = 'none';
+                    document.getElementById('activeGame').style.display   = 'none';
+                    document.getElementById('finishedScreen').style.display = 'block';
+
+                    const caught = data.reveal_data.killer_caught;
+                    const banner = document.getElementById('winnerBanner');
+                    banner.innerText  = caught ? '🏆 Innocents Win!' : '🔪 The Killer Escaped!';
+                    banner.className  = `winner-banner ${caught ? 'win-innocent' : 'win-killer'}`;
+
+                    // Recap
+                    const recap = data.reveal_data.recap || '';
+                    if (recap) {
+                        document.getElementById('recapCard').style.display = 'block';
+                        document.getElementById('recapText').innerText = recap;
+                    }
+
+                    // Solution
+                    document.getElementById('revealTruth').innerText =
+                        data.reveal_data.master_story.the_solution || '—';
+
+                    // Votes
+                    const votesEl = document.getElementById('voteResults');
+                    votesEl.innerHTML = '';
+                    if (!data.reveal_data.votes.length) {
+                        votesEl.innerHTML = '<div style="padding:16px; color:var(--muted); font-size:13px;">Nobody voted.</div>';
+                    } else {
+                        data.reveal_data.votes.forEach(v => {
+                            votesEl.innerHTML += `
+                                <div class="vote-row">
+                                    <span class="voter">${v.voter}<br><span style="font-size:11px;color:var(--muted);">${v.player_name||''}</span></span>
+                                    <span class="target">accused ${v.target}</span>
+                                    <span class="verdict">${v.is_correct ? '✅' : '❌'}</span>
+                                </div>`;
+                        });
+                    }
+
+                    // Identities
+                    const idEl = document.getElementById('revealIdentities');
+                    idEl.innerHTML = '';
+                    data.reveal_data.true_identities.forEach(p => {
+                        let pill = '<span class="role-pill rp-innocent">😇 Innocent</span>';
+                        if      (p.is_killer)       pill = '<span class="role-pill rp-killer">🔪 Killer</span>';
+                        else if (p.is_poisoner)     pill = '<span class="role-pill rp-poisoner">☠️ Poisoner</span>';
+                        else if (p.is_accomplice)   pill = '<span class="role-pill rp-accomplice">🤝 Accomplice</span>';
+                        else if (p.is_investigator) pill = '<span class="role-pill rp-investigator">🔎 Investigator</span>';
+                        else if (p.is_drunk)        pill = '<span class="role-pill rp-drunk">🍺 Drunk</span>';
+                        else if (p.is_paranoid)     pill = '<span class="role-pill rp-paranoid">🧠 Paranoid</span>';
+                        else if (p.is_spy)          pill = '<span class="role-pill rp-investigator">🕵️ Spy</span>';
+                        else if (p.is_fool)         pill = '<span class="role-pill rp-killer">🃏 Fool</span>';
+                        idEl.innerHTML += `
+                            <div class="identity-row">
+                                <div><div class="iname">${p.name}</div><div class="iplayer">${p.player||'—'}</div></div>
+                                <div>${pill}</div>
+                            </div>`;
+                    });
+                    return;
+                }
+
+                // ── WAITING ───────────────────────────────────────────────
+                if (data.game_status === 'waiting') {
+                    document.getElementById('waitingScreen').style.display = 'block';
+                    document.getElementById('activeGame').style.display   = 'none';
+                    document.getElementById('roomTitle').innerText = data.theme_title || 'Mystery';
+                    document.getElementById('roomDesc').innerText  = data.short_description || '';
+                    document.getElementById('waitChar').innerText  = data.character_name;
+                    document.getElementById('kCount').innerText = `🔪 ${data.killers_count} Killer${data.killers_count!==1?'s':''}`;
+                    document.getElementById('aCount').innerText = `🤝 ${data.accomplice_count} Accomplice${data.accomplice_count!==1?'s':''}`;
+                    return;
+                }
+
+                // ── ACTIVE ────────────────────────────────────────────────
+                document.getElementById('waitingScreen').style.display = 'none';
+                document.getElementById('activeGame').style.display   = 'block';
+
+                // Dead screen
+                if (data.is_dead) {
+                    document.getElementById('deadScreen').style.display  = 'block';
+                    document.getElementById('votingSection').style.display = 'none';
+                    document.getElementById('ghostClueText').innerText = data.ghost_clue || '';
+                    if (data.ghost_clue_recipient) {
+                        document.getElementById('ghostClueSender').style.display = 'none';
+                        document.getElementById('ghostClueSent').style.display   = 'block';
+                        document.getElementById('sentToTarget').innerText = data.ghost_clue_recipient;
+                    } else {
+                        document.getElementById('ghostClueSender').style.display = 'block';
+                        document.getElementById('ghostClueSent').style.display   = 'none';
+                    }
+                } else {
+                    document.getElementById('deadScreen').style.display   = 'none';
+                    document.getElementById('votingSection').style.display = 'block';
+                }
+
+                // Ghost clues received
+                const gcBox = document.getElementById('receivedGhostClues');
+                const gcList = document.getElementById('ghostCluesList');
+                gcList.innerHTML = '';
+                if (data.received_ghost_clues && data.received_ghost_clues.length) {
+                    gcBox.style.display = 'block';
+                    data.received_ghost_clues.forEach(gc => {
+                        gcList.innerHTML += `
+                            <div class="ghost-received-item">
+                                <div class="ghost-from">👻 From ${gc.character_name}</div>
+                                <div class="ghost-msg">"${gc.ghost_clue}"</div>
+                            </div>`;
+                    });
+                } else { gcBox.style.display = 'none'; }
+
+                // Character name + alerts
+                document.getElementById('charName').innerText = data.character_name;
+
+                let alerts = '';
+                if (data.is_killer)
+                    alerts += `<div class="alert alert-killer"><div class="alert-title">⚠️ You are the Killer</div>Deflect suspicion. You do not know who your accomplice is.</div>`;
+                if (data.is_poisoner)
+                    alerts += `<div class="alert alert-accomplice"><div class="alert-title">☠️ You are the Poisoner</div>Corrupt the evidence. Protect the killer.<div class="alert-secret">Killer: <u>${data.known_killer}</u></div></div>`;
+                else if (data.is_accomplice)
+                    alerts += `<div class="alert alert-accomplice"><div class="alert-title">🤝 You are the Accomplice</div>Protect the killer at all costs.<div class="alert-secret">Killer: <u>${data.known_killer}</u></div></div>`;
+                if (data.is_investigator)
+                    alerts += `<div class="alert alert-investigator"><div class="alert-title">🔎 You are the Investigator</div>Pay close attention to your Round 2 clue.</div>`;
+                if (data.is_paranoid)
+                    alerts += `<div class="alert alert-paranoid"><div class="alert-title">🧠 Your instincts never lie</div>You are utterly convinced one guest is the killer. Trust that feeling completely.</div>`;
+                if (data.is_spy)
+                    alerts += `<div class="alert alert-investigator"><div class="alert-title">🕵️ You are the Spy</div>Once per game, use your spy panel to secretly learn another player's true role. Choose wisely — one use only.</div>`;
+                if (data.is_fool)
+                    alerts += `<div class="alert alert-killer"><div class="alert-title">🃏 You are the… Killer?</div>You have a motive. You had a plan. But you didn't do it. Play your role exactly as written — you are innocent, but nobody will believe you.</div>`;
+                document.getElementById('alertsContainer').innerHTML = alerts;
+
+                // Role sheet
+                document.getElementById('roleDesc').innerText = data.role_description || '';
+
+                // Save/restore select values
+                const killSel   = document.getElementById('killTarget');
+                const voteSel   = document.getElementById('suspectList');
+                const ghostSel  = document.getElementById('ghostTarget');
+                const poisonSel = document.getElementById('poisonTarget');
+                const prevKill   = killSel?.value   || '';
+                const prevVote   = voteSel?.value   || '';
+                const prevGhost  = ghostSel?.value  || '';
+                const prevPoison = poisonSel?.value || '';
+
+                if (killSel)   killSel.innerHTML   = "<option value=''>Select target…</option>";
+                if (voteSel)   voteSel.innerHTML   = "<option value=''>Select suspect…</option>";
+                if (ghostSel)  ghostSel.innerHTML  = "<option value=''>Select player…</option>";
+                if (poisonSel) poisonSel.innerHTML = "<option value=''>Select target…</option>";
+
+                // Notebook
+                const nbContainer = document.getElementById('notebookContainer');
+                nbContainer.innerHTML = '';
+
+                data.notebook.forEach((p, i) => {
+                    const status   = p.my_note.status || 'neutral';
+                    const dotClass = status === 'sus' ? 'sus' : status === 'alright fam' ? 'alright' : '';
+                    const isDead   = p.is_publicly_dead;
+
+                    if (!isDead) {
+                        if (killSel)   killSel.innerHTML   += `<option value="${p.character_name}">${p.character_name} (${p.claimed_by})</option>`;
+                        if (ghostSel)  ghostSel.innerHTML  += `<option value="${p.character_name}">${p.character_name}</option>`;
+                        if (voteSel)   voteSel.innerHTML   += `<option value="${p.character_name}">${p.character_name}</option>`;
+                        if (poisonSel) poisonSel.innerHTML += `<option value="${p.character_name}">${p.character_name}</option>`;
+                        const spySel   = document.getElementById('spyTarget');
+                        const exileSel = document.getElementById('exileTarget');
+                        if (spySel)   spySel.innerHTML   += `<option value="${p.character_name}">${p.character_name}</option>`;
+                        if (exileSel) exileSel.innerHTML += `<option value="${p.character_name}">${p.character_name} (${p.claimed_by})</option>`;
+                    }
+
+                    nbContainer.innerHTML += `
+                        <div class="notebook-card">
+                            <div class="notebook-header" onclick="toggleNote(${i})">
+                                <div class="nb-status-dot ${dotClass}" id="dot_${i}"></div>
+                                <div style="flex:1;">
+                                    <div class="nb-name">${p.character_name}${isDead ? ' <span class="nb-dead">☠️ eliminated</span>' : ''}</div>
+                                    <div class="nb-player">${p.claimed_by || '—'}</div>
+                                </div>
+                                <span class="nb-expand" id="arrow_${i}">▾</span>
+                            </div>
+                            <div class="notebook-body" id="nbody_${i}">
+                                <div class="nb-summary">${p.public_summary || ''}</div>
+                                <div class="nb-controls">
+                                    <button class="nb-status-btn ${status==='sus'?'active-sus':''}" id="btn_sus_${i}" onclick="setStatus('${p.character_name}',${i},'sus')">🔴 Sus</button>
+                                    <button class="nb-status-btn ${status==='neutral'?'active-neutral':''}" id="btn_neutral_${i}" onclick="setStatus('${p.character_name}',${i},'neutral')">⚪ Neutral</button>
+                                    <button class="nb-status-btn ${status==='alright fam'?'active-alright':''}" id="btn_alright_${i}" onclick="setStatus('${p.character_name}',${i},'alright fam')">🟢 Alright</button>
+                                </div>
+                                <textarea class="nb-note" id="note_${i}" rows="2"
+                                    placeholder="Jot a note…"
+                                    onblur="saveNote('${p.character_name}',${i})">${p.my_note.note_text || ''}</textarea>
+                            </div>
+                        </div>`;
+                });
+
+                // Restore selects
+                if (prevKill   && killSel)   killSel.value   = prevKill;
+                if (prevVote   && voteSel)   voteSel.value   = prevVote;
+                if (prevGhost  && ghostSel)  ghostSel.value  = prevGhost;
+                if (prevPoison && poisonSel) poisonSel.value = prevPoison;
+
+                // Killer panel
+                document.getElementById('killerPanel').style.display =
+                    (data.is_killer && !data.is_dead) ? 'block' : 'none';
+
+                // Poisoner panel
+                const poisonPanel = document.getElementById('poisonerPanel');
+                if (data.is_poisoner && !data.is_dead) {
+                    poisonPanel.style.display = 'block';
+                    if (data.poison_target)
+                        document.getElementById('poisonConfirm').innerText =
+                            `☠️ Locked: ${data.poison_target} — will corrupt on next round release.`;
+                } else {
+                    poisonPanel.style.display = 'none';
+                }
+
+                // Spy panel
+                const spyPanel = document.getElementById('spyPanel');
+                if (data.is_spy && !data.is_dead) {
+                    spyPanel.style.display = 'block';
+                    if (data.spy_used) {
+                        spyPanel.querySelector('select').disabled = true;
+                        spyPanel.querySelector('button').disabled = true;
+                        document.getElementById('spyConfirm').innerText = data.spy_result || 'Ability used.';
+                    }
+                } else {
+                    spyPanel.style.display = 'none';
+                }
+
+                // Exile panel (only Round 2, alive)
+                const exilePanel = document.getElementById('exilePanel');
+                exilePanel.style.display = (data.current_round === 2 && !data.is_dead) ? 'block' : 'none';
+
+                // Public clues
+                const pubBox  = document.getElementById('publicCluesBox');
+                const pubCont = document.getElementById('publicCluesContainer');
+                const active  = (data.active_story?.public_clues || []).filter(c => c.round <= data.current_round);
+                if (active.length && data.current_round > 1) {
+                    pubBox.style.display = 'block';
+                    pubCont.innerHTML = '';
+                    active.forEach(c => {
+                        pubCont.innerHTML += `
+                            <div class="pub-clue-item">
+                                <span class="pub-clue-round">R${c.round}</span>
+                                <span class="clue-text">${c.content}</span>
+                            </div>`;
+                    });
+                } else { pubBox.style.display = 'none'; }
+
+                // Private clues
+                const cluesCont = document.getElementById('cluesContainer');
+                if (!data.available_clues.length) {
+                    cluesCont.innerHTML = '<div class="clue-empty">No evidence yet. Mingle and roleplay.</div>';
+                } else {
+                    cluesCont.innerHTML = '';
+                    data.available_clues.forEach(clue => {
+                        const text = clue.content.replace(/^•\s*/gm, '').trim();
+                        cluesCont.innerHTML += `
+                            <div class="clue-item">
+                                <span class="clue-round">R${clue.round_number}</span>
+                                <span class="clue-text">${text}</span>
+                            </div>`;
+                    });
+                }
+
+                // Vote state
+                if (data.voted_for) {
+                    voteSel.style.display = 'none';
+                    document.querySelector('#votingSection .btn').style.display = 'none';
+                    document.getElementById('voteConfirmed').innerText = `✓ You accused: ${data.voted_for}`;
+                } else {
+                    voteSel.style.display = 'block';
+                    document.querySelector('#votingSection .btn').style.display = 'block';
+                    document.getElementById('voteConfirmed').innerText = '';
+                }
+            })
+            .catch(() => {
+                document.getElementById('loadingScreen').innerText = 'Connection error. Tap sync to retry.';
+            });
     }
-    try {
-        const res  = await fetch(`/player/dashboard/${accessKey}`);
-        if (!res.ok) throw new Error(`Server error ${res.status}`);
+
+    // ── Notebook interactions ───────────────────────────────────────────────
+    function toggleNote(i) {
+        const body  = document.getElementById(`nbody_${i}`);
+        const arrow = document.getElementById(`arrow_${i}`);
+        const open  = body.classList.toggle('open');
+        arrow.classList.toggle('open', open);
+    }
+
+    function setStatus(charName, i, status) {
+        // Update dot
+        const dot = document.getElementById(`dot_${i}`);
+        dot.className = `nb-status-dot ${status === 'sus' ? 'sus' : status === 'alright fam' ? 'alright' : ''}`;
+        // Update button highlights
+        ['sus','neutral','alright fam'].forEach(s => {
+            const key = s === 'alright fam' ? 'alright' : s;
+            const btn = document.getElementById(`btn_${key}_${i}`);
+            if (!btn) return;
+            btn.className = `nb-status-btn ${s === status ? (s === 'sus' ? 'active-sus' : s === 'alright fam' ? 'active-alright' : '') : ''}`;
+        });
+        saveNoteStatus(charName, i, status);
+    }
+
+    async function saveNoteStatus(charName, i, status) {
+        const text = document.getElementById(`note_${i}`)?.value || '';
+        await fetch(`/player/notes/${accessKey}?target_character=${encodeURIComponent(charName)}&status=${encodeURIComponent(status)}&note_text=${encodeURIComponent(text)}`, { method: 'POST' });
+    }
+
+    async function saveNote(charName, i) {
+        const status = document.getElementById(`dot_${i}`)?.classList.contains('sus') ? 'sus'
+                     : document.getElementById(`dot_${i}`)?.classList.contains('alright') ? 'alright fam' : 'neutral';
+        const text = document.getElementById(`note_${i}`)?.value || '';
+        await fetch(`/player/notes/${accessKey}?target_character=${encodeURIComponent(charName)}&status=${encodeURIComponent(status)}&note_text=${encodeURIComponent(text)}`, { method: 'POST' });
+    }
+
+    // ── Game actions ────────────────────────────────────────────────────────
+    async function eliminateTarget() {
+        const target = document.getElementById('killTarget').value;
+        if (!target) return;
+        const res  = await fetch(`/player/eliminate/${accessKey}?target_character=${encodeURIComponent(target)}`, { method: 'POST' });
         const data = await res.json();
-        countdown  = SYNC_SECS; // reset countdown after successful fetch
-        document.getElementById('syncStatus').innerText = `Synced ${new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}`;
-        render(data);
-    } catch(e) {
-        document.getElementById('syncStatus').innerText = 'Sync failed';
-    }
-}
-
-// ── Render ─────────────────────────────────────────────────────────────────
-function render(data) {
-    document.getElementById('loadingView').style.display = 'none';
-    document.getElementById('mainView').style.display    = 'block';
-    document.getElementById('topGameTitle').innerText    = data.theme_title || '🕵️ WHODUNIT';
-    document.getElementById('topCharName').innerText     = data.character_name || '—';
-
-    if      (data.game_status === 'waiting')  renderWaiting(data);
-    else if (data.game_status === 'finished') renderFinished(data);
-    else                                       renderActive(data);
-}
-
-// ── WAITING ────────────────────────────────────────────────────────────────
-function renderWaiting(data) {
-    document.getElementById('mainView').innerHTML = `
-        <div class="card waiting-card">
-            <div class="waiting-icon">🔒</div>
-            <div class="waiting-title">${data.theme_title || 'Mystery'}</div>
-            <div class="waiting-desc">${data.short_description || 'Trust no one.'}</div>
-            <div class="waiting-char">${data.character_name}</div>
-            <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Your secret identity is ready. Waiting for the host to begin…</p>
-            <div class="waiting-stats">
-                <span class="stat-pill">🔪 ${data.killers_count} Killer${data.killers_count!==1?'s':''}</span>
-                <span class="stat-pill">🤝 ${data.accomplice_count} Accomplice${data.accomplice_count!==1?'s':''}</span>
-            </div>
-        </div>`;
-}
-
-// ── ACTIVE ─────────────────────────────────────────────────────────────────
-function renderActive(data) {
-    const view = document.getElementById('mainView');
-    view.innerHTML = '';
-
-    // Dead screen
-    if (data.is_dead) {
-        view.innerHTML += buildDeadPanel(data);
+        document.getElementById('killConfirm').innerText = res.ok ? `🔪 Locked: ${target}` : data.detail;
     }
 
-    // Ghost clues received
-    if (data.received_ghost_clues?.length > 0) {
-        let ghosts = `<div class="card"><div class="card-title">👻 Messages from the Beyond</div>`;
-        data.received_ghost_clues.forEach(g => {
-            ghosts += `<div class="ghost-item"><div class="ghost-from">From ${g.character_name}</div>${g.ghost_clue}</div>`;
-        });
-        ghosts += `</div>`;
-        view.innerHTML += ghosts;
+    async function poisonPlayer() {
+        const target = document.getElementById('poisonTarget').value;
+        if (!target) return;
+        const res  = await fetch(`/player/poison/${accessKey}?target_character=${encodeURIComponent(target)}`, { method: 'POST' });
+        const data = await res.json();
+        document.getElementById('poisonConfirm').innerText = res.ok ? `☠️ ${data.message}` : data.detail;
     }
 
-    // Role alerts
-    view.innerHTML += buildAlerts(data);
-
-    // Story
-    if (data.active_story?.background) {
-        view.innerHTML += `
-            <div class="card">
-                <div class="card-title">📖 The Setting</div>
-                <div class="story-block"><div class="story-label">Background</div><div class="story-text">${data.active_story.background}</div></div>
-                ${data.active_story.the_murder ? `<div class="story-block"><div class="story-label">The Murder</div><div class="story-text">${data.active_story.the_murder}</div></div>` : ''}
-            </div>`;
+    async function submitVote() {
+        const suspect = document.getElementById('suspectList').value;
+        if (!suspect) return;
+        const res = await fetch(`/player/vote/${accessKey}?suspect=${encodeURIComponent(suspect)}`, { method: 'POST' });
+        if (!res.ok) { const e = await res.json(); alert(e.detail); return; }
+        fetchData();
     }
 
-    // Role sheet
-    view.innerHTML += `
-        <div class="card">
-            <div class="card-title">🎭 Your Secret Identity</div>
-            <div class="role-text">${data.role_description || ''}</div>
-        </div>`;
-
-    // Action panels (killer, poisoner, spy) — only if alive
-    if (!data.is_dead) {
-        if (data.is_killer)   view.innerHTML += buildKillerPanel(data);
-        if (data.is_poisoner) view.innerHTML += buildPoisonerPanel(data);
-        if (data.is_spy)      view.innerHTML += buildSpyPanel(data);
-    }
-
-    // Public clues (round 3 only)
-    const pubClues = (data.active_story?.public_clues || []).filter(c => c.round <= data.current_round);
-    if (pubClues.length > 0) {
-        let pub = `<div class="card"><div class="card-title">📢 Public Announcement</div>`;
-        pubClues.forEach(c => {
-            pub += `<div class="public-clue"><div class="public-clue-label">Round ${c.round} — Everyone sees this</div><div class="public-clue-text">${c.content}</div></div>`;
-        });
-        pub += `</div>`;
-        view.innerHTML += pub;
-    }
-
-    // Private clues
-    const clues = data.available_clues || [];
-    let clueHtml = `<div class="card"><div class="card-title">🔍 Your Evidence</div>`;
-    if (clues.length === 0) {
-        clueHtml += `<p class="clue-empty">No evidence uncovered yet. Wait for the host to release Round 2.</p>`;
-    } else {
-        clues.forEach(c => {
-            clueHtml += `<div class="clue-item"><div class="clue-round">Round ${c.round_number} — Private</div>${c.content}</div>`;
-        });
-    }
-    clueHtml += `</div>`;
-    view.innerHTML += clueHtml;
-
-    // Exile vote (Round 2 only, alive players)
-    if (data.current_round === 2 && !data.is_dead) {
-        view.innerHTML += buildExilePanel(data);
-    }
-
-    // Notebook
-    view.innerHTML += buildNotebook(data);
-
-    // Voting (Round 3, alive)
-    if (data.current_round >= 3 && !data.is_dead) {
-        view.innerHTML += buildVotePanel(data);
-    }
-
-    // Re-attach listeners
-    attachListeners(data);
-}
-
-// ── Panel builders ─────────────────────────────────────────────────────────
-function buildAlerts(data) {
-    let html = '';
-    if (data.is_killer) html += `
-        <div class="alert alert-killer">
-            <div class="alert-title">🔪 You are the Killer</div>
-            <div class="alert-body">Deflect suspicion. Use your assassination panel to eliminate a target before each round. You do NOT know who your accomplice is.</div>
-        </div>`;
-    if (data.is_poisoner) html += `
-        <div class="alert alert-evil">
-            <div class="alert-title">☠️ You are the Poisoner</div>
-            <div class="alert-body">You are an accomplice. Protect the killer at all costs — and corrupt the evidence.<div class="secret-pill">Killer: ${data.known_killer}</div></div>
-        </div>`;
-    else if (data.is_accomplice) html += `
-        <div class="alert alert-evil">
-            <div class="alert-title">🤝 You are the Accomplice</div>
-            <div class="alert-body">Protect the killer. Feed disinformation. Take the fall if needed.<div class="secret-pill">Killer: ${data.known_killer}</div></div>
-        </div>`;
-    if (data.is_investigator) html += `
-        <div class="alert alert-special">
-            <div class="alert-title">🔎 You are the Investigator</div>
-            <div class="alert-body">Your Round 3 clue will name exactly two suspects — one is the killer. Use it to anchor the group's final vote.</div>
-        </div>`;
-    if (data.is_drunk) html += `
-        <div class="alert alert-paranoid">
-            <div class="alert-title">🍺 You are the Drunk</div>
-            <div class="alert-body">You think you're a normal innocent. But your clues are completely false — though you have no way of knowing that.</div>
-        </div>`;
-    if (data.is_paranoid) html += `
-        <div class="alert alert-paranoid">
-            <div class="alert-title">🧠 You are the Paranoid</div>
-            <div class="alert-body">Your gut screams the truth and it never lies. Trust your instincts above all the clues.</div>
-        </div>`;
-    if (data.is_spy) html += `
-        <div class="alert alert-special">
-            <div class="alert-title">🕵️ You are the Spy</div>
-            <div class="alert-body">Once per game, you may secretly learn the true role of one other player. Use your spy panel wisely — you only get one chance.</div>
-        </div>`;
-    if (data.is_fool) html += `
-        <div class="alert alert-fool">
-            <div class="alert-title">🃏 You are the… Killer?</div>
-            <div class="alert-body">You have a motive. You had the means. You had the plan. But you didn't do it.<br><br>Play your role as written. You are innocent — but nobody will believe you.</div>
-        </div>`;
-    return html;
-}
-
-function buildKillerPanel(data) {
-    const opts = (data.notebook || []).filter(p => !p.is_publicly_dead).map(p =>
-        `<option value="${p.character_name}">${p.character_name} (${p.claimed_by || '?'})</option>`
-    ).join('');
-    return `
-        <div class="action-panel panel-killer" id="killerPanel">
-            <div class="panel-title">🔪 Assassination Protocol</div>
-            <div class="panel-desc">Select your target. They drop dead at the start of the next round. You can change your mind until the host advances.</div>
-            <select id="killTarget"><option value="">— Select target —</option>${opts}</select>
-            <button class="btn btn-killer" onclick="eliminateTarget()">Lock in target</button>
-            <div class="confirm-msg" id="killConfirm" style="color:var(--danger);"></div>
-        </div>`;
-}
-
-function buildPoisonerPanel(data) {
-    const opts = (data.notebook || []).filter(p => !p.is_publicly_dead).map(p =>
-        `<option value="${p.character_name}">${p.character_name}</option>`
-    ).join('');
-    const locked = data.poison_target ? `<div class="confirm-msg" style="color:var(--accent);">☠️ Locked: ${data.poison_target}</div>` : '';
-    return `
-        <div class="action-panel panel-poisoner" id="poisonerPanel">
-            <div class="panel-title">☠️ Poison Protocol</div>
-            <div class="panel-desc">Choose one player. Their next clue will be silently corrupted when the round releases. Resets each round.</div>
-            <select id="poisonTarget"><option value="">— Select target —</option>${opts}</select>
-            <button class="btn btn-poisoner" onclick="poisonPlayer()">Lock in poison target</button>
-            <div class="confirm-msg" id="poisonConfirm" style="color:var(--accent);">${data.poison_target ? '☠️ Locked: '+data.poison_target : ''}</div>
-        </div>`;
-}
-
-function buildSpyPanel(data) {
-    if (data.spy_used) {
-        return `
-            <div class="action-panel panel-spy">
-                <div class="panel-title">🕵️ Intelligence Report</div>
-                <div class="panel-desc">Ability used.</div>
-                <div class="confirm-msg" style="color:var(--accent2);">${data.spy_result || ''}</div>
-            </div>`;
-    }
-    const opts = (data.notebook || []).map(p =>
-        `<option value="${p.character_name}">${p.character_name}</option>`
-    ).join('');
-    return `
-        <div class="action-panel panel-spy" id="spyPanel">
-            <div class="panel-title">🕵️ Spy Ability</div>
-            <div class="panel-desc">Choose one player to investigate. You will learn their true role. One use only — choose carefully.</div>
-            <select id="spyTarget"><option value="">— Select player —</option>${opts}</select>
-            <button class="btn btn-spy" onclick="spyPeek()">Investigate</button>
-            <div class="confirm-msg" id="spyConfirm" style="color:var(--accent2);"></div>
-        </div>`;
-}
-
-function buildExilePanel(data) {
-    const opts = (data.notebook || []).filter(p => !p.is_publicly_dead).map(p =>
-        `<option value="${p.character_name}">${p.character_name} (${p.claimed_by || '?'})</option>`
-    ).join('');
-    return `
-        <div class="action-panel panel-exile" id="exilePanel">
-            <div class="panel-title">⚖️ Exile Vote</div>
-            <div class="panel-desc">Propose someone to exile before the final round. If the majority agree, they leave — publicly, not as a murder. Be careful: exiling an innocent helps the killer.</div>
-            <select id="exileTarget"><option value="">— Nominate a suspect —</option>${opts}</select>
-            <button class="btn btn-exile" onclick="nominateExile()">Cast exile vote</button>
-            <div class="exile-tally" id="exileTally"></div>
-            <div class="exile-bar"><div class="exile-bar-fill" id="exileBarFill" style="width:0%"></div></div>
-            <div class="confirm-msg" id="exileConfirm" style="color:var(--warn);"></div>
-        </div>`;
-}
-
-function buildDeadPanel(data) {
-    const sentAlready = data.ghost_clue_recipient;
-    const livingOpts  = (data.notebook || []).filter(p => !p.is_publicly_dead).map(p =>
-        `<option value="${p.character_name}">${p.character_name}</option>`
-    ).join('');
-    const senderSection = sentAlready
-        ? `<div class="confirm-msg" style="color:var(--teal);">✓ Ghost clue sent to ${data.ghost_clue_recipient}</div>`
-        : `<select id="ghostTarget"><option value="">— Select living player —</option>${livingOpts}</select>
-           <button class="btn btn-ghost" onclick="sendGhostClue()">Send message from beyond</button>
-           <div class="confirm-msg" id="ghostConfirm" style="color:var(--teal);"></div>`;
-    return `
-        <div class="alert alert-dead">
-            <div class="alert-title">💀 You have been eliminated</div>
-            <div class="alert-body" style="margin-bottom:12px;">You may still speak in person. Your one last act: send your ghost clue to a living player.</div>
-            <div class="action-panel panel-ghost" style="margin-bottom:0;">
-                <div class="panel-title">👻 Ghost Clue</div>
-                <div class="panel-desc" style="color:var(--text);">${data.ghost_clue || 'No ghost clue available.'}</div>
-                ${senderSection}
-            </div>
-        </div>`;
-}
-
-function buildNotebook(data) {
-    if (!data.notebook?.length) return '';
-    let html = `<div class="card"><div class="card-title">📓 Notebook</div>`;
-    data.notebook.forEach(p => {
-        const note   = p.my_note || {};
-        const status = note.status || 'neutral';
-        const dead   = p.is_publicly_dead ? ' nb-dead' : '';
-        html += `
-            <div class="notebook-entry${dead}">
-                <div class="nb-info">
-                    <div class="nb-name">${p.character_name}${p.is_publicly_dead ? ' 💀' : ''}</div>
-                    <div class="nb-desc">${p.claimed_by ? p.claimed_by + ' · ' : ''}${p.public_summary || ''}</div>
-                </div>
-                <div class="nb-status">
-                    <button class="status-btn ${status==='sus'?'active-sus':''}" title="Suspicious"
-                        onclick="setNote('${p.character_name}', 'sus')">🔴</button>
-                    <button class="status-btn ${status==='alright'?'active-alright':''}" title="Alright"
-                        onclick="setNote('${p.character_name}', 'alright')">🟢</button>
-                </div>
-            </div>`;
-    });
-    return html + '</div>';
-}
-
-function buildVotePanel(data) {
-    const opts = (data.notebook || []).filter(p => !p.is_publicly_dead).map(p =>
-        `<option value="${p.character_name}">${p.character_name} (${p.claimed_by || '?'})</option>`
-    ).join('');
-    const voted = data.voted_for
-        ? `<div class="confirm-msg" style="color:var(--accent);margin-top:10px;">🗳️ Voted for: ${data.voted_for}</div>`
-        : '';
-    return `
-        <div class="card">
-            <div class="card-title">🗳️ Final Accusation</div>
-            <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Who is the killer? You can change your vote until the host ends the game.</p>
-            <select id="suspectList"><option value="">— Select your accusation —</option>${opts}</select>
-            <button class="btn btn-vote" onclick="submitVote()">Lock in vote</button>
-            ${voted}
-        </div>`;
-}
-
-// ── FINISHED ───────────────────────────────────────────────────────────────
-function renderFinished(data) {
-    const r = data.reveal_data;
-    if (!r) return;
-    const view = document.getElementById('mainView');
-
-    const bannerClass = r.killer_caught ? 'win-innocent' : 'win-killer';
-    const bannerText  = r.killer_caught ? '🏆 Innocents Win — The killer was caught!' : '🔪 The Killer Escaped!';
-
-    let votesHtml = '';
-    if (r.votes?.length) {
-        r.votes.forEach(v => {
-            votesHtml += `
-                <div class="vote-row">
-                    <span class="vote-tick">${v.is_correct ? '✅' : '❌'}</span>
-                    <span class="vote-voter">${v.voter}</span>
-                    <span class="vote-target">accused ${v.target}</span>
-                </div>`;
-        });
-    } else {
-        votesHtml = `<p style="color:var(--muted);font-size:13px;">Nobody cast a vote.</p>`;
-    }
-
-    let identitiesHtml = '';
-    (r.true_identities || []).forEach(p => {
-        let pill = '';
-        if      (p.is_killer)       pill = `<span class="role-pill rp-killer">🔪 Killer</span>`;
-        else if (p.is_poisoner)     pill = `<span class="role-pill rp-poisoner">☠️ Poisoner</span>`;
-        else if (p.is_accomplice)   pill = `<span class="role-pill rp-accomplice">🤝 Accomplice</span>`;
-        else if (p.is_investigator) pill = `<span class="role-pill rp-investigator">🔎 Investigator</span>`;
-        else if (p.is_drunk)        pill = `<span class="role-pill rp-drunk">🍺 Drunk</span>`;
-        else if (p.is_paranoid)     pill = `<span class="role-pill rp-paranoid">🧠 Paranoid</span>`;
-        else if (p.is_spy)          pill = `<span class="role-pill rp-spy">🕵️ Spy</span>`;
-        else if (p.is_fool)         pill = `<span class="role-pill rp-fool">🃏 Fool</span>`;
-        else                        pill = `<span class="role-pill rp-innocent">😇 Innocent</span>`;
-        identitiesHtml += `
-            <div class="identity-row">
-                <div><div class="id-name">${p.name}</div><div class="id-player">${p.player || '—'}</div></div>
-                <div>${pill}</div>
-            </div>`;
-    });
-
-    view.innerHTML = `
-        <div class="winner-banner ${bannerClass}">${bannerText}</div>
-
-        ${r.recap ? `
-        <div class="recap-card">
-            <div class="card-title" style="margin-bottom:12px;">📖 The Story of What Really Happened</div>
-            <div class="recap-text">${r.recap}</div>
-        </div>` : ''}
-
-        <div class="card">
-            <div class="card-title">🔍 The Solution</div>
-            <div class="story-text">${r.master_story?.the_solution || '—'}</div>
-        </div>
-
-        <div class="card">
-            <div class="card-title">🗳️ Final Votes</div>
-            ${votesHtml}
-        </div>
-
-        <div class="card">
-            <div class="card-title">🎭 True Identities</div>
-            ${identitiesHtml}
-        </div>`;
-}
-
-// ── Action functions ───────────────────────────────────────────────────────
-function attachListeners(data) {
-    // Restore selects to current locked values
-    const killEl = document.getElementById('killTarget');
-    // (values restored via panel builders, nothing extra needed)
-}
-
-async function eliminateTarget() {
-    const target = document.getElementById('killTarget')?.value;
-    if (!target) return;
-    const res  = await fetch(`/player/eliminate/${accessKey}?target_character=${encodeURIComponent(target)}`, { method: 'POST' });
-    const data = await res.json();
-    document.getElementById('killConfirm').innerText = res.ok ? `🔪 Locked: ${target}` : data.detail;
-}
-
-async function poisonPlayer() {
-    const target = document.getElementById('poisonTarget')?.value;
-    if (!target) return;
-    const res  = await fetch(`/player/poison/${accessKey}?target_character=${encodeURIComponent(target)}`, { method: 'POST' });
-    const data = await res.json();
-    document.getElementById('poisonConfirm').innerText = res.ok ? `☠️ Locked: ${target}` : data.detail;
-}
-
-async function spyPeek() {
-    const target = document.getElementById('spyTarget')?.value;
-    if (!target) return;
-    const res  = await fetch(`/player/spy/${accessKey}?target_character=${encodeURIComponent(target)}`, { method: 'POST' });
-    const data = await res.json();
-    if (res.ok) {
-        document.getElementById('spyConfirm').innerText = `🕵️ ${data.target} is: ${data.role}`;
-        document.getElementById('spyPanel').querySelector('select').disabled = true;
-        document.getElementById('spyPanel').querySelector('button').disabled = true;
-    } else {
-        document.getElementById('spyConfirm').innerText = data.detail;
-    }
-}
-
-async function nominateExile() {
-    const target = document.getElementById('exileTarget')?.value;
-    if (!target) return;
-    // Get current game_id from access key via dashboard — we stored it on load
-    const res  = await fetch(`/player/exile-nominate/${accessKey}?target_character=${encodeURIComponent(target)}`, { method: 'POST' });
-    const data = await res.json();
-    if (res.ok) {
-        if (data.exiled) {
-            document.getElementById('exileConfirm').innerText = `⚖️ ${data.target} has been exiled!`;
-            fetchData();
+    async function spyPeek() {
+        const target = document.getElementById('spyTarget').value;
+        if (!target) return;
+        const res  = await fetch(`/player/spy/${accessKey}?target_character=${encodeURIComponent(target)}`, { method: 'POST' });
+        const data = await res.json();
+        const conf = document.getElementById('spyConfirm');
+        if (res.ok) {
+            conf.innerText = `🕵️ ${data.target} is: ${data.role}`;
+            document.getElementById('spyPanel').querySelector('select').disabled = true;
+            document.getElementById('spyPanel').querySelector('button').disabled = true;
         } else {
-            document.getElementById('exileConfirm').innerText = data.message;
-            // Also fetch tally
-            fetchExileTally();
+            conf.innerText = data.detail;
         }
-    } else {
-        document.getElementById('exileConfirm').innerText = data.detail || 'Error';
     }
-}
 
-async function fetchExileTally() {
-    // We need the game_id — fetch it from dashboard quickly
-    const dash = await fetch(`/player/dashboard/${accessKey}`).then(r => r.json());
-    if (!dash) return;
-    // Get exile status
-    const res  = await fetch(`/player/exile-status/${dash.game_id}`);
-    const data = await res.json();
-    const tally = data.tally || {};
-    const needed = data.needed || 1;
-    const alive  = data.alive_count || 1;
-    const exileEl = document.getElementById('exileTally');
-    const barEl   = document.getElementById('exileBarFill');
-    if (!exileEl) return;
-    let tallyText = Object.entries(tally).map(([name, count]) =>
-        `${name}: ${count}/${Math.ceil(needed)} votes`
-    ).join(' · ') || 'No votes yet';
-    exileEl.innerText = tallyText;
-    // Show bar for currently selected target
-    const sel = document.getElementById('exileTarget')?.value;
-    if (sel && tally[sel] !== undefined) {
-        barEl.style.width = Math.min(100, (tally[sel] / needed) * 100) + '%';
+    async function nominateExile() {
+        const target = document.getElementById('exileTarget').value;
+        if (!target) return;
+        const res  = await fetch(`/player/exile-nominate/${accessKey}?target_character=${encodeURIComponent(target)}`, { method: 'POST' });
+        const data = await res.json();
+        const conf = document.getElementById('exileConfirm');
+        if (res.ok) {
+            conf.innerText = data.message;
+            if (data.exiled) fetchData();
+            else {
+                // fetch tally
+                const dash     = await fetch(`/player/dashboard/${accessKey}`).then(r=>r.json());
+                const tallyRes = await fetch(`/player/exile-status/${dash.game_id}`).then(r=>r.json());
+                const tally    = tallyRes.tally || {};
+                const needed   = tallyRes.needed || 1;
+                document.getElementById('exileTally').innerText =
+                    Object.entries(tally).map(([n,c]) => `${n}: ${c}/${Math.ceil(needed)} votes`).join(' · ') || '';
+            }
+        } else {
+            conf.innerText = data.detail || 'Error';
+        }
     }
-}
 
-async function sendGhostClue() {
-    const target = document.getElementById('ghostTarget')?.value;
-    if (!target) return;
-    const res  = await fetch(`/player/send-ghost-clue/${accessKey}?target_character=${encodeURIComponent(target)}`, { method: 'POST' });
-    const data = await res.json();
-    if (res.ok) {
-        document.getElementById('ghostConfirm').innerText = `✓ Sent to ${target}`;
-        document.getElementById('ghostTarget').disabled = true;
-    } else {
-        document.getElementById('ghostConfirm').innerText = data.detail;
+    async function sendGhostClue() {
+        const target = document.getElementById('ghostTarget').value;
+        if (!target) return;
+        await fetch(`/player/send-ghost-clue/${accessKey}?target_character=${encodeURIComponent(target)}`, { method: 'POST' });
+        fetchData();
     }
-}
 
-async function submitVote() {
-    const suspect = document.getElementById('suspectList')?.value;
-    if (!suspect) return;
-    const res  = await fetch(`/player/vote/${accessKey}?suspect=${encodeURIComponent(suspect)}`, { method: 'POST' });
-    const data = await res.json();
-    if (res.ok) fetchData();
-}
-
-async function setNote(character, status) {
-    await fetch(`/player/notes/${accessKey}?target_character=${encodeURIComponent(character)}&status=${status}&note_text=`, { method: 'POST' });
+    // ── Boot ────────────────────────────────────────────────────────────────
     fetchData();
-}
-
-// ── Boot ───────────────────────────────────────────────────────────────────
-fetchData();
-startAutoSync();
+    const SYNC_MS = 3 * 60 * 1000; // 3 minutes
+    let countdown = SYNC_MS / 1000;
+    setInterval(fetchData, SYNC_MS);
+    setInterval(() => {
+        countdown = Math.max(0, countdown - 1);
+        const el = document.getElementById('syncCountdown');
+        if (el) el.innerText = countdown > 0 ? `Auto-sync in ${countdown}s` : 'Syncing…';
+        if (countdown === 0) countdown = SYNC_MS / 1000;
+    }, 1000);
 </script>
 </body>
 </html>
