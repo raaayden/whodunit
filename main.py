@@ -119,8 +119,10 @@ async def create_game(
         "'Either [Killer Name] or [Innocent Name] is guilty.' Delivered at the final round."
     ) if include_investigator else "NO characters may have 'is_investigator': true."
     poisoner_instruction     = (
-        "ONE accomplice MUST have 'is_poisoner': true. "
-        "In their role_description add: '• Poisoner Ability: Each round you may secretly corrupt one player\'s evidence on your device.'"
+        f"One of the {accomplice_count} accomplice character(s) MUST have both 'is_accomplice': true AND "
+        "'is_poisoner': true simultaneously on the SAME character object. "
+        "This is not a new character — it is an existing accomplice who also has the poisoner role. "
+        "In their role_description add: '• Poisoner Ability: Each round you may secretly corrupt one player\\'s evidence on your device.'"
     ) if include_poisoner and accomplice_count > 0 else "NO characters may have 'is_poisoner': true."
     paranoid_instruction     = (
         "EXACTLY ONE innocent character MUST have 'is_paranoid': true. "
@@ -143,8 +145,10 @@ async def create_game(
 
     --- STRICT RULES ---
     1. NO PLACEHOLDERS. Fill every detail. Never write "[Name]", "[Killer]", "[Motive]" etc.
-    2. TOTAL CHARACTERS: Generate EXACTLY {player_count} characters — no more, no fewer.
-       Special roles are assigned TO existing characters. They do NOT add extra characters.
+    2. TOTAL CHARACTERS: The "characters" array MUST contain EXACTLY {player_count} objects.
+       Count them before returning. {player_count} characters. Not {player_count + 1}. Not {player_count + 2}. Exactly {player_count}.
+       Special roles (drunk, investigator, paranoid, poisoner, spy, fool) are LABELS applied to
+       characters that already exist in the list. They are NOT new characters. Do not add extras.
     3. ROLE COUNTS:
        - EXACTLY 1 character must have "is_killer": true.
        - {accomplice_instruction}
@@ -154,15 +158,20 @@ async def create_game(
        - {paranoid_instruction}
        - {spy_instruction}
        - {fool_instruction}
-    4. CLUE RULES — critical:
-       - Clues MUST be about OTHER named characters — what this character OBSERVED, OVERHEARD, or FOUND.
-       - NEVER write a clue about the character themselves.
-       - Every innocent needs TWO versions of each clue:
-         * "true_content": first-person observation about ANOTHER character implicating the killer/accomplice.
-           Format: "You noticed that [other character name] [specific observable action pointing to guilt]."
-         * "poisoned_content": FALSE version redirecting suspicion to an innocent.
-           Format: "You noticed that [different innocent name] [false but plausible observable detail]."
-       - Killer/Accomplice clues: both versions are disinformation.
+    4. CLUE RULES — read every word carefully:
+       a) ALL clues must be written as first-person observations about a THIRD PARTY — never about oneself.
+       b) INNOCENT clues (true_content): subtle and indirect. Do NOT say "implicates the killer" or name the
+          killer directly. Instead describe a suspicious behaviour, overheard conversation, or physical detail
+          about another character that a smart player could piece together over multiple rounds.
+          Round 2 clues = something seen or heard. Round 3 clues = something physical found.
+       c) INNOCENT clues (poisoned_content): equally indirect, equally plausible, but pointing at a DIFFERENT
+          innocent character. Should read identically in tone to the true_content — just about someone else.
+       d) KILLER and ACCOMPLICE clues: write a convincing false alibi or an observation that subtly frames
+          an innocent person. Should sound exactly like an innocent's clue in tone and style.
+       e) NEVER use the words "killer", "accomplice", "murderer", "guilty", or "evidence" inside a clue.
+          Clues are observations and discoveries, not conclusions.
+       f) POISONER: if is_poisoner is true on an accomplice, that character MUST be marked with both
+          "is_accomplice": true AND "is_poisoner": true. Do not create a separate character for the poisoner.
     5. PUBLIC CLUE: Only ONE public clue at Round 3 (the final round only). No Round 2 public clue.
        Make it dramatic — physical evidence or a witnessed event that narrows down the killer.
 
@@ -386,9 +395,16 @@ async def end_game(game_id: str):
     outcome_text    = "The killer was caught and justice was served" if killer_caught else f"{killer_name} got away with murder"
 
     recap_prompt = f"""
-    Write a short noir-style post-game story recap for a murder mystery called "{theme_title}".
-    Write exactly 3 paragraphs. Be atmospheric and dramatic. Use character names only, not player names.
-    Do not use markdown, headers, or bullet points. Plain prose only.
+    Write a noir-style post-game story recap for a murder mystery called "{theme_title}".
+    Write exactly 5 paragraphs of rich, atmospheric prose. Each paragraph should be 4-6 sentences.
+    Use character names only, never player names. No markdown, headers, or bullet points.
+
+    Structure it like this:
+    - Paragraph 1: Set the scene. Describe the setting, the mood of the evening, and the discovery of the murder.
+    - Paragraph 2: The web of suspicion. Who suspected whom, what red herrings confused the group, how the paranoid/drunk/fool (if present) stirred the pot.
+    - Paragraph 3: Behind the scenes. What the killer and accomplices were really doing — their plan, their lies, how they almost got away with it.
+    - Paragraph 4: The turning point. What evidence or moment shifted the tide — the ghost clue, the investigator's ping, the public announcement, or the exile vote.
+    - Paragraph 5: The verdict. How the final vote went, whether justice was served or the killer escaped, and a closing line that feels like the last frame of a film.
 
     Facts to weave in naturally:
     - The killer was {killer_name}
@@ -401,7 +417,7 @@ async def end_game(game_id: str):
     - Outcome: {outcome_text}
     - The true story: {master_story.get("the_solution", "")}
 
-    Write it as the closing narration of a noir film. Make it feel complete and satisfying.
+    Write it as the closing narration of a classic noir film. Be cinematic and specific — name characters, describe moments, make it feel like this particular game.
     """
 
     recap_text = ""
