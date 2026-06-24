@@ -294,6 +294,30 @@
                         <div class="toggle-thumb"></div>
                     </label>
                 </div>
+
+                <div class="role-row">
+                    <div class="role-left">
+                        <span class="role-icon">🕵️</span>
+                        <div><div class="role-name">Spy</div><div class="role-desc">Learns one player's true role — once</div></div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="incSpy">
+                        <div class="toggle-track"></div>
+                        <div class="toggle-thumb"></div>
+                    </label>
+                </div>
+
+                <div class="role-row" id="foolRow" style="opacity:0.4;" title="Only available for 10+ players">
+                    <div class="role-left">
+                        <span class="role-icon">🃏</span>
+                        <div><div class="role-name">Fool <span style="font-size:10px;color:var(--muted);">(10+ players)</span></div><div class="role-desc">Thinks they're the killer — but isn't</div></div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="incFool" disabled>
+                        <div class="toggle-track"></div>
+                        <div class="toggle-thumb"></div>
+                    </label>
+                </div>
             </div>
 
             <button class="btn btn-primary" id="generateBtn" onclick="createGame()">Generate Mystery</button>
@@ -379,6 +403,19 @@
     }
 
     function updateAccompliceLimit() {
+        const pCount = parseInt(document.getElementById('playerCount').value);
+        const foolRow = document.getElementById('foolRow');
+        const foolCb  = document.getElementById('incFool');
+        if (pCount >= 10) {
+            foolRow.style.opacity = '1';
+            foolRow.title = '';
+            foolCb.disabled = false;
+        } else {
+            foolRow.style.opacity = '0.4';
+            foolRow.title = 'Only available for 10+ players';
+            foolCb.disabled = true;
+            foolCb.checked = false;
+        }
         const max = parseInt(document.getElementById('playerCount').value) > 6 ? 2 : 1;
         const el  = document.getElementById('accCount');
         if (parseInt(el.value) > max) { el.value = max; stepAcc(0); }
@@ -407,6 +444,8 @@
             include_investigator: document.getElementById('incInvestigator').checked,
             include_poisoner:     document.getElementById('incPoisoner').checked,
             include_paranoid:     document.getElementById('incParanoid').checked,
+            include_spy:          document.getElementById('incSpy').checked,
+            include_fool:         document.getElementById('incFool').checked,
         });
 
         try {
@@ -460,6 +499,8 @@
             if (t.has_investigator) tags.push(`<span class="tag tag-special">🔎 Investigator</span>`);
             if (t.has_drunk)        tags.push(`<span class="tag tag-special">🍺 Drunk</span>`);
             if (t.has_paranoid)     tags.push(`<span class="tag tag-special">🧠 Paranoid</span>`);
+            if (t.has_spy)          tags.push(`<span class="tag tag-special">🕵️ Spy</span>`);
+            if (t.has_fool)         tags.push(`<span class="tag tag-special">🃏 Fool (10+)</span>`);
             tags.push(`<span class="tag">👤 ${t.player_count}p</span>`);
 
             list.innerHTML += `
