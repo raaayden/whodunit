@@ -142,14 +142,14 @@ async def create_game(
 
     prompt = f"""
     Create a highly interactive social deduction murder mystery for {player_count} players. Theme: {theme}.
-
+ 
     --- STRICT RULES ---
     1. NO PLACEHOLDERS. Fill every detail. Never write "[Name]", "[Killer]", "[Motive]" etc.
     2. TOTAL CHARACTERS: The "characters" array MUST contain EXACTLY {player_count} objects.
        Count them before returning. {player_count} characters. Not {player_count + 1}. Not {player_count + 2}. Exactly {player_count}.
        Special roles (drunk, investigator, paranoid, poisoner, spy, fool) are LABELS applied to
        characters that already exist in the list. They are NOT new characters. Do not add extras.
-    3. ROLE COUNTS:
+    3. ROLE COUNTS — every role listed as "EXACTLY ONE" is MANDATORY. Skipping one is a failure:
        - EXACTLY 1 character must have "is_killer": true.
        - {accomplice_instruction}
        - {drunk_instruction}
@@ -158,6 +158,8 @@ async def create_game(
        - {paranoid_instruction}
        - {spy_instruction}
        - {fool_instruction}
+       Every role above marked "EXACTLY ONE" MUST appear assigned to one of the {player_count} characters.
+       Do not skip any. If a role says "EXACTLY ONE" and you did not assign it, your output is wrong.
     4. CLUE RULES — read every word carefully:
        a) ALL clues must be written as first-person observations about a THIRD PARTY — never about oneself.
        b) INNOCENT clues (true_content): subtle and indirect. Do NOT say "implicates the killer" or name the
@@ -174,7 +176,7 @@ async def create_game(
           "is_accomplice": true AND "is_poisoner": true. Do not create a separate character for the poisoner.
     5. PUBLIC CLUE: Only ONE public clue at Round 3 (the final round only). No Round 2 public clue.
        Make it dramatic — physical evidence or a witnessed event that narrows down the killer.
-
+ 
     Return ONLY a JSON object with this exact structure:
     {{
         "theme_title": "A catchy 2-4 word title",
@@ -204,13 +206,22 @@ async def create_game(
                     }},
                     {{
                         "round": 3,
-                        "true_content": "You found [specific physical evidence] that directly implicates [killer or accomplice name].",
-                        "poisoned_content": "You found [fabricated evidence] that appears to implicate [innocent character name]."
+                        "true_content": "You found [specific physical object or detail] that connects to something suspicious you noticed about [another character name].",
+                        "poisoned_content": "You found [specific physical object or detail] near [different innocent character name]'s belongings that seemed out of place."
                     }}
                 ]
             }}
         ]
     }}
+ 
+    BEFORE RETURNING verify this checklist:
+    [ ] characters array has exactly {player_count} objects — count them
+    [ ] Exactly 1 character has "is_killer": true
+    [ ] Every role instructed as "EXACTLY ONE" above is assigned to one character
+    [ ] "is_poisoner": true and "is_accomplice": true appear on the SAME character object
+    [ ] No clue text contains the words: killer, accomplice, murderer, guilty, evidence, suspect
+    [ ] No clue is about the character themselves
+    If any check fails, fix it before returning.
     """
 
     response  = gemini.models.generate_content(
