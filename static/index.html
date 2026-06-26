@@ -182,6 +182,39 @@
 
         .empty-state { color: var(--muted); font-size: 13px; text-align: center; padding: 28px 0; }
 
+        /* Experimental tab */
+        .preset-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+        .preset-card:hover { border-color: var(--border2); }
+        .preset-badge { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; }
+        .badge-pirate { background: rgba(255,179,71,0.12); color: var(--warn); border: 1px solid rgba(255,179,71,0.3); }
+        .badge-espionage { background: rgba(109,184,255,0.12); color: var(--accent2); border: 1px solid rgba(109,184,255,0.3); }
+        .preset-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+        .preset-desc { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
+        .preset-roles { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
+        .preset-spawn-btn { width: 100%; background: linear-gradient(135deg, var(--accent), #6db8ff); color: #0d0d0f; font-size: 13px; font-weight: 700; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-family: var(--sans); transition: opacity 0.15s; }
+        .preset-spawn-btn:hover { opacity: 0.88; }
+        .preset-spawn-btn:disabled { background: var(--border2); color: var(--muted); cursor: not-allowed; }
+        .lab-note { font-size: 12px; color: var(--muted); background: rgba(157,124,255,0.06); border: 1px solid rgba(157,124,255,0.15); border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; line-height: 1.5; }
+
+        /* Crisis dilemma panel in right side */
+        .crisis-panel { background: rgba(255,92,92,0.04); border: 1px solid rgba(255,92,92,0.2); border-radius: 10px; padding: 16px; grid-column: 1 / -1; }
+        .crisis-title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--danger); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+        .crisis-question { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 12px; line-height: 1.5; }
+        .crisis-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        .crisis-opt { padding: 10px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; font-family: var(--sans); transition: all 0.15s; text-align: left; }
+        .crisis-safe { background: rgba(77,216,158,0.1); color: var(--success); border: 1px solid rgba(77,216,158,0.3); }
+        .crisis-safe:hover { background: rgba(77,216,158,0.2); }
+        .crisis-danger { background: rgba(255,92,92,0.1); color: var(--danger); border: 1px solid rgba(255,92,92,0.3); }
+        .crisis-danger:hover { background: rgba(255,92,92,0.2); }
+        .crisis-tally { display: flex; gap: 12px; margin-bottom: 10px; font-family: var(--mono); font-size: 12px; }
+        .tally-safe { color: var(--success); }
+        .tally-danger { color: var(--danger); }
+        .crisis-resolve-btn { background: var(--danger); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: var(--sans); transition: opacity 0.15s; }
+        .crisis-resolve-btn:hover { opacity: 0.85; }
+        .crisis-resolved-msg { font-size: 13px; font-weight: 600; padding: 10px; border-radius: 8px; text-align: center; }
+        .crisis-safe-win { background: rgba(77,216,158,0.1); color: var(--success); border: 1px solid rgba(77,216,158,0.25); }
+        .crisis-danger-win { background: rgba(255,92,92,0.1); color: var(--danger); border: 1px solid rgba(255,92,92,0.25); }
+
         @media (max-width: 900px) {
             .main-layout { grid-template-columns: 1fr; height: auto; }
             .right-body { grid-template-columns: 1fr; }
@@ -208,6 +241,7 @@
         <div class="panel-tabs">
             <button class="panel-tab active" id="btnForge" onclick="switchTab('forge')">✨ AI Forge</button>
             <button class="panel-tab" id="btnLibrary" onclick="switchTab('library')">📚 Library</button>
+            <button class="panel-tab" id="btnExperimental" onclick="switchTab('experimental')">⚗️ Lab</button>
         </div>
 
         <!-- Forge -->
@@ -331,6 +365,50 @@
             </div>
         </div>
 
+        <!-- Experimental Lab -->
+        <div class="panel-body" id="viewExperimental" style="display:none;">
+            <p class="lab-note">⚗️ Preset scenarios with hardcoded characters, clues, and special mechanics. No AI call needed — spawns instantly. Characters are hand-crafted for maximum social deduction chaos.</p>
+
+            <!-- Preset 1: The Cursed Galleon -->
+            <div class="preset-card">
+                <div class="preset-badge badge-pirate">🏴‍☠️ Pirate · 8 Players</div>
+                <div class="preset-title">The Cursed Galleon</div>
+                <div class="preset-desc">A body found on deck at dawn. The crew of the Serpent's Fury must find the killer before they reach port — but one of them doesn't want to be found, and one of them desperately wants to be caught.</div>
+                <div class="preset-roles">
+                    <span class="tag tag-killer">🔪 Killer</span>
+                    <span class="tag tag-accomplice">🤝 Accomplice</span>
+                    <span class="tag tag-special">🔎 Investigator</span>
+                    <span class="tag tag-special">🍺 Drunk</span>
+                    <span class="tag tag-special">🧠 Paranoid</span>
+                    <span class="tag tag-special">🕵️ Spy</span>
+                    <span class="tag tag-special">🃏 Jester</span>
+                    <span class="tag">😇 Innocent ×1</span>
+                </div>
+                <button class="preset-spawn-btn" id="spawnGalleonBtn" onclick="spawnPreset('cursed_galleon', 'spawnGalleonBtn')">▶ Spawn The Cursed Galleon</button>
+            </div>
+
+            <!-- Preset 2: Operation Nusantara -->
+            <div class="preset-card">
+                <div class="preset-badge badge-espionage">🌏 Espionage · 12 Players</div>
+                <div class="preset-title">Operation Nusantara</div>
+                <div class="preset-desc">A senior double agent is found dead during a classified trilateral intelligence summit. Operatives from Malaysia, Singapore, and Indonesia must identify the killer — but every delegation has something to hide. Features mid-round Crisis Dilemma.</div>
+                <div class="preset-roles">
+                    <span class="tag tag-killer">🔪 Killer</span>
+                    <span class="tag tag-accomplice">🤝 Accomplice ×2</span>
+                    <span class="tag tag-special">☠️ Poisoner</span>
+                    <span class="tag tag-special">🔎 Investigator</span>
+                    <span class="tag tag-special">🍺 Drunk</span>
+                    <span class="tag tag-special">🧠 Paranoid</span>
+                    <span class="tag tag-special">🕵️ Spy</span>
+                    <span class="tag tag-special">🃏 Fool</span>
+                    <span class="tag tag-special">🃏 Jester</span>
+                    <span class="tag">😇 Innocent ×2</span>
+                    <span class="tag" style="border-color:rgba(255,92,92,0.4);color:var(--danger);">⚡ Crisis Night</span>
+                </div>
+                <button class="preset-spawn-btn" id="spawnNusantaraBtn" onclick="spawnPreset('operation_nusantara', 'spawnNusantaraBtn')">▶ Spawn Operation Nusantara</button>
+            </div>
+        </div>
+
         <!-- Library -->
         <div class="panel-body" id="viewLibrary" style="display:none;">
             <select id="themeFilter" class="template-filter" onchange="applyFilter()"></select>
@@ -360,6 +438,23 @@
                 </div>
             </div>
 
+            <!-- Crisis dilemma panel (only shown for crisis games) -->
+            <div class="crisis-panel" id="crisisPanelContainer" style="display:none;">
+                <div class="crisis-title">⚡ Crisis Dilemma — Round 2</div>
+                <div class="crisis-question" id="crisisQuestion">Loading dilemma…</div>
+                <div class="crisis-options">
+                    <button class="crisis-opt crisis-safe" id="crisisSafeBtn" onclick="showCrisisVoteTally('safe')">Loading…</button>
+                    <button class="crisis-opt crisis-danger" id="crisisDangerBtn" onclick="showCrisisVoteTally('dangerous')">Loading…</button>
+                </div>
+                <div class="crisis-tally">
+                    <span class="tally-safe">✅ Safe: <span id="crisisTallySafe">0</span></span>
+                    <span class="tally-danger">🔴 Dangerous: <span id="crisisTallyDanger">0</span></span>
+                    <span style="color:var(--muted);">/ <span id="crisisTallyTotal">?</span> alive</span>
+                </div>
+                <div id="crisisResolvedMsg" style="display:none;"></div>
+                <button class="crisis-resolve-btn" id="crisisResolveBtn" onclick="resolveCrisis()" style="display:none;">⚡ Lock in result & apply consequences</button>
+            </div>
+
             <div class="info-card full">
                 <div class="card-header"><div class="dot live"></div>Live Roster</div>
                 <table class="roster-table">
@@ -385,12 +480,11 @@
     }
 
     function switchTab(tab) {
-        const forge = tab === 'forge';
-        document.getElementById('viewForge').style.display   = forge ? 'block' : 'none';
-        document.getElementById('viewLibrary').style.display = forge ? 'none'  : 'block';
-        document.getElementById('btnForge').classList.toggle('active', forge);
-        document.getElementById('btnLibrary').classList.toggle('active', !forge);
-        if (!forge) loadTemplates();
+        ['forge','library','experimental'].forEach(t => {
+            document.getElementById('view' + t.charAt(0).toUpperCase() + t.slice(1)).style.display = t === tab ? 'block' : 'none';
+            document.getElementById('btn'  + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', t === tab);
+        });
+        if (tab === 'library') loadTemplates();
     }
 
     function stepAcc(delta) {
@@ -523,6 +617,77 @@
         });
     }
 
+    async function spawnPreset(presetId, btnId) {
+        const pass = document.getElementById('adminPass').value;
+        if (!pass) { showToast('⚠️ Enter your admin password first'); return; }
+        const btn = document.getElementById(btnId);
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Spawning…';
+        try {
+            const res  = await fetch(`/admin/spawn-preset/${presetId}`, { method: 'POST', headers: { 'x-admin-token': pass } });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.detail || 'Spawn failed');
+            localStorage.setItem("activeGameId", data.game_id);
+            document.getElementById('gameId').value = data.game_id;
+            document.getElementById('roomLinkContainer').style.display = 'block';
+            document.getElementById('roomLinkInput').value = data.room_url;
+            switchTab('forge');
+            await fetchGodMode();
+            showToast(`⚡ ${data.message}`);
+        } catch(e) {
+            showToast(`❌ ${e.message}`);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = btn.id === 'spawnGalleonBtn' ? '▶ Spawn The Cursed Galleon' : '▶ Spawn Operation Nusantara';
+        }
+    }
+
+    async function loadCrisisDilemma(gameId) {
+        const pass = document.getElementById('adminPass').value;
+        try {
+            const res  = await fetch(`/admin/crisis-dilemma/${gameId}`, { headers: { 'x-admin-token': pass } });
+            if (!res.ok) return;
+            const data = await res.json();
+            document.getElementById('crisisPanelContainer').style.display = 'block';
+            document.getElementById('crisisQuestion').innerText    = data.dilemma.question || '';
+            document.getElementById('crisisSafeBtn').innerText     = '✅ ' + (data.dilemma.safe || 'Safe option');
+            document.getElementById('crisisDangerBtn').innerText   = '⚠️ ' + (data.dilemma.dangerous || 'Dangerous option');
+            document.getElementById('crisisTallySafe').innerText   = data.tally.safe || 0;
+            document.getElementById('crisisTallyDanger').innerText = data.tally.dangerous || 0;
+            if (data.crisis_resolved) {
+                document.getElementById('crisisResolveBtn').style.display = 'none';
+                const msg  = document.getElementById('crisisResolvedMsg');
+                msg.style.display = 'block';
+                msg.className     = 'crisis-resolved-msg ' + (data.dangerous_won ? 'crisis-danger-win' : 'crisis-safe-win');
+                msg.innerText     = data.dangerous_won
+                    ? '⚠️ Dangerous option won — killer has been granted an extra elimination before Round 3!'
+                    : '✅ Safe option won — no extra consequences.';
+            } else {
+                document.getElementById('crisisResolveBtn').style.display = 'block';
+            }
+        } catch(e) { /* not a crisis game, panel stays hidden */ }
+    }
+
+    function showCrisisVoteTally(side) {
+        // Host view only — shows live tally, players vote from their own devices
+        showToast(`Players vote for "${side}" on their device. Tally updates on Refresh.`);
+    }
+
+    async function resolveCrisis() {
+        if (!confirm('Lock in the crisis result? This will apply consequences immediately.')) return;
+        const pass   = document.getElementById('adminPass').value;
+        const gameId = document.getElementById('gameId').value;
+        const btn    = document.getElementById('crisisResolveBtn');
+        btn.disabled = true;
+        btn.innerText = 'Applying…';
+        const res  = await fetch(`/admin/resolve-crisis/${gameId}`, { method: 'POST', headers: { 'x-admin-token': pass } });
+        const data = await res.json();
+        showToast(data.message);
+        btn.disabled = false;
+        await fetchGodMode();
+        loadCrisisDilemma(gameId);
+    }
+
     async function spawnTemplate(id) {
         const pass = document.getElementById('adminPass').value;
         const res  = await fetch(`/admin/create-from-template/${id}`, { method: 'POST', headers: { 'x-admin-token': pass } });
@@ -594,6 +759,13 @@
             advBtn.style.display = 'none'; endBtn.style.display = 'block'; closeBtn.style.display = 'none';
         }
 
+        // Load crisis dilemma panel if applicable
+        if (data.game.is_crisis_game && data.game.current_round >= 2 && !finished) {
+            loadCrisisDilemma(gameId);
+        } else {
+            document.getElementById('crisisPanelContainer').style.display = 'none';
+        }
+
         let story = {};
         try { story = JSON.parse(data.game.master_story); } catch {}
         document.getElementById('storyDot').classList.toggle('live', !finished);
@@ -624,6 +796,9 @@
             else if (p.is_investigator) pill = `<span class="role-pill rp-investigator">🔎 Investigator</span>`;
             else if (p.is_drunk)        pill = `<span class="role-pill rp-drunk">🍺 Drunk</span>`;
             else if (p.is_paranoid)     pill = `<span class="role-pill rp-paranoid">🧠 Paranoid</span>`;
+            else if (p.is_spy)          pill = `<span class="role-pill rp-investigator">🕵️ Spy</span>`;
+            else if (p.is_fool)         pill = `<span class="role-pill rp-killer" style="opacity:0.6;">🃏 Fool</span>`;
+            else if (p.is_jester)       pill = `<span class="role-pill" style="background:rgba(157,124,255,0.1);color:#d4a0ff;border:1px solid rgba(157,124,255,0.3);">🎭 Jester</span>`;
             else                        pill = `<span class="role-pill rp-innocent">😇 Innocent</span>`;
 
             tbody.innerHTML += `

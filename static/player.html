@@ -209,15 +209,46 @@
             <button class="modal-close" onclick="closeModal('helpModal')">✕</button>
         </div>
         <div class="modal-body">
+            <p style="color:var(--muted);margin-bottom:14px;">3 rounds. Talk in person. Check your phone for clues. Vote for the killer at the end.</p>
+
+            <strong style="display:block;margin-bottom:8px;color:var(--text);">🎯 Win Conditions</strong>
             <ul>
-                <li><strong>Innocents</strong> — share clues, argue your case, and vote for who you think the killer is. At least half of living innocents must vote correctly to win.</li>
-                <li><strong>Killer</strong> — blend in, deflect suspicion, and secretly queue one player to eliminate each round.</li>
-                <li><strong>Accomplice</strong> — you know the killer's identity. Protect them, spread false leads.</li>
-                <li><strong>Poisoner</strong> — each round, pick one player on your device. Their next clue will be silently corrupted.</li>
-                <li><strong>Investigator</strong> — your Round 2 clue gives you a 50/50 ping: one of two named players is the killer.</li>
-                <li><strong>Drunk</strong> — you think you're innocent, but all your clues are false.</li>
-                <li><strong>Paranoid</strong> — your gut points at a specific person. Trust it completely (even if it's wrong).</li>
-                <li><strong>Eliminated?</strong> — you can still talk, but lose your vote. Send one ghost clue to a living player's device.</li>
+                <li><strong>Innocents win</strong> — majority of living innocents vote for the real killer.</li>
+                <li><strong>Killer wins</strong> — killer avoids getting the majority vote.</li>
+                <li><strong>Jester wins</strong> — if the Jester tricks the majority into voting for them, everyone else loses. Neither innocents nor killer win.</li>
+            </ul>
+
+            <strong style="display:block;margin:14px 0 8px;color:var(--text);">🃏 Roles</strong>
+            <ul>
+                <li><strong>😇 Innocent</strong> — share clues, build cases, vote correctly.</li>
+                <li><strong>🔪 Killer</strong> — blend in, secretly queue one elimination per round. You do not know your accomplice.</li>
+                <li><strong>🤝 Accomplice</strong> — you know the killer. Protect them and spread disinformation.</li>
+                <li><strong>☠️ Poisoner</strong> — an accomplice variant. Pick one player each round on your device — their next clue is silently corrupted. They never know.</li>
+                <li><strong>🔎 Investigator</strong> — your Round 3 clue names exactly two suspects. One is the killer.</li>
+                <li><strong>🍺 Drunk</strong> — you believe you are innocent. All your clues are false. You have no way of knowing.</li>
+                <li><strong>🧠 Paranoid</strong> — your gut tells you a specific person is the killer. It is pointing at an innocent. Trust it anyway.</li>
+                <li><strong>🕵️ Spy</strong> — once per game, secretly learn one other player's true role via your device.</li>
+                <li><strong>🃏 Fool</strong> — you think you are the killer but you are not. Play your role sheet as written. You are innocent.</li>
+                <li><strong>🎭 Jester</strong> — you are neither killer nor innocent. Your only goal is to get the majority to vote for YOU. Act suspicious. Be theatrical. Make them think you did it.</li>
+            </ul>
+
+            <strong style="display:block;margin:14px 0 8px;color:var(--text);">💀 Eliminated?</strong>
+            <ul>
+                <li>You can still talk in person — use that.</li>
+                <li>You lose your final vote (unless ghost vote applies).</li>
+                <li>Send one ghost clue to a living player's device.</li>
+            </ul>
+
+            <strong style="display:block;margin:14px 0 8px;color:var(--text);">⚖️ Exile Vote (Round 2)</strong>
+            <ul>
+                <li>Living players can nominate someone for exile — a public removal before the final round.</li>
+                <li>If the majority agree, that player is exiled. Exiling an innocent helps the killer.</li>
+            </ul>
+
+            <strong style="display:block;margin:14px 0 8px;color:var(--text);">⚡ Crisis Dilemma (special games)</strong>
+            <ul>
+                <li>At Round 2, everyone votes on a critical decision.</li>
+                <li>If the dangerous option wins, the killer gets an extra elimination before Round 3.</li>
             </ul>
         </div>
     </div>
@@ -318,6 +349,7 @@
                 <select id="killTarget"></select>
                 <button class="btn btn-danger" onclick="eliminateTarget()">Lock in target</button>
                 <div class="action-confirm" style="color:var(--danger);" id="killConfirm"></div>
+                <div id="extraKillNotice" style="display:none;margin-top:12px;padding:10px 12px;background:rgba(255,92,92,0.08);border:1px solid rgba(255,92,92,0.25);border-radius:8px;font-size:12px;color:var(--danger);"><strong>⚡ Crisis Bonus — Extra Kill Active</strong><br>The dangerous option won. You may lock in a second target above before Round 3.</div>
             </div>
 
             <!-- Poisoner action panel -->
@@ -424,10 +456,20 @@
                     document.getElementById('activeGame').style.display   = 'none';
                     document.getElementById('finishedScreen').style.display = 'block';
 
-                    const caught = data.reveal_data.killer_caught;
+                    const caught     = data.reveal_data.killer_caught;
+                    const jesterWon  = data.reveal_data.jester_won;
+                    const jesterName = data.reveal_data.jester_name || "The Jester";
                     const banner = document.getElementById('winnerBanner');
-                    banner.innerText  = caught ? '🏆 Innocents Win!' : '🔪 The Killer Escaped!';
-                    banner.className  = `winner-banner ${caught ? 'win-innocent' : 'win-killer'}`;
+                    if (jesterWon) {
+                        banner.innerText = `🎭 The Jester Wins — ${jesterName} tricked everyone into voting for them!`;
+                        banner.className = "winner-banner win-killer";
+                    } else if (caught) {
+                        banner.innerText = "🏆 Innocents Win — The killer was caught!";
+                        banner.className = "winner-banner win-innocent";
+                    } else {
+                        banner.innerText = "🔪 The Killer Escaped!";
+                        banner.className = "winner-banner win-killer";
+                    }
 
                     // Recap
                     const recap = data.reveal_data.recap || '';
@@ -468,7 +510,8 @@
                         else if (p.is_drunk)        pill = '<span class="role-pill rp-drunk">🍺 Drunk</span>';
                         else if (p.is_paranoid)     pill = '<span class="role-pill rp-paranoid">🧠 Paranoid</span>';
                         else if (p.is_spy)          pill = '<span class="role-pill rp-investigator">🕵️ Spy</span>';
-                        else if (p.is_fool)         pill = '<span class="role-pill rp-killer">🃏 Fool</span>';
+                        else if (p.is_fool)         pill = '<span class="role-pill rp-killer" style="opacity:0.6;">🃏 Fool</span>';
+                        else if (p.is_jester)       pill = '<span class="role-pill" style="background:rgba(157,124,255,0.1);color:#d4a0ff;border:1px solid rgba(157,124,255,0.3);">🎭 Jester</span>';
                         idEl.innerHTML += `
                             <div class="identity-row">
                                 <div><div class="iname">${p.name}</div><div class="iplayer">${p.player||'—'}</div></div>
@@ -545,6 +588,8 @@
                     alerts += `<div class="alert alert-investigator"><div class="alert-title">🕵️ You are the Spy</div>Once per game, use your spy panel to secretly learn another player's true role. Choose wisely — one use only.</div>`;
                 if (data.is_fool)
                     alerts += `<div class="alert alert-killer"><div class="alert-title">🃏 You are the… Killer?</div>You have a motive. You had a plan. But you didn't do it. Play your role exactly as written — you are innocent, but nobody will believe you.</div>`;
+                if (data.is_jester)
+                    alerts += `<div class="alert" style="border-color:#d4a0ff;background:rgba(157,124,255,0.07);color:#d4a0ff;"><div class="alert-title">🎭 You are the Jester</div>You are not the killer. You are not innocent. Your only goal is to get the majority of players to vote for YOU at the final vote. Act suspicious. Be theatrical. Make them think you're the killer — then watch them destroy themselves.</div>`;
                 document.getElementById('alertsContainer').innerHTML = alerts;
 
                 // Role sheet
@@ -619,6 +664,10 @@
                 document.getElementById('killerPanel').style.display =
                     (data.is_killer && !data.is_dead) ? 'block' : 'none';
 
+                // Extra kill notice (crisis games, dangerous option won)
+                const ekn = document.getElementById('extraKillNotice');
+                if (ekn) ekn.style.display = (data.has_extra_kill && data.is_killer && !data.is_dead) ? 'block' : 'none';
+
                 // Poisoner panel
                 const poisonPanel = document.getElementById('poisonerPanel');
                 if (data.is_poisoner && !data.is_dead) {
@@ -646,6 +695,27 @@
                 // Exile panel (only Round 2, alive)
                 const exilePanel = document.getElementById('exilePanel');
                 exilePanel.style.display = (data.current_round === 2 && !data.is_dead) ? 'block' : 'none';
+
+                // Crisis dilemma panel
+                const crisisDivPlayer = document.getElementById('crisisDivPlayer');
+                if (crisisDivPlayer) {
+                    if (data.is_crisis_game && data.current_round === 2 && !data.is_dead && !data.crisis_resolved) {
+                        crisisDivPlayer.style.display = 'block';
+                        loadPlayerCrisisDilemma();
+                    } else {
+                        crisisDivPlayer.style.display = 'none';
+                    }
+                    // Show resolved message
+                    const crisisResolvedDiv = document.getElementById('crisisResolvedDiv');
+                    if (crisisResolvedDiv && data.crisis_resolved) {
+                        crisisResolvedDiv.style.display = 'block';
+                        crisisResolvedDiv.innerText = data.crisis_dangerous_won
+                            ? '⚡ The dangerous option won — the killer has an extra elimination before Round 3.'
+                            : '✅ The safe option was chosen — no extra consequences.';
+                    } else if (crisisResolvedDiv) {
+                        crisisResolvedDiv.style.display = 'none';
+                    }
+                }
 
                 // Public clues
                 const pubBox  = document.getElementById('publicCluesBox');
@@ -744,6 +814,47 @@
         const res  = await fetch(`/player/poison/${accessKey}?target_character=${encodeURIComponent(target)}`, { method: 'POST' });
         const data = await res.json();
         document.getElementById('poisonConfirm').innerText = res.ok ? `☠️ ${data.message}` : data.detail;
+    }
+
+    async function submitCrisisVote(vote) {
+        const res  = await fetch(`/player/crisis-vote/${accessKey}?vote=${vote}`, { method: 'POST' });
+        const data = await res.json();
+        const conf = document.getElementById('crisisVoteConf');
+        if (res.ok) {
+            conf.innerText = `✓ Voted: ${vote}. Tally — ✅ Safe: ${data.tally.safe || 0}, ⚠️ Dangerous: ${data.tally.dangerous || 0} (${data.total_voted}/${data.total_alive} voted)`;
+            document.getElementById('crisisSafeBtnP').disabled   = true;
+            document.getElementById('crisisDangerBtnP').disabled = true;
+        } else {
+            conf.innerText = data.detail;
+        }
+    }
+
+    async function loadPlayerCrisisDilemma() {
+        const themeTitle = document.getElementById('charName')?.closest('[data-theme]')?.dataset.theme || '';
+        const questions = {
+            nusantara: {
+                q: "The building's communications have been cut. Enforce a complete comms blackout, or allow each delegation to use their own encrypted channels?",
+                safe: "✅ Comms blackout — nobody contacts outside",
+                danger: "⚠️ Allow individual encrypted channels"
+            },
+            galleon: {
+                q: "A second body spotted in the anchor chain. Haul it up in full view of the crew, or cut it loose quietly to preserve order?",
+                safe: "✅ Haul it up — full transparency",
+                danger: "⚠️ Cut it loose — control the information"
+            }
+        };
+        // Determine which game by fetching dashboard again (we already have it in data but can use theme_title)
+        try {
+            const dash = await fetch(`/player/dashboard/${accessKey}`).then(r => r.json());
+            const key  = dash.theme_title?.includes('Nusantara') ? 'nusantara' : 'galleon';
+            const q    = questions[key];
+            const qEl  = document.getElementById('crisisQPlayer');
+            const sBtn = document.getElementById('crisisSafeBtnP');
+            const dBtn = document.getElementById('crisisDangerBtnP');
+            if (qEl)  qEl.innerText   = q.q;
+            if (sBtn) sBtn.innerText  = q.safe;
+            if (dBtn) dBtn.innerText  = q.danger;
+        } catch(e) {}
     }
 
     async function submitVote() {
