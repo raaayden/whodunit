@@ -407,6 +407,23 @@
                 </div>
                 <button class="preset-spawn-btn" id="spawnNusantaraBtn" onclick="spawnPreset('operation_nusantara', 'spawnNusantaraBtn')">▶ Spawn Operation Nusantara</button>
             </div>
+
+            <!-- Preset 3: The Last Carriage -->
+            <div class="preset-card">
+                <div class="preset-badge" style="background:rgba(77,216,158,0.1);color:var(--success);border:1px solid rgba(77,216,158,0.25);">🚂 Thriller · 6 Players</div>
+                <div class="preset-title">The Last Carriage</div>
+                <div class="preset-desc">The brakes on the Midnight Meridian have been sabotaged and the liaison is dead. Six passengers, one killer, and a moving train with no way to stop. Features mid-round Crisis Dilemma. Best starting preset for new groups.</div>
+                <div class="preset-roles">
+                    <span class="tag tag-killer">🔪 Killer</span>
+                    <span class="tag tag-accomplice">🤝 Accomplice</span>
+                    <span class="tag tag-special">☠️ Poisoner</span>
+                    <span class="tag tag-special">🔎 Investigator</span>
+                    <span class="tag tag-special">🧠 Paranoid</span>
+                    <span class="tag">😇 Innocent ×2</span>
+                    <span class="tag" style="border-color:rgba(255,92,92,0.4);color:var(--danger);">⚡ Crisis Night</span>
+                </div>
+                <button class="preset-spawn-btn" id="spawnCarriageBtn" onclick="spawnPreset('the_last_carriage', 'spawnCarriageBtn')">▶ Spawn The Last Carriage</button>
+            </div>
         </div>
 
         <!-- Library -->
@@ -638,7 +655,7 @@
             showToast(`❌ ${e.message}`);
         } finally {
             btn.disabled = false;
-            btn.innerHTML = btn.id === 'spawnGalleonBtn' ? '▶ Spawn The Cursed Galleon' : '▶ Spawn Operation Nusantara';
+            btn.innerHTML = btn.id === 'spawnGalleonBtn' ? '▶ Spawn The Cursed Galleon' : btn.id === 'spawnNusantaraBtn' ? '▶ Spawn Operation Nusantara' : '▶ Spawn The Last Carriage';
         }
     }
 

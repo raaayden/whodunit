@@ -841,12 +841,17 @@
                 q: "A second body spotted in the anchor chain. Haul it up in full view of the crew, or cut it loose quietly to preserve order?",
                 safe: "✅ Haul it up — full transparency",
                 danger: "⚠️ Cut it loose — control the information"
+            },
+            carriage: {
+                q: "The train is still accelerating. Stop at the next station and wait for authorities — or keep moving to prevent the saboteur from slipping away in the chaos?",
+                safe: "✅ Stop and wait — let the authorities handle it",
+                danger: "⚠️ Keep moving — don't let them escape"
             }
         };
         // Determine which game by fetching dashboard again (we already have it in data but can use theme_title)
         try {
             const dash = await fetch(`/player/dashboard/${accessKey}`).then(r => r.json());
-            const key  = dash.theme_title?.includes('Nusantara') ? 'nusantara' : 'galleon';
+            const key  = dash.theme_title?.includes('Nusantara') ? 'nusantara' : dash.theme_title?.includes('Carriage') ? 'carriage' : 'galleon';
             const q    = questions[key];
             const qEl  = document.getElementById('crisisQPlayer');
             const sBtn = document.getElementById('crisisSafeBtnP');
