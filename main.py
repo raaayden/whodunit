@@ -142,6 +142,16 @@ async def release_clues(game_id: str, round_num: int):
         supabase.table("clues").update({"is_released": True}).eq(
             "game_id", game_id).eq("round_number", round_num).execute()
 
+    # Apply crisis extra kill when Round 3 begins
+    if round_num == 3:
+        killer = supabase.table("players").select("extra_kill_target").eq(
+            "game_id", game_id).eq("is_killer", True).execute()
+        if killer.data and killer.data[0].get("extra_kill_target"):
+            extra_target = killer.data[0]["extra_kill_target"]
+            supabase.table("players").update({
+                "is_dead": True, "death_round": 3
+            }).eq("game_id", game_id).eq("character_name", extra_target).execute()
+
     return {"message": f"Round {round_num} active!"}
 
 
@@ -189,7 +199,8 @@ async def get_crisis_dilemma(game_id: str):
 
 @app.post("/admin/resolve-crisis/{game_id}", dependencies=[Depends(verify_host)])
 async def resolve_crisis(game_id: str):
-    votes = supabase.table("crisis_votes").select("vote").eq("game_id", game_id).execute()
+    import random
+    votes = supabase.table("crisis_votes").select("vote, player_id").eq("game_id", game_id).execute()
     tally = {"safe": 0, "dangerous": 0}
     for v in votes.data: tally[v["vote"]] = tally.get(v["vote"], 0) + 1
     dangerous_won = tally["dangerous"] > tally["safe"]
@@ -197,12 +208,59 @@ async def resolve_crisis(game_id: str):
         "crisis_resolved":      True,
         "crisis_dangerous_won": dangerous_won,
     }).eq("id", game_id).execute()
-    if dangerous_won:
+
+    if not dangerous_won:
+        return {"message": "✅ Safe option won — no extra consequences.", "dangerous_won": False, "tally": tally}
+
+    game     = supabase.table("games").select("theme_title, master_story").eq("id", game_id).execute()
+    theme    = game.data[0]["theme_title"]
+    alive    = supabase.table("players").select(
+        "id, character_name, is_killer, is_accomplice"
+    ).eq("game_id", game_id).eq("is_dead", False).execute()
+    innocents = [p for p in alive.data if not p["is_killer"] and not p.get("is_accomplice")]
+
+    # ── Penalty: Vote Suppression — Dead on Air ──────────────────────────────
+    if "dead on air" in theme.lower():
+        dangerous_ids = {v["player_id"] for v in votes.data if v["vote"] == "dangerous"}
+        candidates    = [p for p in innocents if p["id"] in dangerous_ids] or innocents
+        if candidates:
+            target = random.choice(candidates)
+            supabase.table("players").update({"is_quarantined": True}).eq(
+                "id", target["id"]).execute()
+            return {
+                "message": f"⚠️ Dangerous option won — {target['character_name']} is quarantined and cannot cast a final vote. Announce this to the table.",
+                "dangerous_won": True, "tally": tally,
+                "quarantined_player": target["character_name"],
+            }
+        return {"message": "⚠️ Dangerous option won — quarantine penalty applied.", "dangerous_won": True, "tally": tally}
+
+    # ── Penalty: Contaminated Broadcast — The Coastal Protocol ───────────────
+    elif "coastal protocol" in theme.lower():
+        if innocents:
+            target      = random.choice(innocents)
+            target_name = target["character_name"]
+            fake_clue   = (
+                f"⚠ STATION EMERGENCY LOG — Auto-archived 23:14: Movement sensor triggered in "
+                f"Specimen Pool corridor at 22:58. Badge access confirmed: {target_name}. "
+                f"Duration: 4 minutes. Alert was manually cleared without supervisor authorization. "
+                f"— StationNet v2.4"
+            )
+            story = json.loads(game.data[0]["master_story"])
+            story.setdefault("public_clues", []).append({"round": 2, "content": fake_clue})
+            supabase.table("games").update({"master_story": json.dumps(story)}).eq(
+                "id", game_id).execute()
+            return {
+                "message": f"⚠️ Dangerous option won — contaminated broadcast pushed to all player devices, implicating {target_name}. Players will see it on next sync.",
+                "dangerous_won": True, "tally": tally,
+            }
+        return {"message": "⚠️ Dangerous option won — contaminated broadcast could not be generated.", "dangerous_won": True, "tally": tally}
+
+    # ── Default Penalty: Extra Kill — all other crisis games ─────────────────
+    else:
         supabase.table("players").update({"has_extra_kill": True}).eq(
             "game_id", game_id).eq("is_killer", True).execute()
         return {"message": "⚠️ Dangerous option won — killer granted an extra elimination before Round 3.",
                 "dangerous_won": True, "tally": tally}
-    return {"message": "✅ Safe option won — no extra consequences.", "dangerous_won": False, "tally": tally}
 
 
 # ── Player: Join room ─────────────────────────────────────────────────────────
@@ -350,16 +408,15 @@ async def get_player_dashboard(access_key: str):
         "is_killer":            player["is_killer"],
         "is_accomplice":        player["is_accomplice"],
         "is_investigator":      player.get("is_investigator", False),
-        "is_drunk":             player.get("is_drunk",        False),
         "is_poisoner":          player.get("is_poisoner",     False),
-        "is_paranoid":          player.get("is_paranoid",     False),
         "is_spy":               player.get("is_spy",          False),
-        "is_fool":              player.get("is_fool",         False),
         "is_jester":            player.get("is_jester",       False),
         "spy_used":             player.get("spy_used",        False),
         "spy_result":           player.get("spy_result",      ""),
         "poison_target":        player.get("poison_target"),
         "has_extra_kill":       player.get("has_extra_kill",  False),
+        "extra_kill_target":    player.get("extra_kill_target"),
+        "is_quarantined":       player.get("is_quarantined",  False),
         "known_killer":         known_killer,
         "is_exiled":            player.get("is_exiled",       False),
         "is_dead":              is_currently_dead,
@@ -388,6 +445,30 @@ async def eliminate_player(killer_access_key: str, target_character: str):
     supabase.table("players").update({"is_dead": True, "death_round": next_round}).eq(
         "game_id", game_id).eq("character_name", target_character).execute()
     return {"message": f"Target locked: {target_character}. They drop dead at Round {next_round}."}
+
+
+# ── Player: Extra kill (crisis bonus) ────────────────────────────────────────
+
+@app.post("/player/extra-kill/{access_key}")
+async def extra_kill(access_key: str, target_character: str):
+    from fastapi import HTTPException
+    player_res = supabase.table("players").select("*").eq("access_key", access_key).execute()
+    if not player_res.data:
+        raise HTTPException(status_code=404, detail="Invalid access key.")
+    p = player_res.data[0]
+    if not p["is_killer"]:
+        raise HTTPException(status_code=403, detail="Only the killer can use the extra kill.")
+    if p.get("is_dead"):
+        raise HTTPException(status_code=403, detail="Eliminated players cannot use abilities.")
+    if not p.get("has_extra_kill"):
+        raise HTTPException(status_code=403, detail="No crisis bonus available.")
+    target = supabase.table("players").select("id").eq(
+        "game_id", p["game_id"]).eq("character_name", target_character).eq("is_dead", False).execute()
+    if not target.data:
+        raise HTTPException(status_code=404, detail="Target not found or already eliminated.")
+    supabase.table("players").update({"extra_kill_target": target_character}).eq(
+        "access_key", access_key).execute()
+    return {"message": f"Extra target locked: {target_character}. They will be eliminated when Round 3 begins."}
 
 
 # ── Player: Ghost clue ────────────────────────────────────────────────────────
@@ -550,6 +631,8 @@ async def cast_vote(access_key: str, suspect: str):
     player = supabase.table("players").select("*").eq("access_key", access_key).execute()
     if player.data[0]["is_dead"]:
         raise HTTPException(status_code=403, detail="Eliminated players cannot vote.")
+    if player.data[0].get("is_quarantined"):
+        raise HTTPException(status_code=403, detail="You are quarantined and cannot cast a vote.")
     game_id = player.data[0]["game_id"]
     target  = supabase.table("players").select("is_dead").eq(
         "game_id", game_id).eq("character_name", suspect).execute()

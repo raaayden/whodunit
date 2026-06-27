@@ -360,6 +360,16 @@ CRISIS_DILEMMAS = {
         "safe":      "Stop and wait — let the authorities handle it",
         "dangerous": "Keep moving — don't let them escape",
     },
+    "Dead on Air": {
+        "question": "Network security has arrived at the studio entrance — Marcus's emergency alert went out before he died. Let them in and hand over the investigation, or lock the doors and finish the live broadcast for the remaining forty minutes?",
+        "safe":      "Let security in — hand over immediately",
+        "dangerous": "Lock them out — finish the broadcast first",
+    },
+    "The Coastal Protocol": {
+        "question": "The station's automated emergency beacon has activated and is transmitting a distress signal to the coast guard. Override and disable it — or allow the signal to continue and let external authorities respond at dawn?",
+        "safe":      "Let it run — coast guard arrives in the morning",
+        "dangerous": "Override the beacon — handle this internally",
+    },
 }
 
 

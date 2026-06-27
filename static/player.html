@@ -349,7 +349,15 @@
                 <select id="killTarget"></select>
                 <button class="btn btn-danger" onclick="eliminateTarget()">Lock in target</button>
                 <div class="action-confirm" style="color:var(--danger);" id="killConfirm"></div>
-                <div id="extraKillNotice" style="display:none;margin-top:12px;padding:10px 12px;background:rgba(255,92,92,0.08);border:1px solid rgba(255,92,92,0.25);border-radius:8px;font-size:12px;color:var(--danger);"><strong>⚡ Crisis Bonus — Extra Kill Active</strong><br>The dangerous option won. You may lock in a second target above before Round 3.</div>
+            </div>
+
+            <!-- Extra kill panel (crisis bonus — only shown when dangerous option won) -->
+            <div id="extraKillPanel" style="display:none;" class="action-panel killer-panel">
+                <div class="action-label" style="color:var(--danger);">⚡ Crisis Bonus — Second Elimination</div>
+                <div class="action-desc">The dangerous option prevailed. Pick one additional target — they will be eliminated when Round 3 begins. This is separate from your regular kill.</div>
+                <select id="extraKillTarget"></select>
+                <button class="btn btn-danger" onclick="lockExtraKill()">Lock in extra target</button>
+                <div class="action-confirm" style="color:var(--danger);" id="extraKillConfirm"></div>
             </div>
 
             <!-- Poisoner action panel -->
@@ -416,6 +424,7 @@
             <div class="card" id="votingSection">
                 <div class="card-header">🗳️ Final Accusation</div>
                 <div class="card-body">
+                    <div id="quarantineNotice" style="display:none; color:var(--danger); font-size:13px; font-weight:600; text-align:center; padding:4px 0 8px;">⚠️ You are quarantined — your vote has been suppressed by the crisis outcome.</div>
                     <select id="suspectList"></select>
                     <button class="btn btn-accent" onclick="submitVote()">Lock in vote</button>
                     <div id="voteConfirmed" style="color:var(--success); font-size:13px; font-weight:600; margin-top:10px; text-align:center;"></div>
@@ -594,12 +603,8 @@
                     alerts += `<div class="alert alert-accomplice"><div class="alert-title">🤝 You are the Accomplice</div>Protect the killer at all costs.<div class="alert-secret">Killer: <u>${data.known_killer}</u></div></div>`;
                 if (data.is_investigator)
                     alerts += `<div class="alert alert-investigator"><div class="alert-title">🔎 You are the Investigator</div>Pay close attention to your Round 2 clue.</div>`;
-                if (data.is_paranoid)
-                    alerts += `<div class="alert alert-paranoid"><div class="alert-title">🧠 Your instincts never lie</div>You are utterly convinced one guest is the killer. Trust that feeling completely.</div>`;
                 if (data.is_spy)
                     alerts += `<div class="alert alert-investigator"><div class="alert-title">🕵️ You are the Spy</div>Once per game, use your spy panel to secretly learn another player's true role. Choose wisely — one use only.</div>`;
-                if (data.is_fool)
-                    alerts += `<div class="alert alert-killer"><div class="alert-title">🃏 You are the… Killer?</div>You have a motive. You had a plan. But you didn't do it. Play your role exactly as written — you are innocent, but nobody will believe you.</div>`;
                 if (data.is_jester)
                     alerts += `<div class="alert" style="border-color:#d4a0ff;background:rgba(157,124,255,0.07);color:#d4a0ff;"><div class="alert-title">🎭 You are the Jester</div>You are not the killer. You are not innocent. Your only goal is to get the majority of players to vote for YOU at the final vote. Act suspicious. Be theatrical. Make them think you're the killer — then watch them destroy themselves.</div>`;
                 document.getElementById('alertsContainer').innerHTML = alerts;
@@ -612,19 +617,21 @@
                 const voteSel   = document.getElementById('suspectList');
                 const ghostSel  = document.getElementById('ghostTarget');
                 const poisonSel = document.getElementById('poisonTarget');
-                const spySel    = document.getElementById('spyTarget');
-                const exileSel  = document.getElementById('exileTarget');
+                const spySel      = document.getElementById('spyTarget');
+                const exileSel    = document.getElementById('exileTarget');
+                const extKillSel  = document.getElementById('extraKillTarget');
                 const prevKill   = killSel?.value   || '';
                 const prevVote   = voteSel?.value   || '';
                 const prevGhost  = ghostSel?.value  || '';
                 const prevPoison = poisonSel?.value || '';
 
-                if (killSel)   killSel.innerHTML   = "<option value=''>Select target…</option>";
-                if (voteSel)   voteSel.innerHTML   = "<option value=''>Select suspect…</option>";
-                if (ghostSel)  ghostSel.innerHTML  = "<option value=''>Select player…</option>";
-                if (poisonSel) poisonSel.innerHTML = "<option value=''>Select target…</option>";
-                if (spySel)    spySel.innerHTML    = "<option value=''>Select player…</option>";
-                if (exileSel)  exileSel.innerHTML  = "<option value=''>Select player…</option>";
+                if (killSel)    killSel.innerHTML    = "<option value=''>Select target…</option>";
+                if (voteSel)    voteSel.innerHTML    = "<option value=''>Select suspect…</option>";
+                if (ghostSel)   ghostSel.innerHTML   = "<option value=''>Select player…</option>";
+                if (poisonSel)  poisonSel.innerHTML  = "<option value=''>Select target…</option>";
+                if (spySel)     spySel.innerHTML     = "<option value=''>Select player…</option>";
+                if (exileSel)   exileSel.innerHTML   = "<option value=''>Select player…</option>";
+                if (extKillSel) extKillSel.innerHTML = "<option value=''>Select target…</option>";
 
                 // Notebook
                 const nbContainer = document.getElementById('notebookContainer');
@@ -640,8 +647,9 @@
                         if (ghostSel)  ghostSel.innerHTML  += `<option value="${p.character_name}">${p.character_name}</option>`;
                         if (voteSel)   voteSel.innerHTML   += `<option value="${p.character_name}">${p.character_name}</option>`;
                         if (poisonSel) poisonSel.innerHTML += `<option value="${p.character_name}">${p.character_name}</option>`;
-                        if (spySel)   spySel.innerHTML   += `<option value="${p.character_name}">${p.character_name}</option>`;
-                        if (exileSel) exileSel.innerHTML += `<option value="${p.character_name}">${p.character_name} (${p.claimed_by})</option>`;
+                        if (spySel)     spySel.innerHTML     += `<option value="${p.character_name}">${p.character_name}</option>`;
+                        if (exileSel)   exileSel.innerHTML   += `<option value="${p.character_name}">${p.character_name} (${p.claimed_by})</option>`;
+                        if (extKillSel) extKillSel.innerHTML += `<option value="${p.character_name}">${p.character_name} (${p.claimed_by})</option>`;
                     }
 
                     nbContainer.innerHTML += `
@@ -678,9 +686,15 @@
                 document.getElementById('killerPanel').style.display =
                     (data.is_killer && !data.is_dead) ? 'block' : 'none';
 
-                // Extra kill notice (crisis games, dangerous option won)
-                const ekn = document.getElementById('extraKillNotice');
-                if (ekn) ekn.style.display = (data.has_extra_kill && data.is_killer && !data.is_dead) ? 'block' : 'none';
+                // Extra kill panel (separate crisis bonus — only when dangerous won and crisis resolved)
+                const extraKillPanel = document.getElementById('extraKillPanel');
+                if (extraKillPanel) {
+                    extraKillPanel.style.display =
+                        (data.is_killer && !data.is_dead && data.has_extra_kill && data.crisis_resolved) ? 'block' : 'none';
+                    if (data.extra_kill_target)
+                        document.getElementById('extraKillConfirm').innerText =
+                            `⚡ Locked: ${data.extra_kill_target} — will be eliminated when Round 3 begins.`;
+                }
 
                 // Poisoner panel
                 const poisonPanel = document.getElementById('poisonerPanel');
@@ -764,11 +778,19 @@
                 }
 
                 // Vote state
-                if (data.voted_for) {
+                const quarantineNotice = document.getElementById('quarantineNotice');
+                if (data.is_quarantined) {
+                    if (quarantineNotice) quarantineNotice.style.display = 'block';
+                    voteSel.style.display = 'none';
+                    document.querySelector('#votingSection .btn').style.display = 'none';
+                    document.getElementById('voteConfirmed').innerText = '';
+                } else if (data.voted_for) {
+                    if (quarantineNotice) quarantineNotice.style.display = 'none';
                     voteSel.style.display = 'none';
                     document.querySelector('#votingSection .btn').style.display = 'none';
                     document.getElementById('voteConfirmed').innerText = `✓ You accused: ${data.voted_for}`;
                 } else {
+                    if (quarantineNotice) quarantineNotice.style.display = 'none';
                     voteSel.style.display = 'block';
                     document.querySelector('#votingSection .btn').style.display = 'block';
                     document.getElementById('voteConfirmed').innerText = '';
@@ -814,6 +836,16 @@
     }
 
     // ── Game actions ────────────────────────────────────────────────────────
+    async function lockExtraKill() {
+        const target = document.getElementById('extraKillTarget').value;
+        if (!target) return;
+        const res  = await fetch(`/player/extra-kill/${accessKey}?target_character=${encodeURIComponent(target)}`, { method: 'POST' });
+        const data = await res.json();
+        document.getElementById('extraKillConfirm').innerText = res.ok
+            ? `⚡ Locked: ${target} — will be eliminated when Round 3 begins.`
+            : data.detail;
+    }
+
     async function eliminateTarget() {
         const target = document.getElementById('killTarget').value;
         if (!target) return;
@@ -835,7 +867,7 @@
         const data = await res.json();
         const conf = document.getElementById('crisisVoteConf');
         if (res.ok) {
-            conf.innerText = `✓ Voted: ${vote}. Tally — ✅ Safe: ${data.tally.safe || 0}, ⚠️ Dangerous: ${data.tally.dangerous || 0} (${data.total_voted}/${data.total_alive} voted)`;
+            conf.innerText = `✓ Vote cast. ${data.total_voted}/${data.total_alive} players have voted.`;
             document.getElementById('crisisSafeBtnP').disabled   = true;
             document.getElementById('crisisDangerBtnP').disabled = true;
         } else {

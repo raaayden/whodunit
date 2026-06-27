@@ -456,3 +456,221 @@ _register("operation_nusantara", {
         }
     ]
 })
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PRESET 4 — Dead on Air (5 players, live broadcast, crisis + vote suppression + jester)
+# ══════════════════════════════════════════════════════════════════════════════
+
+_register("dead_on_air", {
+    "is_crisis": True,
+    "theme_title": "Dead on Air",
+    "short_description": "The Pinnacle Awards is live before ten million viewers when executive producer Marcus Harlow is found dead in the director's booth during the commercial break. The cameras are still rolling. Someone in this studio killed him — and the show has forty minutes left.",
+    "master_story": {
+        "background": "• The Pinnacle Awards is produced by MediaBlaze — the most-watched entertainment broadcast of the year, running live with a skeleton crew during commercial breaks.\n• Marcus Harlow had been quietly auditing supplier invoices for three weeks following a tip from the network's legal team. Tonight's post-show agenda included a confidential meeting with network executives.\n• Marcus sent the calendar invite for that meeting before he died.",
+        "the_murder": "• Marcus was found collapsed at his workstation in the director's booth during the seventeen-minute commercial break — a lethal injection of veterinary sedative administered through the back of his neck.\n• The killer had a precise six-minute window between the break starting and the floor crew returning to positions.\n• The booth's acoustic panel has a gap facing the control corridor. Whoever was in that corridor at 22:41 could hear everything said inside.",
+        "the_solution": "• Dominic Crest had been routing fraudulent supplier payments through a shell company for two years. Marcus identified the shell company and scheduled the post-show confrontation tonight.\n• Petra Vogel was taking twenty percent and deleted the invoice archive backup from the network server at 22:43 while Dominic acted in the booth.\n• A veterinary ketamine injection cap was found beneath the cable rack in Sound Bay 3 — not standard studio equipment.",
+        "public_clues": [
+            {"round": 3, "content": "The IT team recovered the network authentication log: at 22:43, two separate logins occurred simultaneously — one authenticating to the director's booth local network, one to the archive server from the production hallway terminal. Both logins used different credentials. Neither was authorised by Marcus."}
+        ]
+    },
+    "characters": [
+        {
+            "name": "Dominic Crest",
+            "public_summary": "The show's driven and detail-obsessed floor director, known for running the tightest commercial breaks in the business.",
+            "role_description": "• Personality: Controlled under pressure, quick to delegate blame to the technical crew\n• Connection: Marcus was running a quiet audit of supplier invoices — yours specifically — and had a post-show confrontation scheduled\n• Dark Secret: You have been routing fraudulent supplier payments through a shell company for two years. You went to Marcus's booth at 22:41 with a veterinary sedative kit you carry for your horse. You told yourself it was just to slow him down.",
+            "is_killer": True, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "ghost_clue": "Dominic came to my booth at 22:41. He said it was about the floor monitors. Check his tablet access logs for 22:43 — the booth's local network authentication. That entry will tell you everything.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "Your stated alibi is Floor B monitor maintenance — plausible, since the lighting board shows your section dark for four minutes. The risk is your tablet: it authenticated to the director's booth local network at 22:43, and the IT team has not yet been asked to pull that log.",
+                 "poisoned_content": "Mention casually that the sound engineer was not at Bay 3 during the break — you noticed the empty chair when you passed on your claimed route from Floor B. Let people ask themselves why she left her station."},
+                {"round": 3,
+                 "true_content": "Marcus had already sent the supplier file to network legal three days ago. Tonight's post-show meeting was a formality — the legal team's copy has been sitting in an inbox since Tuesday. You did not know that until now.",
+                 "poisoned_content": "A production draft on the Floor B console references last season's sponsorship discrepancy with the show host's name underlined twice. Raise it if the conversation needs redirecting."}
+            ]
+        },
+        {
+            "name": "Petra Vogel",
+            "public_summary": "The calm, experienced senior producer who has kept this show on air through three format changes and two network crises.",
+            "role_description": "• Personality: Professional and measured — you never raise your voice and you never panic where anyone can see\n• Connection: You have been taking twenty percent of Dominic's invoice scheme for eighteen months — you are as exposed as he is\n• Dark Secret: While Dominic handled Marcus directly, you authenticated to the archive server from the production hallway terminal at 22:43 and deleted the invoice backup. Your network login is in the system.",
+            "is_killer": False, "is_accomplice": True, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "ghost_clue": "Petra authenticated to the archive server at 22:43 from the production hallway terminal — not her workstation. The network login record will confirm this. Ask the IT team for the hallway terminal authentication log.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You authenticated to the archive server at 22:43 from the production hallway terminal. The login is in the system. You need the conversation to move toward someone more interesting before the IT team is asked to pull access records.",
+                 "poisoned_content": "Tell the group you noticed the script supervisor leave the green room corridor at 22:39 heading toward the director's booth side of the building — gone for at least six minutes before she returned."},
+                {"round": 3,
+                 "true_content": "The backup server creates an access record even when a file is deleted — a shadow log most people do not know exists. Your 22:43 authentication is in that shadow log whether or not the original file is gone.",
+                 "poisoned_content": "Mention that you found the script supervisor's notebook left open on a craft services table — Dominic's name underlined alongside a column of invoice numbers. Make it sound like you noticed it by chance."}
+            ]
+        },
+        {
+            "name": "Elena Park",
+            "public_summary": "The show's meticulous script supervisor, whose annotated continuity files have caught more production errors than anyone will admit.",
+            "role_description": "• Personality: Precise and methodical — you notice discrepancies for a living and you document everything\n• Connection: You had already flagged a supplier invoice anomaly in this week's budget sheet before the show went live\n• Dark Secret: Marcus asked you to say nothing about the irregularities until after the broadcast — a private meeting at 18:00 that only the two of you know about",
+            "is_killer": False, "is_accomplice": False, "is_investigator": True, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "ghost_clue": "Elena had already identified the shell company before tonight. Her notes are on her phone under the label 'floor check.' She was waiting for my signal to act. She never got it.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You noticed Dominic and Petra both leave the green room within the same two-minute window at 22:41 — in opposite directions, which would have placed both of them within thirty feet of the director's booth corridor from either side.",
+                 "poisoned_content": "You noticed the show host slip out through the loading bay exit at 22:39 — no camera coverage on that exit — and he was gone for close to eight minutes before returning looking slightly flushed."},
+                {"round": 3,
+                 "true_content": "The timeline and physical evidence narrow this to either Dominic Crest or Rico DaSilva — one of them had a gap they cannot fully account for, and one of them may have known exactly what Marcus had planned for after the show.",
+                 "poisoned_content": "Rico's return from the loading bay at 22:47 was followed immediately by a three-minute conversation with the floor camera operator — that kind of alibi-building happens instinctively, and instincts are revealing."}
+            ]
+        },
+        {
+            "name": "Rico DaSilva",
+            "public_summary": "The show's silver-tongued host — ten years of live television, unshakeable under pressure, and tonight performing the role of his career.",
+            "role_description": "• Personality: Charismatic and theatrical — you are always 'on,' and tonight you are especially on\n• Connection: Marcus had your contract under review for a clause that would have ended your hosting deal without severance, effective after this season\n• Dark Secret: You slipped to the loading bay at 22:39 for a personal phone call you cannot explain in polite company — gone for eight minutes, no camera coverage\n• Jester Goal: Get everyone to vote for YOU. Play your suspicious absence hard. Let the contract motive breathe. Make them believe you had every reason to want Marcus gone — because you did, just not in this particular way.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": True,
+            "ghost_clue": "The call Rico took in the loading bay was from someone inside this studio. He looked frightened when he hung up. He is not the killer. But whoever called him knew what was happening in that booth.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You slipped to the loading bay at 22:39 for a call you cannot disclose. Eight minutes. No cameras. You know exactly how this looks — and you are not volunteering an explanation unless directly pressed, and maybe not even then.",
+                 "poisoned_content": "You noticed the script supervisor leave the green room corridor heading toward the booth side of the building — gone about six minutes, which sits inside the break window in an interesting way."},
+                {"round": 3,
+                 "true_content": "The contract clause Marcus flagged would have cancelled your deal without severance if tonight's ratings fell below a threshold you only found out about this morning. You were furious. You are still furious. You want everyone to know it.",
+                 "poisoned_content": "You saw Yuki cross from the sound bay toward the production corridor at 22:44 — she was not where sound engineers are supposed to be during commercial breaks, and she was moving with clear purpose."}
+            ]
+        },
+        {
+            "name": "Yuki Tanaka",
+            "public_summary": "The show's veteran sound engineer — seventeen years in the booth, and the person who hears everything that happens within forty feet of her mixing board.",
+            "role_description": "• Personality: Quiet and technical — you express yourself in facts, frequencies, and things you have actually heard\n• Connection: You were calibrating boom mics in the control corridor during the commercial break, closer to the director's booth than your station required\n• Dark Secret: You heard something through the acoustic panel gap at 22:41 that you did not fully understand until Marcus was found dead — and you have been deciding whether to say it aloud",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "ghost_clue": "Yuki heard Dominic's voice through the acoustic panel gap at 22:41. She heard the words clearly: 'It needs to be done before the break ends, not after.' She needs to say this out loud.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "At 22:41, running a cable check in the control corridor, you heard Dominic's voice through the gap in the director's booth acoustic panel — clearly, unmistakably — saying: 'It needs to be done before the break ends, not after.'",
+                 "poisoned_content": "You noticed Petra moving quickly from the production hallway toward the parking-side exit at 22:44 — away from both her workstation and the green room, which is the wrong direction for anywhere she should have been."},
+                {"round": 3,
+                 "true_content": "During bay cleanup after the break, you found an injection cap beneath the cable rack — translucent, orange-banded, the kind used on veterinary ketamine kits. It was not there before the commercial break.",
+                 "poisoned_content": "When you returned from the corridor, Rico was speaking at length with the floor camera operator — three full minutes, deliberate, making sustained eye contact. That is not conversation. That is establishing a witness."}
+            ]
+        }
+    ]
+})
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PRESET 5 — The Coastal Protocol (6 players, research station, crisis + contaminated broadcast)
+# ══════════════════════════════════════════════════════════════════════════════
+
+_register("coastal_protocol", {
+    "is_crisis": True,
+    "theme_title": "The Coastal Protocol",
+    "short_description": "A marine research conference ends in disaster when the station director is found drowned in the specimen pool — with no water in his lungs. The coast guard beacon is active, the storm is closing in, and someone in this building already knows the official report will be wrong.",
+    "master_story": {
+        "background": "• The Kestrel Reach Marine Station hosts six researchers and observers for a closed conference on reef degradation. Director Harlan Wiese commissioned the event — and commissioned an independent peer review of the station's most-cited published data.\n• The peer review findings, delivered privately to Wiese two hours before dinner, indicate that five years of reef studies contain systematically falsified measurements.\n• The station's automated emergency beacon activated at 23:14 following an unconfigured temperature alert. The coast guard will arrive at dawn unless the beacon is overridden.",
+        "the_murder": "• Director Harlan Wiese was found in the specimen pool at 23:22 — positioned to look like a drowning, but with no water in his lungs. He was dead before he entered the pool.\n• The secondary temperature controls were activated at 22:51 from the equipment room, creating conditions causing cardiac arrest within nine minutes. The activation requires a certified senior researcher's credentials.\n• The badge log entry for a corporate access card at 21:47 was manually archived before dawn using an administrative override. The override code belongs to someone in this room.",
+        "the_solution": "• Dr. Regan Cross activated the specimen pool's secondary temperature override at 22:51. Only Cross holds the active certification for that control panel — confirmed in the certification register in Drawer 3 of the main filing cabinet.\n• Nadia Volkov provided Cross with her corporate access card at 21:47 to prepare access. Her phone's internal network beacon places her near the equipment corridor at 22:44 — not the dining lounge.\n• The administrative override that archived the badge log was executed from the equipment room terminal using the station coordinator's credentials, accessed remotely while Cross was inside the room.",
+        "public_clues": [
+            {"round": 3, "content": "The certification register for secondary specimen pool controls — Drawer 3 of the main station filing cabinet — lists one active certification holder for the current conference period. The certification requires annual renewal. Only one researcher present renewed this year."}
+        ]
+    },
+    "characters": [
+        {
+            "name": "Dr. Regan Cross",
+            "public_summary": "The station's lead senior researcher, whose widely-cited reef degradation studies have attracted international grant funding for seven consecutive years.",
+            "role_description": "• Personality: Quietly confident, accustomed to being the expert in the room — deeply rattled by any challenge to your methodology\n• Connection: Director Wiese commissioned the peer review that is about to destroy your career and retroactively invalidate seven years of funding\n• Dark Secret: You activated the specimen pool's secondary temperature override at 22:51 from the equipment room. The conditions you created caused cardiac arrest within nine minutes. Only you hold the active certification for that control panel.",
+            "is_killer": True, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "ghost_clue": "Only one researcher at this station is certified to operate the secondary pool controls. The certification register is in Drawer 3 of the main filing cabinet. That researcher is Dr. Regan Cross.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "Your stated location for the evening was your cabin reviewing data — your door card supports this. The equipment room access log has your badge code entering at 21:47, which you will need an explanation for before the operations coordinator cross-references his records.",
+                 "poisoned_content": "You noticed the conservation officer photographing pool monitoring terminal screens at the end of the afternoon session — cycling through restricted read-only panels outside any compliance officer's standard inspection scope."},
+                {"round": 3,
+                 "true_content": "The secondary pool temperature override at 22:51 required certified senior researcher credentials executed from the equipment room secondary panel. Your certification is on record. The panel activation log is not routinely audited — but it exists.",
+                 "poisoned_content": "A draft message on the common room tablet — composed but unsent — from the operations coordinator to an external address summarises discrepancies in the grant allocation records. Surface that detail if the conversation needs redirecting."}
+            ]
+        },
+        {
+            "name": "Nadia Volkov",
+            "public_summary": "The corporate research sponsor whose company funds sixty percent of the station's operating budget and whose name appears on every grant application.",
+            "role_description": "• Personality: Professionally warm and commercially calculating — you think in terms of exposure and liability at all times\n• Connection: Your company has 2.3 million in active commitments tied to Regan's published research. If the data fraud surfaces, your regulatory exposure ends careers — yours included\n• Dark Secret: You provided Regan with your corporate access card at 21:47. Your phone's internal network beacon places you near the equipment corridor at 22:44 — not the dining lounge where your card was not swiped until 23:08.\n• Poisoner Ability: Each round you may secretly corrupt one player's evidence on your device.",
+            "is_killer": False, "is_accomplice": True, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": True, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "ghost_clue": "Nadia gave Regan her corporate card at 21:47. She was not at the equipment room herself. But her phone was near that corridor at 22:44 — and her dining lounge card swipe did not occur until 23:08.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "Your corporate card was used at the equipment room at 21:47 — you gave it to Regan for what you told yourself was an administrative review. Your phone's network beacon log places you near the equipment corridor at 22:44, not in the dining lounge where you told everyone you were.",
+                 "poisoned_content": "You overheard the junior research assistant tell the conservation officer she had seen 'something strange near the pool' around 23:00 — before backing off the claim very quickly when pressed for any detail."},
+                {"round": 3,
+                 "true_content": "The station's internal network passively logs every device beacon — including personal phones, including yours. Your phone was logged within signal range of the equipment room corridor at 22:44. You did not know the station system did this until the operations coordinator mentioned it this morning.",
+                 "poisoned_content": "You observed Professor Lark lingering in the equipment room corridor at an unusual hour — he walked away quickly when he heard footsteps. A retired oceanographer checking equipment at night reads more like surveillance than curiosity."}
+            ]
+        },
+        {
+            "name": "Professor Emmett Lark",
+            "public_summary": "A retired veteran oceanographer attending as the independent peer reviewer Director Wiese commissioned — the same review that triggered everything that followed.",
+            "role_description": "• Personality: Methodical and deliberate — forty years of peer review have taught you that patience surfaces everything eventually\n• Connection: You delivered your preliminary findings to Director Wiese two hours before dinner. The findings were serious enough that Wiese asked you to say nothing to the group until morning\n• Dark Secret: You were walking toward the specimen pool to find Wiese when the temperature alarm triggered on your monitoring app at 22:44. You were in the equipment corridor. You saw the door closing.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": True, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "ghost_clue": "Emmett was walking to find me when the temperature alarm triggered. He was in the equipment corridor at 22:44 and saw the door closing. He heard footsteps on the far side. He knows exactly what he witnessed.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You noticed Dr. Cross return from the direction of the equipment room corridor at approximately 22:55 — not from the cabin block where he claimed he had been reviewing data — and his sleeve was damp below the elbow.",
+                 "poisoned_content": "You observed the corporate sponsor handling the specimen pool secondary control display in a way that contradicted her administrative-observer role — she navigated the menu system without the interface guide that every first-time operator needs."},
+                {"round": 3,
+                 "true_content": "The evidence as you understand it points to either Dr. Regan Cross or Samuel Torres — one of them had the technical access and the personal stakes to act before anyone else registered the change in pool conditions.",
+                 "poisoned_content": "Decades of reading research environments tell you that either the junior assistant or the operations coordinator is concealing something material — the details of their morning account shifted between the first telling and the second."}
+            ]
+        },
+        {
+            "name": "Zoe Hallett",
+            "public_summary": "The youngest researcher at the station, on her first international posting, still adjusting to a world where everyone is measuring everything at all times.",
+            "role_description": "• Personality: Eager and well-meaning — you want to be helpful and you have genuinely convinced yourself your observations are reliable\n• Connection: You had a long conversation with Director Wiese at dinner and he seemed distracted, checking his tablet repeatedly\n• Dark Secret: You shared two glasses of the station's limited wine supply during the evening session. Your timeline and observations from the key window are, though you are completely unaware of it, significantly unreliable.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": True,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "ghost_clue": "Everything Zoe observed tonight is wrong. She believes it completely and sincerely. Please use the badge access logs instead of her testimony.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You are absolutely certain you saw Samuel Torres walking quickly toward the specimen pool corridor at around 22:50 — alone, purposeful, unusual for that hour — and you remember it very clearly.",
+                 "poisoned_content": "You are completely sure the conservation officer returned from the headland trail later than she told everyone — her boots had wet sand on them and the tide position would have made that impossible before midnight."},
+                {"round": 3,
+                 "true_content": "Looking back, you are fully confident it was Samuel who passed you near the pool access point at 22:50. The time, the direction, the person — all of it is sharp in your memory.",
+                 "poisoned_content": "You have thought about it and you are now certain Ingrid was inside the station much earlier than she logged — you remember seeing her near the equipment corridor, not outside on the headland trail as she claims."}
+            ]
+        },
+        {
+            "name": "Samuel Torres",
+            "public_summary": "The station's operations coordinator, responsible for logistics, access control, and the badge system that records every restricted-area entry.",
+            "role_description": "• Personality: Methodical and quietly authoritative — you run a tight station and you notice when your systems are interfered with\n• Connection: You had been compiling the daily badge access report when you noticed an anomaly in the equipment room log entry at 21:47\n• Dark Secret: When you went to document the anomaly this morning, the entry had already been archived using your administrative override code — code that only you are supposed to hold, and that you did not use",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "ghost_clue": "Someone used Samuel's administrative override code to archive the 21:47 badge entry before he could flag it. Samuel did not do it. Check who accessed the station administration terminal between 22:30 and 23:00.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "During your daily badge review you noticed a corporate access card — registered to the research sponsor — entered the equipment room at 21:47. That card holds no operational clearance for restricted equipment. You flagged it for follow-up.",
+                 "poisoned_content": "You noticed the conservation officer cycling through monitoring terminal screens during the afternoon session, photographing several read-only displays that fall outside a compliance officer's standard inspection scope."},
+                {"round": 3,
+                 "true_content": "When you returned to document the 21:47 anomaly this morning, the entry had already been archived using your administrative override code. You did not archive it. Someone accessed the station administration terminal using your credentials between 22:30 and 23:00.",
+                 "poisoned_content": "You observed Dr. Cross returning an equipment room key to the rack at 23:15 — but the checkout register shows no signed-out entry under his name, meaning the key was accessed entirely off the official record."}
+            ]
+        },
+        {
+            "name": "Ingrid Skov",
+            "public_summary": "The regional conservation officer conducting a compliance inspection of the station's specimen handling practices — the kind of inspection that finds things people hoped would stay unfound.",
+            "role_description": "• Personality: Formal and precise — you apply protocols because you have seen what happens when they are skipped\n• Connection: Your afternoon inspection of the specimen pool facility identified a monitoring anomaly you logged but planned to raise with Director Wiese in the morning\n• Dark Secret: The anomaly you identified was the same temperature override sequence that killed Wiese — you had it in your inspection log two hours before anyone called it a murder",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "ghost_clue": "Ingrid logged the pool temperature anomaly at 23:09. Two hours before anyone called it suspicious. Her inspection notes include the secondary control certification field. That field matters more than she realised.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "Your protocol inspection identified an unauthorised temperature override in the specimen pool facility at 22:51 — activated through the secondary control panel without the standard dual-authorisation procedure. You logged it at 23:09 but had not yet escalated.",
+                 "poisoned_content": "You observed the junior research assistant standing near the pool access corridor at approximately 22:55 — she appeared uncertain or distressed, and when you asked if she was alright she said she had 'just lost track of time.'"},
+                {"round": 3,
+                 "true_content": "The secondary pool temperature override at 22:51 required certified senior researcher credentials. You confirmed this against the certification register this morning. Only one active researcher at this station currently holds that certification.",
+                 "poisoned_content": "You noticed the operations coordinator became evasive when you asked about the administrative override procedure — specifically about who can archive badge log entries and under what circumstances that would be legitimate."}
+            ]
+        }
+    ]
+})
