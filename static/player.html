@@ -380,6 +380,18 @@
                 <div id="exileTally" style="font-size:12px;color:var(--muted);margin-top:8px;font-family:var(--mono);"></div>
             </div>
 
+            <!-- Crisis dilemma panel (Round 2, crisis games only) -->
+            <div id="crisisDivPlayer" style="display:none;" class="action-panel">
+                <div class="action-label" style="color:var(--danger);">⚡ Crisis Dilemma — Round 2</div>
+                <div class="action-desc" id="crisisQPlayer">Loading dilemma…</div>
+                <div style="display:flex; gap:8px; margin-bottom:10px;">
+                    <button class="btn" style="background:rgba(77,216,158,0.1); border:1px solid rgba(77,216,158,0.3); color:var(--success); flex:1;" id="crisisSafeBtnP" onclick="submitCrisisVote('safe')">Safe</button>
+                    <button class="btn" style="background:rgba(255,92,92,0.1); border:1px solid rgba(255,92,92,0.3); color:var(--danger); flex:1;" id="crisisDangerBtnP" onclick="submitCrisisVote('dangerous')">Dangerous</button>
+                </div>
+                <div class="action-confirm" id="crisisVoteConf"></div>
+            </div>
+            <div id="crisisResolvedDiv" style="display:none;" class="action-panel"></div>
+
             <!-- Public clues -->
             <div class="card" id="publicCluesBox" style="display:none;">
                 <div class="card-header">📢 Public Announcements</div>
@@ -600,6 +612,8 @@
                 const voteSel   = document.getElementById('suspectList');
                 const ghostSel  = document.getElementById('ghostTarget');
                 const poisonSel = document.getElementById('poisonTarget');
+                const spySel    = document.getElementById('spyTarget');
+                const exileSel  = document.getElementById('exileTarget');
                 const prevKill   = killSel?.value   || '';
                 const prevVote   = voteSel?.value   || '';
                 const prevGhost  = ghostSel?.value  || '';
@@ -609,6 +623,8 @@
                 if (voteSel)   voteSel.innerHTML   = "<option value=''>Select suspect…</option>";
                 if (ghostSel)  ghostSel.innerHTML  = "<option value=''>Select player…</option>";
                 if (poisonSel) poisonSel.innerHTML = "<option value=''>Select target…</option>";
+                if (spySel)    spySel.innerHTML    = "<option value=''>Select player…</option>";
+                if (exileSel)  exileSel.innerHTML  = "<option value=''>Select player…</option>";
 
                 // Notebook
                 const nbContainer = document.getElementById('notebookContainer');
@@ -624,8 +640,6 @@
                         if (ghostSel)  ghostSel.innerHTML  += `<option value="${p.character_name}">${p.character_name}</option>`;
                         if (voteSel)   voteSel.innerHTML   += `<option value="${p.character_name}">${p.character_name}</option>`;
                         if (poisonSel) poisonSel.innerHTML += `<option value="${p.character_name}">${p.character_name}</option>`;
-                        const spySel   = document.getElementById('spyTarget');
-                        const exileSel = document.getElementById('exileTarget');
                         if (spySel)   spySel.innerHTML   += `<option value="${p.character_name}">${p.character_name}</option>`;
                         if (exileSel) exileSel.innerHTML += `<option value="${p.character_name}">${p.character_name} (${p.claimed_by})</option>`;
                     }

@@ -137,6 +137,13 @@ def build_game_prompt(
        e) NEVER use the words "killer", "accomplice", "murderer", "guilty", or "evidence" inside a clue.
        f) POISONER: mark both "is_accomplice": true AND "is_poisoner": true on the SAME character.
     5. PUBLIC CLUE: Only ONE public clue at Round 3 (the final round only). No Round 2 public clue.
+    6. GHOST CLUE RULES — every character must have a meaningful ghost_clue:
+       a) Ghost clues are revealed ONLY after that character is eliminated — treat them as a final confession or dying revelation.
+       b) INNOCENT characters: their ghost_clue MUST name a specific suspicious act directly involving the killer or an accomplice
+          (use their actual character name). Never vague. Example: "I saw [Killer Name] pocketing the missing key minutes after the body was found."
+       c) KILLER and ACCOMPLICE characters: their ghost_clue MUST frame a specific INNOCENT player with a believable but false accusation.
+       d) NEVER write ghost clues like "trust no one", "look closer", or other content-free warnings.
+          Every ghost clue must name a specific character and a specific observable act.
 
     BEFORE RETURNING verify:
     [ ] characters array has exactly {player_count} objects

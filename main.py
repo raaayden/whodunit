@@ -330,6 +330,7 @@ async def get_player_dashboard(access_key: str):
 
     return {
         "game_status":          game_status,
+        "game_id":              game_id,
         "current_round":        current_round,
         "character_name":       player["character_name"],
         "theme_title":          theme_title,
