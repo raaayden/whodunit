@@ -776,9 +776,7 @@ CURSED_GALLEON_TEMPLATE = {
         {
             "name": "Captain Rourke O'Malley",
             "public_summary": "The commanding and feared captain of the Serpent's Fury, known for his iron discipline and rumoured debts.",
-            "role_description": "• Personality: Authoritative, deflects blame onto others, quick to remind people of your rank
-• Connection: Diego was your first mate and the only one who knew about the stolen gold
-• Dark Secret: You have been siphoning treasure to pay Blackthorn the pirate lord — Diego found out",
+            "role_description": "• Personality: Authoritative, deflects blame onto others, quick to remind people of your rank • Connection: Diego was your first mate and the only one who knew about the stolen gold • Dark Secret: You have been siphoning treasure to pay Blackthorn the pirate lord — Diego found out",
             "is_killer": True, "is_accomplice": False, "is_investigator": False, "is_drunk": False, "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "ghost_clue": "The night Diego died, he slipped a note under my cabin door. It read: 'I know what you took from the chest. Meet me at the bow at midnight or I go to the crew.' I burned it at dawn.",
             "clues": [
@@ -789,9 +787,7 @@ CURSED_GALLEON_TEMPLATE = {
         {
             "name": "Scarlett Vane",
             "public_summary": "The ship's sharp-eyed navigator, trusted by the captain and respected by the crew for getting them out of dangerous waters.",
-            "role_description": "• Personality: Calm and calculating, always seem to have an angle, never volunteer information
-• Connection: The captain cut you in on the stolen gold — you have as much to lose as he does
-• Dark Secret: You helped the captain dispose of evidence after the murder",
+            "role_description": "• Personality: Calm and calculating, always seem to have an angle, never volunteer information • Connection: The captain cut you in on the stolen gold — you have as much to lose as he does • Dark Secret: You helped the captain dispose of evidence after the murder",
             "is_killer": False, "is_accomplice": True, "is_investigator": False, "is_drunk": False, "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "ghost_clue": "Scarlett Vane helped the captain throw something overboard before sunrise. I saw her from the crow's nest but said nothing — I was afraid.",
             "clues": [
@@ -802,9 +798,7 @@ CURSED_GALLEON_TEMPLATE = {
         {
             "name": "Blind Pete the Bosun",
             "public_summary": "The half-blind but sharp-eared bosun who has sailed with the crew for twenty years and misses nothing despite his poor eyesight.",
-            "role_description": "• Personality: Gruff, nostalgic, uses humour to deflect — but deeply loyal to the crew
-• Connection: Diego was like a son to you; you taught him everything he knew about the sea
-• Dark Secret: You have been smuggling personal rum rations to sell at port — Diego knew and protected you",
+            "role_description": "• Personality: Gruff, nostalgic, uses humour to deflect — but deeply loyal to the crew • Connection: Diego was like a son to you; you taught him everything he knew about the sea • Dark Secret: You have been smuggling personal rum rations to sell at port — Diego knew and protected you",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": True, "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "ghost_clue": "Old Pete was the last one I trusted. His clue is false — the rum has clouded everything he thinks he saw.",
             "clues": [
@@ -815,9 +809,7 @@ CURSED_GALLEON_TEMPLATE = {
         {
             "name": "Mad Meg the Gunpowder Master",
             "public_summary": "The volatile and unpredictable keeper of the ship's cannons, feared for her temper and respected for her accuracy.",
-            "role_description": "• Personality: Loud, confrontational, always the first to accuse — and secretly terrified of being accused yourself
-• Connection: Diego caught you stealing powder to sell at port and threatened to report you
-• Dark Secret: You had a powerful motive to silence Diego, but you did not kill him — you just wished you had",
+            "role_description": "• Personality: Loud, confrontational, always the first to accuse — and secretly terrified of being accused yourself • Connection: Diego caught you stealing powder to sell at port and threatened to report you • Dark Secret: You had a powerful motive to silence Diego, but you did not kill him — you just wished you had",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False, "is_poisoner": False, "is_paranoid": True, "is_spy": False, "is_fool": False, "is_jester": False,
             "ghost_clue": "Meg had nothing to do with my death. But she knows something she is not saying about who visited the captain's cabin the night I died.",
             "clues": [
@@ -828,9 +820,7 @@ CURSED_GALLEON_TEMPLATE = {
         {
             "name": "Dr. Silas Crowe",
             "public_summary": "The ship's soft-spoken surgeon, recruited in Tortuga under mysterious circumstances, who keeps detailed journals no one is allowed to read.",
-            "role_description": "• Personality: Precise, quiet, answers every question with another question
-• Connection: You treated Diego for a chest wound six months ago and he confided secrets to you
-• Dark Secret: You are actually a spy for the governor, documenting the stolen treasure for a future seizure",
+            "role_description": "• Personality: Precise, quiet, answers every question with another question • Connection: You treated Diego for a chest wound six months ago and he confided secrets to you • Dark Secret: You are actually a spy for the governor, documenting the stolen treasure for a future seizure",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False, "is_poisoner": False, "is_paranoid": False, "is_spy": True, "is_fool": False, "is_jester": False,
             "ghost_clue": "Dr. Crowe examined my body with surgical precision. He noted the angle of the blow — something that only someone trained in anatomy would understand the significance of.",
             "clues": [
@@ -841,9 +831,7 @@ CURSED_GALLEON_TEMPLATE = {
         {
             "name": "Copper Jenny the Cook",
             "public_summary": "The resourceful ship's cook who keeps the crew fed and the gossip flowing, knowing everyone's business before they know it themselves.",
-            "role_description": "• Personality: Warm and chatty on the surface, but quietly collecting information about everyone
-• Connection: Diego used to eat alone with you every evening and shared things about the captain
-• Dark Secret: You are planning to leave the crew at the next port with a small bag of stolen coins you have been hoarding",
+            "role_description": "• Personality: Warm and chatty on the surface, but quietly collecting information about everyone • Connection: Diego used to eat alone with you every evening and shared things about the captain • Dark Secret: You are planning to leave the crew at the next port with a small bag of stolen coins you have been hoarding",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False, "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": True,
             "ghost_clue": "Jenny always laughed too easily. But she heard everything that happened near the galley that night — more than she has admitted.",
             "clues": [
@@ -854,9 +842,7 @@ CURSED_GALLEON_TEMPLATE = {
         {
             "name": "Finnegan Ash the Helmsman",
             "public_summary": "The steady-handed helmsman who keeps the ship on course and prides himself on noticing everything from the wheel.",
-            "role_description": "• Personality: Methodical and observant, speaks slowly and chooses words carefully
-• Connection: You respected Diego but always felt he was hiding something about the captain
-• Dark Secret: You saw the navigator leave her post for an hour but stayed quiet because you feared the captain",
+            "role_description": "• Personality: Methodical and observant, speaks slowly and chooses words carefully • Connection: You respected Diego but always felt he was hiding something about the captain • Dark Secret: You saw the navigator leave her post for an hour but stayed quiet because you feared the captain",
             "is_killer": False, "is_accomplice": False, "is_investigator": True, "is_drunk": False, "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "ghost_clue": "Finnegan saw two people near the bow that night. He stayed quiet to protect himself. His silence cost me my life.",
             "clues": [
@@ -867,9 +853,7 @@ CURSED_GALLEON_TEMPLATE = {
         {
             "name": "Luca Bones the Deckhand",
             "public_summary": "The youngest crew member, barely eighteen, who joined the ship in desperation and has been trying to prove himself ever since.",
-            "role_description": "• Personality: Nervous and eager to please, talks too much when scared
-• Connection: Diego was your mentor and the only person who made you feel welcome on the ship
-• Dark Secret: You stole a small gold coin from the treasure chest and Diego promised to stay quiet",
+            "role_description": "• Personality: Nervous and eager to please, talks too much when scared • Connection: Diego was your mentor and the only person who made you feel welcome on the ship • Dark Secret: You stole a small gold coin from the treasure chest and Diego promised to stay quiet",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False, "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "ghost_clue": "Luca was the last person to see me alive. He was crying. He knew something was wrong that night but did not say anything until it was too late.",
             "clues": [
@@ -895,9 +879,7 @@ OPERATION_NUSANTARA_TEMPLATE = {
         {
             "name": "Colonel Siti Rahimah Ismail",
             "public_summary": "Malaysia's acting security coordinator for the summit, decorated BID officer with twenty years of field experience and an uncompromising reputation.",
-            "role_description": "• Personality: Controlled and precise — never raise your voice, never show emotion, let others fill the silence
-• Connection: Azman burned three of your operatives by selling their identities — one did not come home
-• Dark Secret: You synthesised the compound yourself using the medical kit and administered it during the coffee service",
+            "role_description": "• Personality: Controlled and precise — never raise your voice, never show emotion, let others fill the silence • Connection: Azman burned three of your operatives by selling their identities — one did not come home • Dark Secret: You synthesised the compound yourself using the medical kit and administered it during the coffee service",
             "is_killer": True, "is_accomplice": False, "is_investigator": False, "is_drunk": False, "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "ghost_clue": "The last person who refilled my cup was the security coordinator. I thought nothing of it at the time. I should have.",
             "clues": [
@@ -908,9 +890,7 @@ OPERATION_NUSANTARA_TEMPLATE = {
         {
             "name": "Agent Farid Osman",
             "public_summary": "Malaysia's youngest senior analyst, fast-tracked through BID for his technical expertise in signals intelligence and digital forensics.",
-            "role_description": "• Personality: Helpful and deferential in public — you are very good at appearing transparent
-• Connection: Siti mentored you and you owe her your career — when she asked for a favour, you did not ask questions
-• Dark Secret: You deleted seven minutes of corridor footage and planted a forged document in the Indonesian delegation's folder",
+            "role_description": "• Personality: Helpful and deferential in public — you are very good at appearing transparent • Connection: Siti mentored you and you owe her your career — when she asked for a favour, you did not ask questions • Dark Secret: You deleted seven minutes of corridor footage and planted a forged document in the Indonesian delegation's folder",
             "is_killer": False, "is_accomplice": True, "is_investigator": False, "is_drunk": False, "is_poisoner": True, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "ghost_clue": "Someone with deep system access erased exactly the footage that would have identified the killer. That level of precision does not come from panic — it was planned.",
             "clues": [
@@ -921,9 +901,7 @@ OPERATION_NUSANTARA_TEMPLATE = {
         {
             "name": "Director Lim Boon Kiat",
             "public_summary": "Singapore's SID delegation head, a meticulous career intelligence officer known for filing the most detailed meeting notes in the region.",
-            "role_description": "• Personality: Bureaucratic and thorough — you document everything and trust nothing you cannot verify
-• Connection: You had a private meeting with Azman two hours before his death about a suspected leak in the Malaysian delegation
-• Dark Secret: You agreed to keep that meeting off the official record, which now looks very suspicious",
+            "role_description": "• Personality: Bureaucratic and thorough — you document everything and trust nothing you cannot verify • Connection: You had a private meeting with Azman two hours before his death about a suspected leak in the Malaysian delegation • Dark Secret: You agreed to keep that meeting off the official record, which now looks very suspicious",
             "is_killer": False, "is_accomplice": False, "is_investigator": True, "is_drunk": False, "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "ghost_clue": "Lim knows more than he has said. He promised me discretion. I hope it was not his discretion that got me killed.",
             "clues": [
@@ -934,9 +912,7 @@ OPERATION_NUSANTARA_TEMPLATE = {
         {
             "name": "Agent Nurul Ain Hamzah",
             "public_summary": "Malaysia's counter-intelligence liaison for the summit, responsible for securing communications between delegations and vetting all support staff.",
-            "role_description": "• Personality: Professionally warm but intensely alert — you notice everything and share almost nothing
-• Connection: You suspected Azman was compromised six months ago but lacked the evidence to act
-• Dark Secret: You have been running an unofficial parallel investigation into Azman without authorisation from BID",
+            "role_description": "• Personality: Professionally warm but intensely alert — you notice everything and share almost nothing • Connection: You suspected Azman was compromised six months ago but lacked the evidence to act • Dark Secret: You have been running an unofficial parallel investigation into Azman without authorisation from BID",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False, "is_poisoner": False, "is_paranoid": False, "is_spy": True, "is_fool": False, "is_jester": False,
             "ghost_clue": "Nurul knew. She had been watching me for months. If she had moved faster, I might still be alive — or I might have had her silenced too.",
             "clues": [
@@ -947,9 +923,7 @@ OPERATION_NUSANTARA_TEMPLATE = {
         {
             "name": "Pak Wirawan Santoso",
             "public_summary": "Indonesia's BIN deputy director and lead negotiator, a pragmatic political survivor who has outlasted four different administrations.",
-            "role_description": "• Personality: Expansive and diplomatic in public — you create the impression of openness while saying very little of substance
-• Connection: Azman owed you a favour from a joint operation in 2019 that you have never collected on — until now
-• Dark Secret: You came to this summit with a private agenda to acquire the Malaysian agent list, not realising someone else had the same idea with more violent intentions",
+            "role_description": "• Personality: Expansive and diplomatic in public — you create the impression of openness while saying very little of substance • Connection: Azman owed you a favour from a joint operation in 2019 that you have never collected on — until now • Dark Secret: You came to this summit with a private agenda to acquire the Malaysian agent list, not realising someone else had the same idea with more violent intentions",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False, "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": True, "is_jester": False,
             "ghost_clue": "Wirawan wanted the list but not my death. He is guilty of many things — just not this particular one.",
             "clues": [
@@ -960,9 +934,7 @@ OPERATION_NUSANTARA_TEMPLATE = {
         {
             "name": "Dr. Ayu Permatasari",
             "public_summary": "Indonesia's BIN technical advisor and the summit's designated chemical safety officer, responsible for hazardous materials compliance.",
-            "role_description": "• Personality: Academic and detail-oriented, you tend to over-explain things which makes people trust you less than they should
-• Connection: You were asked to inspect the medical kit earlier in the day and noted everything was in order
-• Dark Secret: You failed to log the second inspection properly and your signature was forged on the compliance sheet",
+            "role_description": "• Personality: Academic and detail-oriented, you tend to over-explain things which makes people trust you less than they should • Connection: You were asked to inspect the medical kit earlier in the day and noted everything was in order • Dark Secret: You failed to log the second inspection properly and your signature was forged on the compliance sheet",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False, "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "ghost_clue": "The chemical safety officer inspected the kit. But the second access was not hers. Someone knew her schedule and moved during her gap.",
             "clues": [
@@ -973,9 +945,7 @@ OPERATION_NUSANTARA_TEMPLATE = {
         {
             "name": "Colonel Marcus Tan",
             "public_summary": "Singapore's SID head of field operations, a former commando officer who has transitioned into intelligence with the same direct approach he used in the field.",
-            "role_description": "• Personality: Blunt and impatient with process — you say what you think and expect others to do the same
-• Connection: You worked directly under Azman on a joint operation in 2021 and saw firsthand how he operated
-• Dark Secret: You warned Singapore headquarters three months ago that Azman was compromised — they told you to stand down and say nothing",
+            "role_description": "• Personality: Blunt and impatient with process — you say what you think and expect others to do the same • Connection: You worked directly under Azman on a joint operation in 2021 and saw firsthand how he operated • Dark Secret: You warned Singapore headquarters three months ago that Azman was compromised — they told you to stand down and say nothing",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False, "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "ghost_clue": "Marcus knew I was dirty. He reported it and was silenced. He came to this summit expecting a confrontation — not a funeral.",
             "clues": [
@@ -986,9 +956,7 @@ OPERATION_NUSANTARA_TEMPLATE = {
         {
             "name": "Agent Zara Putri Nabilah",
             "public_summary": "Malaysia's youngest field agent at the summit, assigned as Azman's personal aide and responsible for his schedule and briefing documents.",
-            "role_description": "• Personality: Eager and efficient — you have worked extremely hard to be in this room and you will not do anything to jeopardise that
-• Connection: You handled Azman's coffee order every morning for six months and knew exactly how he took it
-• Dark Secret: Azman had been pressuring you to pass internal documents to him outside official channels — you refused twice and were terrified of what came next",
+            "role_description": "• Personality: Eager and efficient — you have worked extremely hard to be in this room and you will not do anything to jeopardise that • Connection: You handled Azman's coffee order every morning for six months and knew exactly how he took it • Dark Secret: Azman had been pressuring you to pass internal documents to him outside official channels — you refused twice and were terrified of what came next",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False, "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "ghost_clue": "Zara brought me my last coffee as always. But she did not pour it herself this time. She handed it to me from the side table without looking me in the eye.",
             "clues": [
@@ -999,9 +967,7 @@ OPERATION_NUSANTARA_TEMPLATE = {
         {
             "name": "Dato Sri Halim Mohd Noor",
             "public_summary": "Malaysia's senior political liaison to the summit, a career diplomat who bridges the intelligence community and the ministry with practiced ease.",
-            "role_description": "• Personality: Smooth and reassuring — you have spent thirty years making difficult things sound manageable
-• Connection: You sponsored Azman's appointment as director five years ago and have been quietly regretting it ever since
-• Dark Secret: You received a warning from a foreign contact two weeks ago that Azman was about to be publicly exposed — you said nothing because you did not want to be associated with the fallout",
+            "role_description": "• Personality: Smooth and reassuring — you have spent thirty years making difficult things sound manageable • Connection: You sponsored Azman's appointment as director five years ago and have been quietly regretting it ever since • Dark Secret: You received a warning from a foreign contact two weeks ago that Azman was about to be publicly exposed — you said nothing because you did not want to be associated with the fallout",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": True, "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "ghost_clue": "Halim knew I was going to be exposed. He chose to do nothing. His silence was not loyalty — it was self-preservation.",
             "clues": [
@@ -1012,9 +978,7 @@ OPERATION_NUSANTARA_TEMPLATE = {
         {
             "name": "Agent Khairi Zulkifli",
             "public_summary": "Indonesia's BIN field liaison, a quiet and methodical operative who specialises in counter-surveillance and is rarely the most visible person in any room.",
-            "role_description": "• Personality: Understated and precise — you observe more than you speak and you have trained yourself to be forgettable
-• Connection: You noticed the security coordinator accessing the medical kit during your routine sweep and logged it in your private notes
-• Dark Secret: You did not report the irregular access because you were testing whether it would be flagged by the Malaysian system — a professional habit that has now become a serious problem",
+            "role_description": "• Personality: Understated and precise — you observe more than you speak and you have trained yourself to be forgettable • Connection: You noticed the security coordinator accessing the medical kit during your routine sweep and logged it in your private notes • Dark Secret: You did not report the irregular access because you were testing whether it would be flagged by the Malaysian system — a professional habit that has now become a serious problem",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False, "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "ghost_clue": "The Indonesian agent swept the corridor twice. He saw the security coordinator at the medical kit and said nothing. His silence was professional. It was also fatal — for me.",
             "clues": [
@@ -1025,9 +989,7 @@ OPERATION_NUSANTARA_TEMPLATE = {
         {
             "name": "Commissioner Rosnah Ahmad Basri",
             "public_summary": "Malaysia's special commissioner overseeing inter-agency cooperation at the summit, a senior figure who holds authority over all three delegations' conduct.",
-            "role_description": "• Personality: Formal and commanding — people defer to you and you have learned to use that silence as a tool
-• Connection: You have known Azman since his early career and always privately doubted his commitment to the service
-• Dark Secret: You authorised the summit's security arrangements, which means the gap in the footage is technically your responsibility — and you are motivated to ensure the investigation does not go in a direction that exposes your oversight failures",
+            "role_description": "• Personality: Formal and commanding — people defer to you and you have learned to use that silence as a tool • Connection: You have known Azman since his early career and always privately doubted his commitment to the service • Dark Secret: You authorised the summit's security arrangements, which means the gap in the footage is technically your responsibility — and you are motivated to ensure the investigation does not go in a direction that exposes your oversight failures",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False, "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "ghost_clue": "Rosnah will try to control this investigation. Not because she is guilty — but because the truth of what happened will reveal how comprehensively she failed to prevent it.",
             "clues": [
@@ -1038,9 +1000,7 @@ OPERATION_NUSANTARA_TEMPLATE = {
         {
             "name": "Lieutenant Syafiq Danial Roslan",
             "public_summary": "The summit's duty security officer, a military intelligence secondee responsible for physical access control and the room's electronic locking system.",
-            "role_description": "• Personality: Nervous under authority and prone to over-explaining — you know more than your rank suggests you should
-• Connection: You were the one who configured the electronic door lock and you know exactly how the seven-minute footage gap could have been created
-• Dark Secret: Someone senior told you to ignore an access anomaly earlier in the evening and you complied — you do not know if that person is the killer",
+            "role_description": "• Personality: Nervous under authority and prone to over-explaining — you know more than your rank suggests you should • Connection: You were the one who configured the electronic door lock and you know exactly how the seven-minute footage gap could have been created • Dark Secret: Someone senior told you to ignore an access anomaly earlier in the evening and you complied — you do not know if that person is the killer",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False, "is_poisoner": False, "is_paranoid": True, "is_spy": False, "is_fool": False, "is_jester": False,
             "ghost_clue": "The duty officer knew how the footage gap was created. He was told to stay quiet. He is telling the truth when he says he does not know who ordered it — but the order came through the security division.",
             "clues": [
