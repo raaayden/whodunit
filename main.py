@@ -49,7 +49,8 @@ async def player_view(): return FileResponse("static/player.html")
 async def get_templates():
     templates = supabase.table("game_templates").select(
         "id, theme, theme_title, short_description, player_count, accomplice_count, "
-        "has_drunk, has_investigator, has_poisoner, has_paranoid, has_spy, has_fool"
+        "has_drunk, has_investigator, has_poisoner, has_paranoid, has_spy, has_fool, "
+        "has_undertaker, has_recluse, has_alibi_cards"
     ).order("created_at", desc=True).execute()
     return {"templates": templates.data}
 
@@ -83,12 +84,15 @@ async def create_game(
     request: Request, theme: str, player_count: int,
     accomplice_count: int = 0, include_drunk: bool = False,
     include_investigator: bool = False, include_poisoner: bool = False,
-    include_paranoid: bool = False, include_spy: bool = False, include_fool: bool = False
+    include_paranoid: bool = False, include_spy: bool = False, include_fool: bool = False,
+    include_undertaker: bool = False, include_recluse: bool = False,
+    include_alibi_cards: bool = False,
 ):
     prompt    = fn.build_game_prompt(
         theme, player_count, accomplice_count,
         include_drunk, include_investigator, include_poisoner,
-        include_paranoid, include_spy, include_fool
+        include_paranoid, include_spy, include_fool,
+        include_undertaker, include_recluse, include_alibi_cards,
     )
     game_data = fn.generate_game_with_ai(prompt)
 
@@ -104,6 +108,9 @@ async def create_game(
         "has_paranoid":      include_paranoid,
         "has_spy":           include_spy,
         "has_fool":          include_fool,
+        "has_undertaker":    include_undertaker,
+        "has_recluse":       include_recluse,
+        "has_alibi_cards":   include_alibi_cards,
         "master_story":      game_data["master_story"],
         "characters":        game_data["characters"],
     }).execute()
@@ -139,6 +146,8 @@ async def release_clues(game_id: str, round_num: int):
 
     if round_num > 1:
         fn.apply_poison_swap(game_id, round_num)
+        if round_num == 2:
+            fn.apply_undertaker_result(game_id)
         supabase.table("clues").update({"is_released": True}).eq(
             "game_id", game_id).eq("round_number", round_num).execute()
 
@@ -319,7 +328,8 @@ async def get_player_dashboard(access_key: str):
     all_players = supabase.table("players").select(
         "id, character_name, public_summary, claimed_by_user, is_dead, death_round, "
         "is_killer, is_accomplice, is_investigator, is_drunk, is_poisoner, is_paranoid, "
-        "is_spy, is_fool, is_jester, voted_for, poison_target, spy_used, spy_result, is_exiled"
+        "is_spy, is_fool, is_jester, is_undertaker, is_recluse, "
+        "voted_for, poison_target, spy_used, spy_result, is_exiled"
     ).eq("game_id", game_id).execute()
 
     received_ghost_clues = supabase.table("players").select(
@@ -373,6 +383,8 @@ async def get_player_dashboard(access_key: str):
             "is_spy":          p.get("is_spy",          False),
             "is_fool":         p.get("is_fool",         False),
             "is_jester":       p.get("is_jester",       False),
+            "is_undertaker":   p.get("is_undertaker",   False),
+            "is_recluse":      p.get("is_recluse",      False),
             "is_dead":         p.get("is_dead",         False),
             "is_exiled":       p.get("is_exiled",       False),
         } for p in all_players.data]
@@ -411,6 +423,10 @@ async def get_player_dashboard(access_key: str):
         "is_poisoner":          player.get("is_poisoner",     False),
         "is_spy":               player.get("is_spy",          False),
         "is_jester":            player.get("is_jester",       False),
+        "is_undertaker":        player.get("is_undertaker",   False),
+        "is_recluse":           player.get("is_recluse",      False),
+        "undertaker_result":    player.get("undertaker_result", None),
+        "alibi":                player.get("alibi",           None),
         "spy_used":             player.get("spy_used",        False),
         "spy_result":           player.get("spy_result",      ""),
         "poison_target":        player.get("poison_target"),
@@ -576,11 +592,13 @@ async def spy_peek(access_key: str, target_character: str):
     if p.get("spy_used"):      raise HTTPException(status_code=400, detail="Spy ability already used.")
     if p.get("is_dead"):       raise HTTPException(status_code=403, detail="Eliminated players cannot use abilities.")
     t = supabase.table("players").select(
-        "character_name, is_killer, is_accomplice, is_poisoner, is_investigator, is_drunk, is_paranoid, is_fool, is_jester"
+        "character_name, is_killer, is_accomplice, is_poisoner, is_investigator, "
+        "is_drunk, is_paranoid, is_fool, is_jester, is_recluse"
     ).eq("game_id", p["game_id"]).eq("character_name", target_character).execute()
     if not t.data: raise HTTPException(status_code=404, detail="Target not found.")
     td = t.data[0]
     if   td["is_killer"]:              role = "Killer"
+    elif td.get("is_recluse"):         role = "Killer"          # Recluse registers as Killer to Spy
     elif td.get("is_poisoner"):        role = "Poisoner (Accomplice)"
     elif td["is_accomplice"]:          role = "Accomplice"
     elif td.get("is_investigator"):    role = "Investigator"

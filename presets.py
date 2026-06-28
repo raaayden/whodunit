@@ -62,6 +62,9 @@ def spawn_preset_game(request: Request, preset_id: str) -> dict:
             "is_spy":           char.get("is_spy",          False),
             "is_fool":          char.get("is_fool",         False),
             "is_jester":        char.get("is_jester",       False),
+            "is_undertaker":    char.get("is_undertaker",   False),
+            "is_recluse":       char.get("is_recluse",      False),
+            "alibi":            char.get("alibi",           None),
         }).execute().data[0]["id"]
 
         clues = [{
@@ -670,6 +673,189 @@ _register("coastal_protocol", {
                 {"round": 3,
                  "true_content": "The secondary pool temperature override at 22:51 required certified senior researcher credentials. You confirmed this against the certification register this morning. Only one active researcher at this station currently holds that certification.",
                  "poisoned_content": "You noticed the operations coordinator became evasive when you asked about the administrative override procedure — specifically about who can archive badge log entries and under what circumstances that would be legitimate."}
+            ]
+        }
+    ]
+})
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PRESET 6 — The Séance at Blackwood Hall (9 players, Victorian gothic, crisis + alibi cards + undertaker + recluse)
+# ══════════════════════════════════════════════════════════════════════════════
+
+_register("seance_blackwood", {
+    "is_crisis": True,
+    "theme_title": "The Séance at Blackwood Hall",
+    "short_description": "A spiritualist medium is found dead mid-séance in a Victorian manor. Every guest claims they were communing with the dead — which makes every alibi almost impossible to verify.",
+    "master_story": {
+        "background": "• Blackwood Hall has hosted three séances this year, each attended by a rotating cast of aristocrats, skeptics, and desperate relatives of the departed.\n• The medium, Madame Celeste Renard, was known to hold sensitive private communications shared during sessions — letters, confessions, and secrets that powerful people would pay handsomely to suppress.\n• Tonight's séance was arranged by the manor's solicitor, Edmund Voss, who had a specific and urgent reason to want Madame Renard silenced before morning.",
+        "the_murder": "• Madame Celeste Renard was found slumped over the séance table when the gas lamps were relit after the darkened contact session.\n• The physician confirmed she had been poisoned — a compound introduced into her tea cup at some point during the forty minutes of darkness.\n• The table was arranged so that every guest was within reach of her cup. Nobody can account for anyone else's movements in the dark.",
+        "the_solution": "• Edmund Voss introduced the poison into Madame Renard's tea during the moment of 'spiritual contact' — the one interval when all guests had been instructed to close their eyes and hold their neighbours' hands.\n• Clara Nightshade had tampered with the séance candles beforehand to ensure maximum darkness at precisely the right moment. Her role as the medium's assistant gave her advance access to the room.\n• The motive: Madame Renard had obtained a copy of the forged Blackwood inheritance document that Edmund had prepared — she intended to expose him to Lady Sylvia at the conclusion of tonight's séance.",
+        "public_clues": [
+            {"round": 3, "content": "The manor's head footman has recalled something: during the darkened session, he heard the sound of a teacup being replaced on its saucer — once, firmly — from the direction of the medium's seat. The sound came at approximately the midpoint of the contact session. He did not look up. He is certain of the direction."}
+        ]
+    },
+    "characters": [
+        {
+            "name": "Edmund Voss",
+            "public_summary": "The Blackwood estate's solicitor — present at every major family occasion, quiet, meticulous, and trusted with every document the manor has ever produced.",
+            "role_description": "• Personality: Composed and precise — you speak slowly and never answer a question before you have decided exactly what to say\n• Connection: You arranged tonight's séance guest list personally, and you had Madame Renard's private dossier on the Blackwood inheritance in mind from the moment you did\n• Dark Secret: You forged the Blackwood inheritance document eighteen months ago. Madame Renard obtained a copy and told you so in a private note delivered this afternoon. You acted during the darkened contact session — a compound you have carried for three months, waiting for the right evening.",
+            "is_killer": True, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were seated at the head of the table in direct spiritual contact with Madame Renard throughout the darkened session — but you rose once, briefly, claiming to retrieve a dropped glove.",
+            "ghost_clue": "Edmund rose from his seat during the darkened session. He told everyone it was a dropped glove. Look at his coat pocket. The glove was never missing — and the poison vial is not there either, because he was careful. But his seat is closest to mine.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You are aware that Father Crane refused to hold hands with his neighbours during the contact session — his behaviour broke the circle and gave everyone on his side of the table more freedom of movement than the séance protocol should have allowed.",
+                 "poisoned_content": "You noticed Inspector Grey lean forward with his elbow on the table at a moment when the room was particularly dark — a posture that would have placed his hand within easy reach of the medium's cup from across the table."},
+                {"round": 3,
+                 "true_content": "The inheritance document Madame Renard claimed to hold is not in her personal effects here tonight. She sent a copy to her solicitor in London three days ago with instructions to open it if she did not write by Thursday. You have not had time to determine whether anyone else knows this.",
+                 "poisoned_content": "You found a folded note in the hallway near the séance room entrance — it references the east wing and is written in a hand you do not recognise. Tobias Finch was standing near that hallway thirty minutes before the séance began."}
+            ]
+        },
+        {
+            "name": "Clara Nightshade",
+            "public_summary": "Madame Renard's personal assistant and séance coordinator — quietly indispensable, always in the room before anyone else, always the last to leave.",
+            "role_description": "• Personality: Deferential and soft-spoken — you make yourself easy to overlook, which has always been your greatest professional asset\n• Connection: You have assisted Madame Renard for four years and managed every detail of her private affairs, including certain documents she preferred not to keep in her own rooms\n• Dark Secret: Edmund Voss approached you six weeks ago. You modified the séance candles to ensure three specific minutes of near-total darkness at the moment Edmund needed them. You provided the compound. You told yourself you were only handling logistics.\n• Poisoner Ability: Each round you may secretly corrupt one player's evidence on your device.",
+            "is_killer": False, "is_accomplice": True, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": True, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were positioned directly beside Madame Renard throughout, managing the table materials and the candle arrangement — but the candle modification you made ensured no one could see your hands at the critical moment.",
+            "ghost_clue": "Clara modified the candles. She was the only one who handled them before the séance. Ask her why the leftmost candle produced a distinctly different flame quality for three minutes during the contact session. She will have an answer. It will not be true.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You noticed Inspector Grey remove something from his inside coat pocket and replace it quickly at approximately the midpoint of the darkened session. In the brief ambient light from the hall, it appeared to be a folded document rather than a personal effect.",
+                 "poisoned_content": "You observed Father Crane's lips moving silently during the darkened session — not in prayer, but in what appeared to be a counted sequence, as though he were timing something with deliberate precision."},
+                {"round": 3,
+                 "true_content": "The candle modification you made was subtle enough that only someone who understood séance staging would recognise it for what it was. You are now concerned that Mrs. Pembrook, who has observed every séance at this manor, may have noticed the anomaly in the flame quality.",
+                 "poisoned_content": "You found a small piece of torn paper near the séance table after the body was discovered — the handwriting matches what you have seen on Father Crane's personal correspondence during your time managing the household's post."}
+            ]
+        },
+        {
+            "name": "Inspector Aldous Grey",
+            "public_summary": "A Scotland Yard inspector attending tonight's séance unofficially — present at Lady Sylvia's personal invitation, introduced to the group simply as a 'gentleman from London.'",
+            "role_description": "• Personality: Observational and unhurried — you have spent thirty years in rooms where people are lying to you, and you have learned to ask questions that sound like observations\n• Connection: Lady Sylvia wrote to Scotland Yard three weeks ago with concerns about the authenticity of her late husband's estate documents. Tonight was meant to be an informal first meeting with Madame Renard, who had contacted the Yard independently.\n• Dark Secret: You received a private communication from Madame Renard two days ago indicating she had documentary evidence of a serious forgery. You were told not to act until she signalled you. She did not get the chance.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": True, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were seated directly across from Edmund Voss for the entirety of the darkened session and did not leave your chair.",
+            "ghost_clue": "Aldous Grey is not here by coincidence. He received a letter from me two days ago naming the person I intended to expose tonight. That letter is in his inside coat pocket. He has not acted on it because he was waiting for me to speak first.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You observed Edmund Voss rise from his seat during the darkened session. He claimed it was to retrieve a dropped glove. He returned within ninety seconds. His alibi for that ninety seconds is only his own word.",
+                 "poisoned_content": "You observed Father Crane remain conspicuously still during the contact session — arms rigid, posture controlled in a way that suggested deliberate restraint rather than spiritual focus, as though he was waiting for a specific moment to pass."},
+                {"round": 3,
+                 "true_content": "Based on your professional assessment of this evening's physical evidence and the testimony you have gathered, you are confident the answer lies with either Edmund Voss or Clara Nightshade. One of them acted. The other enabled the conditions.",
+                 "poisoned_content": "Your trained eye tells you the manner of the poisoning was premeditated and technically proficient — more consistent with a person who has handled pharmaceutical compounds professionally than with a gentleman of law or a journalist. You are looking at either Father Crane or Dr. Marsh."}
+            ]
+        },
+        {
+            "name": "Mrs. Dorothea Pembrook",
+            "public_summary": "The Blackwood Hall housekeeper — twenty-six years in service, present at every significant event in this manor, and in possession of more institutional knowledge than anyone in this room.",
+            "role_description": "• Personality: Formal and loyal to the house — you express opinions only when asked, but you notice everything and forget nothing\n• Connection: You have attended every séance held at Blackwood Hall and have known Madame Renard professionally for three years\n• Dark Secret: You noticed the candle anomaly during the contact session — the leftmost candle produced a slightly different flame quality for approximately three minutes. You said nothing at the time because you assumed it was a staging effect. You are now no longer assuming anything.\n• Undertaker Ability: After the murder is revealed in Round 2, you will privately learn the true role of the victim.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": True, "is_recluse": False,
+            "alibi": "You were standing at the door to the séance room for the entirety of the evening — you entered the room only when the screaming started.",
+            "ghost_clue": "The candle anomaly was not accidental. Clara Nightshade handled those candles alone for forty minutes before the first guest arrived. I should have stopped her. I saw her at the candles. I thought nothing of it because she was always at the candles.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "From your position at the door, you heard the sound of a teacup being replaced on its saucer during the darkened session — once, firmly, from the direction of the medium's seat. The sound was at approximately the midpoint of the contact session.",
+                 "poisoned_content": "Through the door gap, you observed Tobias Finch shift position twice during the contact session — movements that were larger than the minor fidgeting common to the other guests, each time in the direction of the table's centre."},
+                {"round": 3,
+                 "true_content": "During your three years of professional acquaintance with Madame Renard, you observed her handle only one document with the level of care she gave the sealed envelope she was carrying tonight. She told you its contents pertained to the Blackwood estate. She told you this three days ago.",
+                 "poisoned_content": "You recalled that Father Crane arrived at the manor thirty minutes before any other guest tonight — far earlier than his invitation required — and spent that time alone in the corridor adjacent to the séance room. You assumed he was praying. You are no longer sure."}
+            ]
+        },
+        {
+            "name": "Father Ignatius Crane",
+            "public_summary": "A defrocked priest with an unspecified history in the Church — attending tonight at Tobias Finch's personal invitation, and sitting as far from the medium as the table allowed.",
+            "role_description": "• Personality: Watchful and deliberate — you speak in careful sentences and you never touch anything you have not been invited to touch\n• Connection: You were defrocked seven years ago following a tribunal whose findings were never made public. Tobias Finch has been trying to have those findings reviewed.\n• Dark Secret: You know that your defrocking was based on fabricated testimony arranged by a person who has since died. You are here because Tobias believes Madame Renard had access to the original tribunal records — and you wanted to know what she intended to do with them.\n• Recluse: You are innocent, but something about you sets off every alarm. Detection abilities will misread you as guilty.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": True,
+            "alibi": "You were at the far end of the table, as far from the medium as the seating arrangement permitted — you refused to hold hands with either of your neighbours when the contact session began.",
+            "ghost_clue": "Father Crane did not do this. He refused my hand during the contact session, which made him conspicuous — but his refusal also meant his hands were visible above the table throughout. The person whose hands were not visible is the one you want.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You noticed Edmund Voss speak briefly and quietly to Clara Nightshade before the séance began — a conversation that ended when you approached, which you found unusual since you had no particular relationship with either of them.",
+                 "poisoned_content": "You observed Inspector Grey remove and consult something from his coat pocket twice during the darkened session — a document or card, you could not see the content, but the gesture was purposeful rather than nervous."},
+                {"round": 3,
+                 "true_content": "The tribunal records Tobias believed Madame Renard possessed do not relate to tonight's murder. However, you now believe that whoever organised tonight's séance knew in advance what documents she carried — and arranged the guest list specifically to have access to her.",
+                 "poisoned_content": "Your theological training included study of poisons used in historical ecclesiastical crimes. The compound used on Madame Renard tonight is consistent with a preparation available through professional pharmaceutical suppliers — not through anything you have had access to in the last decade."}
+            ]
+        },
+        {
+            "name": "Lady Sylvia Ashmore",
+            "public_summary": "The owner of Blackwood Hall and the widow of the late Lord Ashmore — hosting tonight's séance in her own home, and increasingly uncertain whether it was a mistake to do so.",
+            "role_description": "• Personality: Imperious in manner but privately frightened — you are accustomed to controlling rooms, and this one has slipped out of your control\n• Connection: You wrote to Scotland Yard three weeks ago about your concerns over the estate inheritance documents — and you invited Inspector Grey tonight without telling him what you suspected\n• Dark Secret: You have been convinced since the séance began that the butler, Mr. Holt, was responsible for your husband's death two years ago. Your gut is never wrong about people. It is wrong about this.\n• Paranoid Instinct: Your gut tells you that Beatrice Holt is guilty of something — and it will never let go of that instinct.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": True, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were seated between the defrocked priest and the journalist, holding both their hands as the séance protocol required — though you noticed the journalist's grip loosened twice during the session.",
+            "ghost_clue": "Lady Sylvia saw something during the darkened session that she has not disclosed because she does not fully understand what she saw. Ask her directly what happened when Edmund rose from his seat. She was watching him. She saw his hands.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You noticed Beatrice Holt's grip on your hand loosen twice during the contact session — not the natural relaxation of someone focused on the séance, but the deliberate release of someone whose attention had moved elsewhere.",
+                 "poisoned_content": "Beatrice Holt was the first person to lean toward Madame Renard after the lamps were lit — before the body had even been confirmed as lifeless — and her first instinct was to reach for the medium's cup rather than to check for a pulse."},
+                {"round": 3,
+                 "true_content": "You watched Edmund Voss rise from his seat during the session. You said nothing at the time because you assumed it was the glove. You are now not sure it was the glove. His hands were at the table level when he returned, not at coat pocket level.",
+                 "poisoned_content": "You recalled that Beatrice Holt spent time alone in the anteroom before the séance — you passed the door and heard paper rustling, which you thought nothing of at the time. Reporters take notes. But she had nothing in her hands when she entered the séance room."}
+            ]
+        },
+        {
+            "name": "Tobias Finch",
+            "public_summary": "The late Lord Ashmore's eccentric nephew — perpetually dishevelled, theatrically enthusiastic about the séance, and seated directly to the left of the medium.",
+            "role_description": "• Personality: Theatrical, self-dramatising, and delighted by the attention a murder investigation places on the person who was sitting closest to the body\n• Connection: You invited Father Crane tonight and spent the weeks before this séance telling anyone who would listen that you expected 'a revelation of some kind'\n• Dark Secret: You are exactly as eccentric as you appear and hold no relevant information whatsoever — but you are seated right next to the body, you made highly public statements about expecting drama, and you are absolutely leaning into this.\n• Jester Goal: Get everyone to vote for YOU. Be suspicious. Be theatrical. Refuse to explain yourself clearly. Make them believe the eccentric nephew with the dramatic predictions is obviously the killer.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": True,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were directly beside Madame Renard on her left side for the entire séance — close enough that everyone in the room will assume the worst, and you find this enormously entertaining.",
+            "ghost_clue": "Tobias did not do this. He was beside me because that was where I placed him — I needed his theatricality to keep the room's attention away from the other side of the table. He has no idea he was being used as a distraction.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You heard Edmund Voss whisper something to Clara before the séance — you were close enough to catch one word: 'timing.' At the time you assumed it was about the séance schedule. You are now reconsidering.",
+                 "poisoned_content": "You noticed Father Crane's lips moving during the contact session in a way that suggested he was counting rather than praying — a measured sequence, very quiet, as though he was waiting for a specific interval to complete."},
+                {"round": 3,
+                 "true_content": "You have become genuinely curious, underneath the theatrics, about the sealed envelope Madame Renard was carrying. You saw her touch it twice this evening — once in the anteroom and once just before the lamps were extinguished. She looked at Edmund when she touched it the second time.",
+                 "poisoned_content": "You noticed Inspector Grey's hand disappear below the table level at one point during the darkened session — a detail that reads differently now than it did then, particularly given that he has not yet fully explained what document he was consulting in the dark."}
+            ]
+        },
+        {
+            "name": "Beatrice Holt",
+            "public_summary": "A journalist from the London Gazette — attending on a press credential arranged by Tobias Finch, who wanted the séance documented for reasons he has not fully articulated.",
+            "role_description": "• Personality: Methodical and professionally sceptical — you have attended three other séances as a reporter and you have never seen anything that convinced you the dead have opinions worth consulting\n• Connection: You are here to observe, document, and write a piece that is probably going to be headlined 'Aristocrats and Charlatans'\n• Dark Secret: You recognised Edmund Voss the moment you arrived — you wrote a profile of him eighteen months ago that touched on estate law irregularities. He does not appear to recognise you. You have been watching him all evening.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were taking notes at the side table and did not approach the séance circle at any point during the contact session.",
+            "ghost_clue": "Beatrice Holt wrote a profile of Edmund Voss eighteen months ago. She noted irregularities in estate transfer records that her editor made her cut for legal reasons. Those notes still exist. They name the Blackwood estate specifically.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "From your position at the side table, you observed Edmund Voss rise from the séance circle during the darkened session. He moved toward the medium's end of the table, not toward the door where he claimed to have dropped the glove. He was gone approximately ninety seconds.",
+                 "poisoned_content": "You noticed Father Crane arrive at the manor thirty minutes before any other guest — you saw him from the entrance drive — and he spent time in the corridor near the séance room before anyone else had entered the building."},
+                {"round": 3,
+                 "true_content": "Your research notes from eighteen months ago include a reference to Edmund Voss overseeing a contested estate transfer that was later withdrawn without explanation. The Blackwood estate is on that list. You have been trying to determine whether tonight's séance was connected to that file since the moment you arrived.",
+                 "poisoned_content": "You observed Clara Nightshade reach into her apron pocket twice during the séance and once more immediately after the lamps were relit — a gesture inconsistent with séance staging duties, which typically require both hands on the table materials at all times."}
+            ]
+        },
+        {
+            "name": "Dr. Leopold Marsh",
+            "public_summary": "A physician and avowed sceptic — attending at Inspector Grey's informal request to provide any medical assessment that might be needed, and visibly uncomfortable about being in this room.",
+            "role_description": "• Personality: Precise, clinical, and entirely unable to suppress his contempt for séance proceedings — you have spent the evening standing near the window and not participating\n• Connection: Inspector Grey is an old acquaintance who wrote to you last week saying only that 'a medical eye may be required at a private gathering'\n• Dark Secret: When you examined Madame Renard's cup after the body was discovered, you noticed a faint residue on the inner rim. You have not said this aloud because you are not certain, and you will not state something as medical fact until you are certain.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were standing near the window for the entire contact session, refusing to participate — you observed the group from a distance.",
+            "ghost_clue": "Dr. Marsh noticed the residue on my cup. He has not said so because he is not certain enough. Tell him he does not need to be certain. Tell him what he observed is enough. The compound leaves a specific faint ring on ceramic. He knows what it is.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "From near the window, you watched Edmund Voss leave the séance circle during the darkened session. The direction of his movement was not toward the entrance where he claimed the glove fell — it was toward the medium's end of the table. You watched him return within ninety seconds.",
+                 "poisoned_content": "You noticed Father Crane's physical posture during the contact session was controlled in a way that suggested deliberate restraint — arms close to the body, breathing measured. In your clinical experience, that degree of self-regulation under social pressure is associated with someone actively suppressing an instinct."},
+                {"round": 3,
+                 "true_content": "After examining Madame Renard, you noticed a faint discolouration on the inner rim of her teacup — consistent with certain alkaloid compounds that are not found in standard tea preparations. You have not stated this aloud because you wanted to examine it more carefully before committing to a professional opinion. You are now prepared to commit.",
+                 "poisoned_content": "You observed Clara Nightshade's hands during the period immediately following the discovery of the body — she was unusually deliberate about keeping them visible and at her sides, which is the opposite of the instinctive behaviour of someone who has just witnessed a death. People who have just seen a death reach out. She kept her hands down."}
             ]
         }
     ]

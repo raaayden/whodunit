@@ -352,6 +352,51 @@
                         <div class="toggle-thumb"></div>
                     </label>
                 </div>
+
+                <div class="role-row">
+                    <div class="role-left">
+                        <span class="role-icon">⚰️</span>
+                        <div>
+                            <div class="role-name">Undertaker</div>
+                            <div class="role-desc">Learns the victim's true role after Round 2</div>
+                        </div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="incUndertaker">
+                        <div class="toggle-track"></div>
+                        <div class="toggle-thumb"></div>
+                    </label>
+                </div>
+
+                <div class="role-row">
+                    <div class="role-left">
+                        <span class="role-icon">🎭</span>
+                        <div>
+                            <div class="role-name">Recluse</div>
+                            <div class="role-desc">Innocent but registers as evil to Spy and Investigator</div>
+                        </div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="incRecluse">
+                        <div class="toggle-track"></div>
+                        <div class="toggle-thumb"></div>
+                    </label>
+                </div>
+
+                <div class="role-row">
+                    <div class="role-left">
+                        <span class="role-icon">📋</span>
+                        <div>
+                            <div class="role-name">Alibi Cards</div>
+                            <div class="role-desc">Every player gets a private alibi — only the killer's is false</div>
+                        </div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="incAlibiCards">
+                        <div class="toggle-track"></div>
+                        <div class="toggle-thumb"></div>
+                    </label>
+                </div>
             </div>
 
             <button class="btn btn-primary" id="generateBtn" onclick="createGame()">Generate Mystery</button>
@@ -423,6 +468,62 @@
                     <span class="tag" style="border-color:rgba(255,92,92,0.4);color:var(--danger);">⚡ Crisis Night</span>
                 </div>
                 <button class="preset-spawn-btn" id="spawnCarriageBtn" onclick="spawnPreset('the_last_carriage', 'spawnCarriageBtn')">▶ Spawn The Last Carriage</button>
+            </div>
+
+            <!-- Preset 4: Dead on Air -->
+            <div class="preset-card">
+                <div class="preset-badge" style="background:rgba(255,92,92,0.1);color:var(--danger);border:1px solid rgba(255,92,92,0.25);">📺 Live Broadcast · 5 Players</div>
+                <div class="preset-title">Dead on Air</div>
+                <div class="preset-desc">The Pinnacle Awards is live before ten million viewers when the executive producer is found dead during the commercial break. Someone in this studio killed him — and the cameras are still rolling. Features Crisis Dilemma with vote suppression penalty and Jester.</div>
+                <div class="preset-roles">
+                    <span class="tag tag-killer">🔪 Killer</span>
+                    <span class="tag tag-accomplice">🤝 Accomplice</span>
+                    <span class="tag tag-special">🔎 Investigator</span>
+                    <span class="tag tag-special">🎭 Jester</span>
+                    <span class="tag">😇 Innocent ×1</span>
+                    <span class="tag" style="border-color:rgba(255,92,92,0.4);color:var(--danger);">⚡ Crisis Night</span>
+                    <span class="tag" style="border-color:rgba(255,92,92,0.4);color:var(--danger);">🗳️ Vote Suppression</span>
+                </div>
+                <button class="preset-spawn-btn" id="spawnDeadOnAirBtn" onclick="spawnPreset('dead_on_air', 'spawnDeadOnAirBtn')">▶ Spawn Dead on Air</button>
+            </div>
+
+            <!-- Preset 5: The Coastal Protocol -->
+            <div class="preset-card">
+                <div class="preset-badge" style="background:rgba(109,184,255,0.1);color:var(--accent2);border:1px solid rgba(109,184,255,0.25);">🌊 Marine Research · 6 Players</div>
+                <div class="preset-title">The Coastal Protocol</div>
+                <div class="preset-desc">A marine research conference ends in disaster when the station director is found drowned in the specimen pool — with no water in his lungs. Features Crisis Dilemma with contaminated broadcast penalty, Poisoner, and Drunk.</div>
+                <div class="preset-roles">
+                    <span class="tag tag-killer">🔪 Killer</span>
+                    <span class="tag tag-accomplice">🤝 Accomplice</span>
+                    <span class="tag tag-special">☠️ Poisoner</span>
+                    <span class="tag tag-special">🔎 Investigator</span>
+                    <span class="tag tag-special">🍺 Drunk</span>
+                    <span class="tag">😇 Innocent ×2</span>
+                    <span class="tag" style="border-color:rgba(255,92,92,0.4);color:var(--danger);">⚡ Crisis Night</span>
+                    <span class="tag" style="border-color:rgba(255,179,71,0.4);color:var(--warn);">📡 Fake Broadcast</span>
+                </div>
+                <button class="preset-spawn-btn" id="spawnCoastalBtn" onclick="spawnPreset('coastal_protocol', 'spawnCoastalBtn')">▶ Spawn The Coastal Protocol</button>
+            </div>
+
+            <!-- Preset 6: The Séance at Blackwood Hall -->
+            <div class="preset-card">
+                <div class="preset-badge" style="background:rgba(157,124,255,0.1);color:var(--accent);border:1px solid rgba(157,124,255,0.25);">🕯️ Victorian Gothic · 9 Players</div>
+                <div class="preset-title">The Séance at Blackwood Hall</div>
+                <div class="preset-desc">A spiritualist medium is found dead mid-séance in a Victorian manor. Every guest claims they were communing with the dead — making alibis almost impossible to verify. Features Crisis Dilemma, Alibi Cards, Undertaker, and Recluse.</div>
+                <div class="preset-roles">
+                    <span class="tag tag-killer">🔪 Killer</span>
+                    <span class="tag tag-accomplice">🤝 Accomplice</span>
+                    <span class="tag tag-special">☠️ Poisoner</span>
+                    <span class="tag tag-special">🔎 Investigator</span>
+                    <span class="tag tag-special">⚰️ Undertaker</span>
+                    <span class="tag tag-special">🎭 Recluse</span>
+                    <span class="tag tag-special">🧠 Paranoid</span>
+                    <span class="tag tag-special">🎭 Jester</span>
+                    <span class="tag">😇 Innocent ×1</span>
+                    <span class="tag" style="border-color:rgba(255,92,92,0.4);color:var(--danger);">⚡ Crisis Night</span>
+                    <span class="tag" style="border-color:rgba(255,179,71,0.4);color:var(--warn);">📋 Alibi Cards</span>
+                </div>
+                <button class="preset-spawn-btn" id="spawnBlackwoodBtn" onclick="spawnPreset('seance_blackwood', 'spawnBlackwoodBtn')">▶ Spawn The Séance at Blackwood Hall</button>
             </div>
         </div>
 
@@ -557,6 +658,9 @@
             include_paranoid:     document.getElementById('incParanoid').checked,
             include_spy:          document.getElementById('incSpy').checked,
             include_fool:         document.getElementById('incFool').checked,
+            include_undertaker:   document.getElementById('incUndertaker').checked,
+            include_recluse:      document.getElementById('incRecluse').checked,
+            include_alibi_cards:  document.getElementById('incAlibiCards').checked,
         });
 
         try {
@@ -612,6 +716,9 @@
             if (t.has_paranoid)     tags.push(`<span class="tag tag-special">🧠 Paranoid</span>`);
             if (t.has_spy)          tags.push(`<span class="tag tag-special">🕵️ Spy</span>`);
             if (t.has_fool)         tags.push(`<span class="tag tag-special">🃏 Fool (10+)</span>`);
+            if (t.has_undertaker)   tags.push(`<span class="tag tag-special">⚰️ Undertaker</span>`);
+            if (t.has_recluse)      tags.push(`<span class="tag tag-special">🎭 Recluse</span>`);
+            if (t.has_alibi_cards)  tags.push(`<span class="tag tag-special">📋 Alibi Cards</span>`);
             tags.push(`<span class="tag">👤 ${t.player_count}p</span>`);
 
             list.innerHTML += `
@@ -816,6 +923,8 @@
             else if (p.is_spy)          pill = `<span class="role-pill rp-investigator">🕵️ Spy</span>`;
             else if (p.is_fool)         pill = `<span class="role-pill rp-killer" style="opacity:0.6;">🃏 Fool</span>`;
             else if (p.is_jester)       pill = `<span class="role-pill" style="background:rgba(157,124,255,0.1);color:#d4a0ff;border:1px solid rgba(157,124,255,0.3);">🎭 Jester</span>`;
+            else if (p.is_undertaker)   pill = `<span class="role-pill rp-investigator">⚰️ Undertaker</span>`;
+            else if (p.is_recluse)      pill = `<span class="role-pill rp-paranoid">🎭 Recluse</span>`;
             else                        pill = `<span class="role-pill rp-innocent">😇 Innocent</span>`;
 
             tbody.innerHTML += `

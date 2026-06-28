@@ -56,6 +56,9 @@ def insert_players_and_clues(game_id: str, characters: list):
             "is_spy":           char.get("is_spy",          False),
             "is_fool":          char.get("is_fool",         False),
             "is_jester":        char.get("is_jester",       False),
+            "is_undertaker":    char.get("is_undertaker",   False),
+            "is_recluse":       char.get("is_recluse",      False),
+            "alibi":            char.get("alibi",           None),
         }).execute().data[0]["id"]
 
         clues = [{
@@ -75,7 +78,9 @@ def insert_players_and_clues(game_id: str, characters: list):
 def build_game_prompt(
     theme: str, player_count: int, accomplice_count: int,
     include_drunk: bool, include_investigator: bool, include_poisoner: bool,
-    include_paranoid: bool, include_spy: bool, include_fool: bool
+    include_paranoid: bool, include_spy: bool, include_fool: bool,
+    include_undertaker: bool = False, include_recluse: bool = False,
+    include_alibi_cards: bool = False,
 ) -> str:
     acc  = f"EXACTLY {accomplice_count} character(s) MUST have 'is_accomplice': true."
     drunk = (
@@ -108,6 +113,23 @@ def build_game_prompt(
         "but set 'is_killer': false and 'is_fool': true. Their clues are normal innocent clues. "
         "Only valid for 10+ player games."
     ) if include_fool and player_count >= 10 else "NO characters may have 'is_fool': true."
+    undertaker = (
+        "EXACTLY ONE innocent character MUST have 'is_undertaker': true. "
+        "In their role_description add: '• Undertaker Ability: After the murder is revealed "
+        "in Round 2, you will privately learn the true role of the victim.'"
+    ) if include_undertaker else "NO characters may have 'is_undertaker': true."
+    recluse = (
+        "EXACTLY ONE innocent character MUST have 'is_recluse': true. "
+        "This character IS innocent — set all evil flags to false. "
+        "In their role_description add: '• Recluse: You are innocent, but something about "
+        "you sets off every alarm. Detection abilities will misread you as guilty.'"
+    ) if include_recluse else "NO characters may have 'is_recluse': true."
+    alibi = (
+        "Every character MUST have an 'alibi' field — one sentence describing where they were "
+        "at the time of the murder. Write as first person ('You were…'). "
+        "Innocent alibis must be true and consistent with the master story. "
+        "The killer's and accomplice alibis must be false and contradict physical evidence."
+    ) if include_alibi_cards else "Do NOT include an 'alibi' field on any character."
 
     return f"""
     Create a highly interactive social deduction murder mystery for {player_count} players. Theme: {theme}.
@@ -126,6 +148,9 @@ def build_game_prompt(
        - {par}
        - {spy}
        - {fool}
+       - {undertaker}
+       - {recluse}
+       - {alibi}
        Every role above marked "EXACTLY ONE" MUST appear assigned to one of the {player_count} characters.
     4. CLUE RULES — read every word carefully:
        a) ALL clues must be written as first-person observations about a THIRD PARTY — never about oneself.
@@ -173,7 +198,9 @@ def build_game_prompt(
                 "is_killer": false, "is_accomplice": false, "is_investigator": false,
                 "is_drunk": false, "is_poisoner": false, "is_paranoid": false,
                 "is_spy": false, "is_fool": false, "is_jester": false,
+                "is_undertaker": false, "is_recluse": false,
                 "ghost_clue": "A revealing clue about the killer or accomplice, only unlocked after this character is murdered.",
+                "alibi": "(include only if alibi cards enabled — else omit this field)",
                 "clues": [
                     {{
                         "round": 2,
@@ -200,6 +227,38 @@ def generate_game_with_ai(prompt: str) -> dict:
         config=types.GenerateContentConfig(response_mime_type="application/json"),
     )
     return json.loads(response.text)
+
+
+# ── Undertaker result (called from release-round after Round 2) ──────────────
+
+def apply_undertaker_result(game_id: str):
+    """Finds who died in Round 2 and tells the undertaker their true role."""
+    undertaker = supabase.table("players").select("id").eq(
+        "game_id", game_id).eq("is_undertaker", True).execute()
+    if not undertaker.data:
+        return
+    dead = supabase.table("players").select(
+        "character_name, is_killer, is_accomplice, is_poisoner, is_investigator, "
+        "is_drunk, is_paranoid, is_spy, is_fool, is_jester, is_recluse, is_undertaker"
+    ).eq("game_id", game_id).eq("death_round", 2).execute()
+    if not dead.data:
+        return
+    v = dead.data[0]
+    if   v["is_killer"]:               role = "Killer"
+    elif v.get("is_poisoner"):         role = "Poisoner (Accomplice)"
+    elif v["is_accomplice"]:           role = "Accomplice"
+    elif v.get("is_investigator"):     role = "Investigator"
+    elif v.get("is_drunk"):            role = "Drunk"
+    elif v.get("is_paranoid"):         role = "Paranoid"
+    elif v.get("is_spy"):              role = "Spy"
+    elif v.get("is_fool"):             role = "Fool (Innocent)"
+    elif v.get("is_jester"):           role = "Jester"
+    elif v.get("is_recluse"):          role = "Recluse (was Innocent)"
+    elif v.get("is_undertaker"):       role = "Undertaker (was Innocent)"
+    else:                              role = "Innocent"
+    supabase.table("players").update({
+        "undertaker_result": f"The victim {v['character_name']} was: {role}"
+    }).eq("id", undertaker.data[0]["id"]).execute()
 
 
 # ── Poison swap (called from release-round) ───────────────────────────────────
@@ -257,6 +316,8 @@ def build_recap(game_id: str) -> str:
     spy         = next((p for p in all_players.data if p.get("is_spy")), None)
     fool        = next((p for p in all_players.data if p.get("is_fool")), None)
     jester      = next((p for p in all_players.data if p.get("is_jester")), None)
+    undertaker  = next((p for p in all_players.data if p.get("is_undertaker")), None)
+    recluse     = next((p for p in all_players.data if p.get("is_recluse")), None)
 
     killer_name   = killer["character_name"] if killer else "Unknown"
     killer_player = killer["claimed_by_user"] if killer else "?"
@@ -276,6 +337,8 @@ def build_recap(game_id: str) -> str:
     paranoid_text   = f"{paranoid['character_name']} was convinced the wrong person was guilty" if paranoid else "no paranoid"
     spy_text        = f"{spy['character_name']} was secretly gathering intelligence" if spy else "no spy"
     fool_text       = f"{fool['character_name']} believed themselves to be the killer but was innocent" if fool else "no fool"
+    undertaker_text = f"{undertaker['character_name']} was the Undertaker and secretly learned the victim's true role" if undertaker else "no undertaker"
+    recluse_text    = f"{recluse['character_name']} was the Recluse — innocent but registered as guilty to all detection" if recluse else "no recluse"
     jester_text     = f"{jester_name} was the Jester and tricked everyone into voting for them!" if jester_won else ("no jester" if not jester_name else f"{jester_name} was the Jester but failed to get voted out")
     outcome_text    = ("The Jester won — everyone voted for the wrong person!" if jester_won
                        else ("The killer was caught" if killer_caught else f"{killer_name} got away with murder"))
@@ -300,6 +363,8 @@ def build_recap(game_id: str) -> str:
     - {spy_text}
     - {fool_text}
     - {jester_text}
+    - {undertaker_text}
+    - {recluse_text}
     - Characters who died: {deaths_text}
     - Outcome: {outcome_text}
     - The true story: {master_story.get("the_solution", "")}
@@ -369,6 +434,11 @@ CRISIS_DILEMMAS = {
         "question": "The station's automated emergency beacon has activated and is transmitting a distress signal to the coast guard. Override and disable it — or allow the signal to continue and let external authorities respond at dawn?",
         "safe":      "Let it run — coast guard arrives in the morning",
         "dangerous": "Override the beacon — handle this internally",
+    },
+    "The Séance at Blackwood Hall": {
+        "question": "The planchette has begun moving on its own — spelling out a name and the words 'east wing'. Do you follow the spirit's instruction and search the east wing, or dismiss it as manipulation and keep the group together?",
+        "safe":      "Stay together — do not let the group be split by a trick",
+        "dangerous": "Search the east wing — follow what the spirit is showing us",
     },
 }
 

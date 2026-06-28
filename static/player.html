@@ -230,6 +230,9 @@
                 <li><strong>🕵️ Spy</strong> — once per game, secretly learn one other player's true role via your device.</li>
                 <li><strong>🃏 Fool</strong> — you think you are the killer but you are not. Play your role sheet as written. You are innocent.</li>
                 <li><strong>🎭 Jester</strong> — you are neither killer nor innocent. Your only goal is to get the majority to vote for YOU. Act suspicious. Be theatrical. Make them think you did it.</li>
+                <li><strong>⚰️ Undertaker</strong> — after Round 2's murder is announced, you privately learn the victim's true role on your device.</li>
+                <li><strong>🎭 Recluse</strong> — you are innocent, but every detection ability reads you as the killer. You will never be told this is happening.</li>
+                <li><strong>📋 Alibi Cards</strong> — every player has a private alibi for the time of the murder. Only the killer's (and accomplices') are false. Share yours or keep it hidden.</li>
             </ul>
 
             <strong style="display:block;margin:14px 0 8px;color:var(--text);">💀 Eliminated?</strong>
@@ -340,6 +343,23 @@
             <div class="card">
                 <div class="card-header">🎭 Your Secret Identity</div>
                 <div class="card-body"><div id="roleDesc" class="role-sheet"></div></div>
+            </div>
+
+            <!-- Alibi card (shown when game has alibi cards) -->
+            <div id="alibiCard" style="display:none;" class="card">
+                <div class="card-header">📋 Your Alibi</div>
+                <div class="card-body">
+                    <p id="alibiText" style="font-size:14px;color:var(--text);line-height:1.7;font-style:italic;"></p>
+                    <p style="font-size:11px;color:var(--muted);margin-top:8px;">Share it, guard it, or use it to trap someone in a lie — but keep your story straight.</p>
+                </div>
+            </div>
+
+            <!-- Undertaker result (appears privately after Round 2) -->
+            <div id="undertakerResult" style="display:none;" class="card">
+                <div class="card-header" style="color:var(--accent2);">⚰️ Undertaker's Report</div>
+                <div class="card-body">
+                    <p id="undertakerText" style="font-size:14px;color:var(--text);"></p>
+                </div>
             </div>
 
             <!-- Killer action panel -->
@@ -533,6 +553,8 @@
                         else if (p.is_spy)          pill = '<span class="role-pill rp-investigator">🕵️ Spy</span>';
                         else if (p.is_fool)         pill = '<span class="role-pill rp-killer" style="opacity:0.6;">🃏 Fool</span>';
                         else if (p.is_jester)       pill = '<span class="role-pill" style="background:rgba(157,124,255,0.1);color:#d4a0ff;border:1px solid rgba(157,124,255,0.3);">🎭 Jester</span>';
+                        else if (p.is_recluse)      pill = '<span class="role-pill rp-paranoid">🎭 Recluse (Innocent)</span>';
+                        else if (p.is_undertaker)   pill = '<span class="role-pill rp-investigator">⚰️ Undertaker</span>';
                         idEl.innerHTML += `
                             <div class="identity-row">
                                 <div><div class="iname">${p.name}</div><div class="iplayer">${p.player||'—'}</div></div>
@@ -607,10 +629,32 @@
                     alerts += `<div class="alert alert-investigator"><div class="alert-title">🕵️ You are the Spy</div>Once per game, use your spy panel to secretly learn another player's true role. Choose wisely — one use only.</div>`;
                 if (data.is_jester)
                     alerts += `<div class="alert" style="border-color:#d4a0ff;background:rgba(157,124,255,0.07);color:#d4a0ff;"><div class="alert-title">🎭 You are the Jester</div>You are not the killer. You are not innocent. Your only goal is to get the majority of players to vote for YOU at the final vote. Act suspicious. Be theatrical. Make them think you're the killer — then watch them destroy themselves.</div>`;
+                if (data.is_undertaker)
+                    alerts += `<div class="alert alert-investigator"><div class="alert-title">⚰️ You are the Undertaker</div>After the murder is revealed in Round 2, you will privately learn the victim's true role on your device. Use it to anchor the group's final deduction.</div>`;
+                if (data.is_recluse)
+                    alerts += `<div class="alert alert-paranoid"><div class="alert-title">🎭 You are the Recluse</div>You are innocent. But something about you sets off every alarm. If anyone uses a detection ability on you, they will see you as guilty. This is not your fault — and you may never find out it happened.</div>`;
                 document.getElementById('alertsContainer').innerHTML = alerts;
 
                 // Role sheet
                 document.getElementById('roleDesc').innerText = data.role_description || '';
+
+                // Alibi card
+                const alibiCard = document.getElementById('alibiCard');
+                if (alibiCard) {
+                    alibiCard.style.display = data.alibi ? 'block' : 'none';
+                    if (data.alibi) document.getElementById('alibiText').innerText = data.alibi;
+                }
+
+                // Undertaker result (private — shown after Round 2 if victim role is known)
+                const undertakerDiv = document.getElementById('undertakerResult');
+                if (undertakerDiv) {
+                    if (data.undertaker_result) {
+                        undertakerDiv.style.display = 'block';
+                        document.getElementById('undertakerText').innerText = data.undertaker_result;
+                    } else {
+                        undertakerDiv.style.display = 'none';
+                    }
+                }
 
                 // Save/restore select values
                 const killSel   = document.getElementById('killTarget');
@@ -737,8 +781,15 @@
                     const crisisResolvedDiv = document.getElementById('crisisResolvedDiv');
                     if (crisisResolvedDiv && data.crisis_resolved) {
                         crisisResolvedDiv.style.display = 'block';
+                        let dangerMsg = '⚡ The dangerous option won — consequences are in effect.';
+                        if (data.theme_title?.includes('Dead on Air'))
+                            dangerMsg = '⚡ The dangerous option won — one player is quarantined and cannot vote in the final accusation.';
+                        else if (data.theme_title?.includes('Coastal'))
+                            dangerMsg = '⚡ The dangerous option won — a contaminated emergency log has been pushed to all devices. Trust nothing.';
+                        else
+                            dangerMsg = '⚡ The dangerous option won — the killer has an extra elimination before Round 3.';
                         crisisResolvedDiv.innerText = data.crisis_dangerous_won
-                            ? '⚡ The dangerous option won — the killer has an extra elimination before Round 3.'
+                            ? dangerMsg
                             : '✅ The safe option was chosen — no extra consequences.';
                     } else if (crisisResolvedDiv) {
                         crisisResolvedDiv.style.display = 'none';
@@ -892,12 +943,32 @@
                 q: "The train is still accelerating. Stop at the next station and wait for authorities — or keep moving to prevent the saboteur from slipping away in the chaos?",
                 safe: "✅ Stop and wait — let the authorities handle it",
                 danger: "⚠️ Keep moving — don't let them escape"
+            },
+            deadonair: {
+                q: "Network security has arrived at the studio entrance. Let them in and hand over the investigation, or lock the doors and finish the live broadcast for the remaining forty minutes?",
+                safe: "✅ Let security in — hand over immediately",
+                danger: "⚠️ Lock them out — finish the broadcast first"
+            },
+            coastal: {
+                q: "The station's automated emergency beacon is transmitting a distress signal to the coast guard. Override and disable it — or let the signal run and allow external authorities to respond at dawn?",
+                safe: "✅ Let it run — coast guard arrives in the morning",
+                danger: "⚠️ Override the beacon — handle this internally"
+            },
+            blackwood: {
+                q: "The planchette has begun moving — spelling out a name and the words 'east wing'. Follow the spirit's instruction and search the east wing, or stay together?",
+                safe: "✅ Stay together — do not split the group",
+                danger: "⚠️ Search the east wing — follow the spirit"
             }
         };
-        // Determine which game by fetching dashboard again (we already have it in data but can use theme_title)
         try {
             const dash = await fetch(`/player/dashboard/${accessKey}`).then(r => r.json());
-            const key  = dash.theme_title?.includes('Nusantara') ? 'nusantara' : dash.theme_title?.includes('Carriage') ? 'carriage' : 'galleon';
+            const t    = dash.theme_title || '';
+            const key  = t.includes('Nusantara') ? 'nusantara'
+                       : t.includes('Carriage')  ? 'carriage'
+                       : t.includes('Dead on Air') ? 'deadonair'
+                       : t.includes('Coastal')    ? 'coastal'
+                       : t.includes('Blackwood')  ? 'blackwood'
+                       : 'galleon';
             const q    = questions[key];
             const qEl  = document.getElementById('crisisQPlayer');
             const sBtn = document.getElementById('crisisSafeBtnP');

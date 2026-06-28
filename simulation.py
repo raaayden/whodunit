@@ -5,9 +5,12 @@ Usage:
     python simulation.py <room_url_or_uuid> [--token=PASSWORD]
 
     # Spawn + simulate a preset:
-    python simulation.py --preset=cursed_galleon   [--token=PASSWORD]
+    python simulation.py --preset=cursed_galleon      [--token=PASSWORD]
     python simulation.py --preset=operation_nusantara [--token=PASSWORD]
-    python simulation.py --preset=the_last_carriage     [--token=PASSWORD]
+    python simulation.py --preset=the_last_carriage   [--token=PASSWORD]
+    python simulation.py --preset=dead_on_air         [--token=PASSWORD]
+    python simulation.py --preset=coastal_protocol    [--token=PASSWORD]
+    python simulation.py --preset=seance_blackwood    [--token=PASSWORD]
 
     # Create new AI game from first template:
     python simulation.py
@@ -71,6 +74,8 @@ def role_badge(p: dict) -> str:
     if p.get("is_spy"):          return "🕵️  SPY         "
     if p.get("is_fool"):         return "🃏 FOOL        "
     if p.get("is_jester"):       return "🎭 JESTER      "
+    if p.get("is_undertaker"):   return "⚰️  UNDERTAKER  "
+    if p.get("is_recluse"):      return "🎭 RECLUSE     "
     return                              "😇 innocent    "
 
 
@@ -115,6 +120,10 @@ def print_player_perspective(bot_name: str, access_key: str):
             print(f"  │  Spy ability: not yet used")
     if d.get("is_jester"):
         print(f"  │  🎭 Goal: trick the majority into voting for me")
+    if d.get("is_undertaker"):
+        print(f"  │  ⚰️  Undertaker: learns victim role after Round 2")
+    if d.get("is_recluse"):
+        print(f"  │  🎭 Recluse: innocent but registers as killer to detection")
 
     # Role sheet
     desc = d.get("role_description", "").strip()
@@ -124,6 +133,18 @@ def print_player_perspective(bot_name: str, access_key: str):
         for line in desc.split("\n"):
             if line.strip():
                 print(f"  │     {line.strip()}")
+
+    # Alibi
+    alibi = d.get("alibi")
+    if alibi:
+        print(f"  │")
+        print(f"  │  📋 Alibi: {alibi}")
+
+    # Undertaker result
+    undertaker_result = d.get("undertaker_result")
+    if undertaker_result:
+        print(f"  │")
+        print(f"  │  ⚰️  Undertaker Report: {undertaker_result}")
 
     # Public clues (Round 3 only)
     public_clues = d.get("active_story", {}).get("public_clues", [])
@@ -253,6 +274,8 @@ def run_simulation(game_id: str | None = None, preset: str | None = None):
         elif p.get("is_spy"):          extras.append("can learn one player's role")
         elif p.get("is_fool"):         extras.append("thinks they're killer — they're not")
         elif p.get("is_jester"):       extras.append("wins if majority votes for them")
+        elif p.get("is_undertaker"):   extras.append("learns victim's role after R2")
+        elif p.get("is_recluse"):      extras.append("innocent but registers as killer to detection")
         suffix = f"  ({extras[0]})" if extras else ""
         print(f"  {role_badge(p)}  {p['character_name']:<32} ← {owner}{suffix}")
 
