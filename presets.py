@@ -109,6 +109,8 @@ _register("cursed_galleon", {
             "role_description": "• Personality: Authoritative, deflects blame onto others, quick to remind people of your rank\n• Connection: Diego was your first mate and the only one who knew about the stolen gold\n• Dark Secret: You have been siphoning treasure to pay Blackthorn the pirate lord — Diego found out",
             "is_killer": True, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were in your cabin reviewing the course charts for the final stretch to port — but the helmsman knows you left your station for over twenty minutes during the height of the storm.",
             "ghost_clue": "The night Diego died, he slipped a note under my cabin door. It read: 'I know what you took from the chest. Meet me at the bow at midnight or I go to the crew.' I burned it at dawn.",
             "clues": [
                 {"round": 2, "true_content": "You heard the surgeon muttering that the wound on Diego's head was consistent with a belaying pin — and you made sure to act surprised.", "poisoned_content": "You saw the cook scrubbing something off the galley floor the morning after the storm."},
@@ -121,6 +123,8 @@ _register("cursed_galleon", {
             "role_description": "• Personality: Calm and calculating, always seem to have an angle, never volunteer information\n• Connection: The captain cut you in on the stolen gold — you have as much to lose as he does\n• Dark Secret: You helped the captain dispose of evidence after the murder",
             "is_killer": False, "is_accomplice": True, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were at the navigation table charting the course all night without interruption — but you left your post for nearly an hour around midnight, and the helmsman saw you go.",
             "ghost_clue": "Scarlett Vane helped the captain throw something overboard before sunrise. I saw her from the crow's nest but said nothing — I was afraid.",
             "clues": [
                 {"round": 2, "true_content": "You helped the captain adjust the ship's log to show Diego was on watch duty during the storm — a lie, but a useful one.", "poisoned_content": "You noticed the gunpowder master acting strangely nervous during the morning headcount."},
@@ -133,6 +137,8 @@ _register("cursed_galleon", {
             "role_description": "• Personality: Gruff, nostalgic, uses humour to deflect — but deeply loyal to the crew\n• Connection: Diego was like a son to you; you taught him everything he knew about the sea\n• Dark Secret: You have been smuggling personal rum rations to sell at port — Diego knew and protected you",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": True,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were in your bunk below decks for the entire storm, as any sensible man would be — you heard nothing unusual, which tells you nothing useful.",
             "ghost_clue": "Old Pete was the last one I trusted. His clue is false — the rum has clouded everything he thinks he saw.",
             "clues": [
                 {"round": 2, "true_content": "You swear you heard the surgeon and the gunpowder master arguing near the hold the night Diego died, but the rum makes everything blurry.", "poisoned_content": "You are certain you saw Mad Meg climbing back from the bow just before the storm peaked, soaking wet and out of breath."},
@@ -145,6 +151,8 @@ _register("cursed_galleon", {
             "role_description": "• Personality: Loud, confrontational, always the first to accuse — and secretly terrified of being accused yourself\n• Connection: Diego caught you stealing powder to sell at port and threatened to report you\n• Dark Secret: You had a powerful motive to silence Diego, but you did not kill him — you just wished you had",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": True, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were at the powder stores from dusk to dawn securing the barrels against the storm — three of the crew can confirm you did not leave that section of the hold.",
             "ghost_clue": "Meg had nothing to do with my death. But she knows something she is not saying about who visited the captain's cabin the night I died.",
             "clues": [
                 {"round": 2, "true_content": "You are absolutely convinced the ship's surgeon did it — the way he examined the body was too calm, too practiced, like he had seen it before.", "poisoned_content": "You are certain the cook is behind it — the man had Diego's blood on his boots the morning after, you are sure of it."},
@@ -157,6 +165,8 @@ _register("cursed_galleon", {
             "role_description": "• Personality: Precise, quiet, answers every question with another question\n• Connection: You treated Diego for a chest wound six months ago and he confided secrets to you\n• Dark Secret: You are actually a spy for the governor, documenting the stolen treasure for a future seizure",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": True, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were in your surgery writing case notes by lantern light throughout the storm — you heard the rain and nothing else until the body was found at dawn.",
             "ghost_clue": "Dr. Crowe examined my body with surgical precision. He noted the angle of the blow — something that only someone trained in anatomy would understand the significance of.",
             "clues": [
                 {"round": 2, "true_content": "During your examination of Diego's body, you noticed a faint smudge of tar on his collar that matches the belaying pin storage rack near the captain's cabin.", "poisoned_content": "You noticed that the navigator's logbook had a page torn out — the entry for the night of the murder is missing."},
@@ -169,6 +179,8 @@ _register("cursed_galleon", {
             "role_description": "• Personality: Warm and chatty on the surface, but quietly collecting information about everyone\n• Connection: Diego used to eat alone with you every evening and shared things about the captain\n• Dark Secret: You are planning to leave the crew at the next port with a small bag of stolen coins — and you need everyone looking elsewhere\n• Jester Goal: Get the crew to vote for YOU. Act suspicious. Drop hints. Make them think you did it.",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": True,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were in the galley all night keeping the fire banked against the storm — the cook's fire never went out, and anyone who came for food will tell you so.",
             "ghost_clue": "Jenny always laughed too easily. But she heard everything that happened near the galley that night — more than she has admitted.",
             "clues": [
                 {"round": 2, "true_content": "You noticed the captain came down to the galley around midnight during the storm — unusual, as he never leaves the helm during bad weather — and helped himself to a cloth and bucket of water.", "poisoned_content": "You saw the surgeon slipping out of Diego's quarters very early in the morning with something tucked under his coat."},
@@ -181,6 +193,8 @@ _register("cursed_galleon", {
             "role_description": "• Personality: Methodical and observant, speaks slowly and chooses words carefully\n• Connection: You respected Diego but always felt he was hiding something about the captain\n• Dark Secret: You saw the navigator leave her post for an hour but stayed quiet because you feared the captain",
             "is_killer": False, "is_accomplice": False, "is_investigator": True, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were at the helm for the entire storm without relief — a fact the captain logged and the ship's wheel bearings can confirm.",
             "ghost_clue": "Finnegan saw two people near the bow that night. He stayed quiet to protect himself. His silence cost me my life.",
             "clues": [
                 {"round": 2, "true_content": "You noticed the navigator was absent from her post for nearly an hour around midnight — you covered for her because you were afraid of what she might do if you told the captain.", "poisoned_content": "You saw the cook carrying something heavy wrapped in canvas towards the stern during the height of the storm."},
@@ -193,6 +207,8 @@ _register("cursed_galleon", {
             "role_description": "• Personality: Nervous and eager to please, talks too much when scared\n• Connection: Diego was your mentor and the only person who made you feel welcome on the ship\n• Dark Secret: You stole a small gold coin from the treasure chest and Diego promised to stay quiet",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were in your hammock in the forecastle the entire night — two other deckhands slept beside you and neither of them stirred.",
             "ghost_clue": "Luca was the last person to see me alive. He was crying. He knew something was wrong that night but did not say anything until it was too late.",
             "clues": [
                 {"round": 2, "true_content": "You saw the captain pacing near the bow very late during the storm — alone, which was strange because the captain always has someone with him in bad weather.", "poisoned_content": "You overheard Mad Meg muttering to herself about making someone pay, right before the storm started."},
@@ -226,6 +242,8 @@ _register("the_last_carriage", {
             "role_description": "• Personality: Composed under pressure — you have been in worse situations and you have always walked away\n• Connection: Victor recognised you from a financial tribunal three years ago and was putting the pieces together\n• Dark Secret: Your briefcase contains proof of a currency manipulation scheme — you cannot let this train reach the border",
             "is_killer": True, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were in your private compartment the entire evening reviewing documents — but your coat was damp when you returned to the dining car, and it had not been raining inside the train.",
             "ghost_clue": "Victor had written a name on a matchbook before he died. The name was Helena Voss. It was in his left breast pocket. Nobody has thought to look there yet.",
             "clues": [
                 {"round": 2, "true_content": "You told the journalist you were in your compartment the entire time, but you noticed Helena's coat was damp when she returned to the dining car — it had not been raining inside the train.", "poisoned_content": "You saw the journalist pacing the corridor near the luggage car entrance around the time of the incident, far from where she claimed to be."},
@@ -238,6 +256,8 @@ _register("the_last_carriage", {
             "role_description": "• Personality: Measured and clinical — you speak in facts and deflect emotion with technical language\n• Connection: Helena approached you before boarding with a proposition you should have refused\n• Dark Secret: You provided a sedative compound to Helena and told yourself it was just to keep Victor calm — you knew it was not\n• Poisoner Ability: Each round you may secretly corrupt one player's evidence on your device.",
             "is_killer": False, "is_accomplice": True, "is_investigator": False, "is_drunk": False,
             "is_poisoner": True, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were in the dining car the entire time, in full view of the steward — except for a brief absence around 02:00 that you described as retrieving your medical bag.",
             "ghost_clue": "The doctor was the last person to bring Victor a drink. Victor accepted it because he trusted him. Doctors are good at being trusted.",
             "clues": [
                 {"round": 2, "true_content": "You fabricated a timeline that places you in the dining car throughout the incident, but the steward remembers you leaving briefly just before the tunnel — you told him you needed your medical bag.", "poisoned_content": "You observed the diplomat making two separate trips to the rear of the train before the tunnel, which is unusual given she claimed to have been asleep."},
@@ -250,6 +270,8 @@ _register("the_last_carriage", {
             "role_description": "• Personality: Unhurried and deliberate — you have spent thirty years reading rooms and you are very good at it\n• Connection: You knew Victor professionally and trusted him; his death has made you genuinely furious\n• Dark Secret: You are carrying undisclosed diplomatic correspondence that you do not want inspected",
             "is_killer": False, "is_accomplice": False, "is_investigator": True, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were in your private compartment with the door latched from 01:30 until the brake alarm sounded — the steward can confirm he did not see you in the corridor during that window.",
             "ghost_clue": "Yeva saw everything. She just does not yet know the significance of what she saw. Give her time.",
             "clues": [
                 {"round": 2, "true_content": "You observed Helena and Dr. Sorel exchange a brief, deliberate look when the brake failure was announced — not panic, not surprise. Recognition.", "poisoned_content": "You noticed the journalist's hands were shaking badly when the alarm sounded — far more than simple fear would explain."},
@@ -262,6 +284,8 @@ _register("the_last_carriage", {
             "role_description": "• Personality: Restless and direct — you ask the question everyone else is avoiding\n• Connection: You were originally on this train to follow a story about border trade irregularities\n• Dark Secret: You have Victor's personal notebook, which you found in the corridor before the body was discovered — you kept it because it referenced your source",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": True, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were moving between the dining car and the forward corridor taking notes — visible to at least three people, though none of them can confirm your exact location at 02:11.",
             "ghost_clue": "Mira is looking in the wrong direction but for the right reasons. The notebook she is hiding has a name in it that matters — just not the name she thinks.",
             "clues": [
                 {"round": 2, "true_content": "You are certain the ambassador arranged this — everything about her calm is performative and the diplomatic bag she guards so carefully is the key to all of it.", "poisoned_content": "You are equally convinced the steward is involved — the way he avoided the rear carriage after the alarm is exactly what someone does when they already know what is back there."},
@@ -274,6 +298,8 @@ _register("the_last_carriage", {
             "role_description": "• Personality: Formal on the surface, quietly observant underneath — you see everything that happens in your carriage\n• Connection: Victor was your counterpart on this route; you have worked together for six years\n• Dark Secret: You took a bribe last month to leave a passenger's luggage uninspected — you are terrified this murder will expose it",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were making your regular rounds through the forward carriages from 01:30 to 02:20 — your punch-card log shows each compartment check in sequence and places you nowhere near the luggage car.",
             "ghost_clue": "Ferris noticed the pharmaceutical kit was moved between 01:45 and 02:00. He thought nothing of it at the time. Doctors move their kits. Except the doctor had not asked for it.",
             "clues": [
                 {"round": 2, "true_content": "You noticed Dr. Sorel's pharmaceutical kit was in a different position on the luggage rack after the tunnel than it was when you last checked the carriage at 01:45.", "poisoned_content": "You observed the journalist enter the rear luggage area at 02:08 — six minutes before the estimated time of death — without a plausible reason to be there."},
@@ -286,6 +312,8 @@ _register("the_last_carriage", {
             "role_description": "• Personality: Anxious and talkative — you fill silence with observation and you have noticed more than you realise\n• Connection: You sat across from Victor at dinner and he seemed distracted, checking his watch repeatedly\n• Dark Secret: You smuggled a minor antique across two checkpoints — it is not serious, but you are behaving as if it is",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were in your compartment with the door locked, unable to sleep because of the mountain curves — you did not open your door until you heard the brake alarm.",
             "ghost_clue": "Pascal heard raised voices from the luggage car at 02:09. He told himself it was the train noise. He was wrong and he knows it.",
             "clues": [
                 {"round": 2, "true_content": "You heard a brief raised voice from the direction of the luggage car at approximately 02:09 — you assumed it was the train noise but the tone was wrong for mechanical sound.", "poisoned_content": "You saw the steward speaking quietly and urgently to the ambassador near the rear door at 02:05 — they separated quickly when you appeared."},

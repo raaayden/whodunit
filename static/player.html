@@ -734,7 +734,7 @@
                 const extraKillPanel = document.getElementById('extraKillPanel');
                 if (extraKillPanel) {
                     extraKillPanel.style.display =
-                        (data.is_killer && !data.is_dead && data.has_extra_kill && data.crisis_resolved) ? 'block' : 'none';
+                        (data.is_killer && !data.is_dead && data.has_extra_kill && data.crisis_resolved && data.current_round < 3) ? 'block' : 'none';
                     if (data.extra_kill_target)
                         document.getElementById('extraKillConfirm').innerText =
                             `⚡ Locked: ${data.extra_kill_target} — will be eliminated when Round 3 begins.`;
