@@ -6,14 +6,16 @@ import json
 from fastapi import HTTPException, Request
 
 # Imported from functions.py at runtime via init_preset_clients()
-supabase       = None
-generate_key   = None
+supabase             = None
+generate_key         = None
+assign_bluff_roles   = None
 
 
-def init_preset_clients(_supabase, _generate_key):
-    global supabase, generate_key
-    supabase     = _supabase
-    generate_key = _generate_key
+def init_preset_clients(_supabase, _generate_key, _assign_bluff_roles):
+    global supabase, generate_key, assign_bluff_roles
+    supabase             = _supabase
+    generate_key         = _generate_key
+    assign_bluff_roles   = _assign_bluff_roles
 
 
 # ── Registry ──────────────────────────────────────────────────────────────────
@@ -77,6 +79,8 @@ def spawn_preset_game(request: Request, preset_id: str) -> dict:
             "is_released":      False,
         } for c in char["clues"]]
         supabase.table("clues").insert(clues).execute()
+
+    assign_bluff_roles(game_id, template["characters"])
 
     return {
         "message":   f"Preset '{template['theme_title']}' spawned!",

@@ -209,49 +209,64 @@
             <button class="modal-close" onclick="closeModal('helpModal')">✕</button>
         </div>
         <div class="modal-body">
-            <p style="color:var(--muted);margin-bottom:14px;">3 rounds. Talk in person. Check your phone for clues. Vote for the killer at the end.</p>
+            <p style="color:var(--muted);margin-bottom:14px;">3 rounds. Talk in person. Check your phone for clues each round. Vote for the killer at the end. This is a detective game — find the story that fits all the clues, not just the person who seems suspicious.</p>
 
-            <strong style="display:block;margin-bottom:8px;color:var(--text);">🎯 Win Conditions</strong>
+            <strong style="display:block;margin-bottom:8px;color:var(--text);">🏆 Win Conditions</strong>
             <ul>
-                <li><strong>Innocents win</strong> — majority of living innocents vote for the real killer.</li>
-                <li><strong>Killer wins</strong> — killer avoids getting the majority vote.</li>
-                <li><strong>Jester wins</strong> — if the Jester tricks the majority into voting for them, everyone else loses. Neither innocents nor killer win.</li>
+                <li><strong>Innocents win</strong> — majority of living innocents vote for the real killer at the end.</li>
+                <li><strong>Killer wins</strong> — killer avoids getting majority voted.</li>
+                <li><strong>Jester wins</strong> — if the Jester tricks the majority into voting for them, everyone else loses.</li>
             </ul>
 
             <strong style="display:block;margin:14px 0 8px;color:var(--text);">🃏 Roles</strong>
             <ul>
-                <li><strong>😇 Innocent</strong> — share clues, build cases, vote correctly.</li>
-                <li><strong>🔪 Killer</strong> — blend in, secretly queue one elimination per round. You do not know your accomplice.</li>
-                <li><strong>🤝 Accomplice</strong> — you know the killer. Protect them and spread disinformation.</li>
-                <li><strong>☠️ Poisoner</strong> — an accomplice variant. Pick one player each round on your device — their next clue is silently corrupted. They never know.</li>
-                <li><strong>🔎 Investigator</strong> — your Round 3 clue names exactly two suspects. One is the killer.</li>
-                <li><strong>🍺 Drunk</strong> — you believe you are innocent. All your clues are false. You have no way of knowing.</li>
-                <li><strong>🧠 Paranoid</strong> — your gut tells you a specific person is the killer. It is pointing at an innocent. Trust it anyway.</li>
-                <li><strong>🕵️ Spy</strong> — once per game, secretly learn one other player's true role via your device.</li>
-                <li><strong>🃏 Fool</strong> — you think you are the killer but you are not. Play your role sheet as written. You are innocent.</li>
-                <li><strong>🎭 Jester</strong> — you are neither killer nor innocent. Your only goal is to get the majority to vote for YOU. Act suspicious. Be theatrical. Make them think you did it.</li>
-                <li><strong>⚰️ Undertaker</strong> — after Round 2's murder is announced, you privately learn the victim's true role on your device.</li>
+                <li><strong>😇 Innocent</strong> — receive genuine clues. Share them, misrepresent them, or stay silent.</li>
+                <li><strong>🔪 Killer</strong> — secretly queue one elimination per round. You have a prepared cover story. You do not know your accomplice.</li>
+                <li><strong>🤝 Accomplice</strong> — you know the killer. Protect them. You also have a prepared cover story.</li>
+                <li><strong>☠️ Poisoner</strong> — an accomplice who secretly corrupts one player's clues each round on their device. The victim never knows.</li>
+                <li><strong>🔎 Investigator</strong> — your Round 3 clue names exactly two suspects. One is the killer. Use it carefully.</li>
+                <li><strong>🍺 Drunk</strong> — you believe you're innocent. All your clues are false. You have no way of knowing.</li>
+                <li><strong>🧠 Paranoid</strong> — your gut tells you a specific person is the killer. Your gut is pointing at an innocent.</li>
+                <li><strong>🕵️ Spy</strong> — once per game, secretly learn one other player's true role on your device.</li>
+                <li><strong>🃏 Fool</strong> — you think you're the killer but you're not. Play your role sheet exactly as written.</li>
+                <li><strong>🎭 Jester</strong> — you are neither killer nor innocent. Get the majority to vote for YOU. Act suspicious on purpose.</li>
+                <li><strong>⚰️ Undertaker</strong> — after the Round 2 murder is revealed, you privately learn the victim's true role.</li>
                 <li><strong>🎭 Recluse</strong> — you are innocent, but every detection ability reads you as the killer. You will never be told this is happening.</li>
-                <li><strong>📋 Alibi Cards</strong> — every player has a private alibi for the time of the murder. Only the killer's (and accomplices') are false. Share yours or keep it hidden.</li>
+                <li><strong>📋 Alibi Cards</strong> — every player has a private alibi for the time of the murder. Only the killer's is false.</li>
             </ul>
 
-            <strong style="display:block;margin:14px 0 8px;color:var(--text);">💀 Eliminated?</strong>
+            <strong style="display:block;margin:14px 0 8px;color:var(--text);">🎭 The Bluff Register</strong>
+            <ul>
+                <li>The killer and their accomplices are given a <strong>prepared cover role</strong> on their device — a fake innocent role they may claim in conversation.</li>
+                <li>The killer has thought about what this role would have seen. Their story will be consistent. Do not assume someone is innocent because they sound convincing.</li>
+                <li>If two people claim the same role, one is lying. This is a clue.</li>
+            </ul>
+
+            <strong style="display:block;margin:14px 0 8px;color:var(--text);">🕵️ Playing Like a Detective</strong>
+            <ul>
+                <li><strong>You never have to reveal your real role.</strong> Claiming to be "just a guest" when you're the Investigator is legal and sometimes the right move.</li>
+                <li><strong>Clues form a web.</strong> Multiple players will have seen the same events from different angles. Find the version of events where all the clues fit simultaneously — that is the coherent narrative.</li>
+                <li><strong>Contradictions are evidence.</strong> If two players describe the same event differently, one of them is lying. Figure out which version is consistent with everything else you know.</li>
+                <li><strong>Role claims are not proof.</strong> Anyone can claim any role. What matters is whether their claimed knowledge is consistent with what that role should actually know.</li>
+            </ul>
+
+            <strong style="display:block;margin:14px 0 8px;color:var(--text);">💀 Eliminated Players</strong>
             <ul>
                 <li>You can still talk in person — use that.</li>
-                <li>You lose your final vote (unless ghost vote applies).</li>
-                <li>Send one ghost clue to a living player's device.</li>
+                <li>You lose your final vote.</li>
+                <li>Send one ghost clue to a living player's device from beyond the grave.</li>
             </ul>
 
             <strong style="display:block;margin:14px 0 8px;color:var(--text);">⚖️ Exile Vote (Round 2)</strong>
             <ul>
-                <li>Living players can nominate someone for exile — a public removal before the final round.</li>
-                <li>If the majority agree, that player is exiled. Exiling an innocent helps the killer.</li>
+                <li>Nominate someone for public removal before the final round. Majority agreement exiles them.</li>
+                <li>Exiling an innocent helps the killer.</li>
             </ul>
 
             <strong style="display:block;margin:14px 0 8px;color:var(--text);">⚡ Crisis Dilemma (special games)</strong>
             <ul>
-                <li>At Round 2, everyone votes on a critical decision.</li>
-                <li>If the dangerous option wins, the killer gets an extra elimination before Round 3.</li>
+                <li>At Round 2, everyone votes on a critical decision. Majority wins.</li>
+                <li>If the dangerous option wins, consequences apply immediately — check your device.</li>
             </ul>
         </div>
     </div>
@@ -359,6 +374,16 @@
                 <div class="card-header" style="color:var(--accent2);">⚰️ Undertaker's Report</div>
                 <div class="card-body">
                     <p id="undertakerText" style="font-size:14px;color:var(--text);"></p>
+                </div>
+            </div>
+
+            <!-- Bluff Register (shown only to killer and accomplices) -->
+            <div id="bluffRegisterCard" style="display:none;" class="card">
+                <div class="card-header" style="color:var(--accent);">🎭 Your Cover Story</div>
+                <div class="card-body">
+                    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">If asked your role in conversation, you may claim to be:</p>
+                    <div id="bluffRoleDisplay" style="font-size:20px;font-weight:700;color:var(--text);text-align:center;padding:14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border2);margin-bottom:10px;"></div>
+                    <p style="font-size:12px;color:var(--muted);line-height:1.6;">This is your prepared lie. You know what this role is supposed to know. Make your story consistent — and remember, the real holder of this role (if there is one) may also be claiming it.</p>
                 </div>
             </div>
 
@@ -560,10 +585,13 @@
                         else if (p.is_jester)       pill = '<span class="role-pill" style="background:rgba(157,124,255,0.1);color:#d4a0ff;border:1px solid rgba(157,124,255,0.3);">🎭 Jester</span>';
                         else if (p.is_recluse)      pill = '<span class="role-pill rp-paranoid">🎭 Recluse (Innocent)</span>';
                         else if (p.is_undertaker)   pill = '<span class="role-pill rp-investigator">⚰️ Undertaker</span>';
+                        const bluffNote = (p.is_killer || p.is_accomplice) && p.bluff_role
+                            ? `<span style="font-size:11px;color:var(--muted);margin-left:6px;">claimed: ${p.bluff_role}</span>`
+                            : '';
                         idEl.innerHTML += `
                             <div class="identity-row">
                                 <div><div class="iname">${p.name}</div><div class="iplayer">${p.player||'—'}</div></div>
-                                <div>${pill}</div>
+                                <div style="display:flex;align-items:center;gap:4px;">${pill}${bluffNote}</div>
                             </div>`;
                     });
                     return;
@@ -658,6 +686,18 @@
                         document.getElementById('undertakerText').innerText = data.undertaker_result;
                     } else {
                         undertakerDiv.style.display = 'none';
+                    }
+                }
+
+                // Bluff register (killer and accomplices only, while alive)
+                const bluffCard = document.getElementById('bluffRegisterCard');
+                if (bluffCard) {
+                    const isEvil = data.is_killer || data.is_accomplice || data.is_poisoner;
+                    if (isEvil && data.bluff_role && !data.is_dead) {
+                        bluffCard.style.display = 'block';
+                        document.getElementById('bluffRoleDisplay').innerText = data.bluff_role;
+                    } else {
+                        bluffCard.style.display = 'none';
                     }
                 }
 

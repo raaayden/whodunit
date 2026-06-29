@@ -72,6 +72,35 @@ def insert_players_and_clues(game_id: str, characters: list):
         } for c in char["clues"]]
         supabase.table("clues").insert(clues).execute()
 
+    # Assign bluff roles after all players are in DB (queries by game_id)
+    assign_bluff_roles(game_id, characters)
+
+
+def assign_bluff_roles(game_id: str, characters: list):
+    """Assign the killer and accomplices a fake innocent role to claim in conversation."""
+    assigned_roles = set()
+    for char in characters:
+        if char.get("is_investigator"): assigned_roles.add("Investigator")
+        if char.get("is_drunk"):        assigned_roles.add("Drunk")
+        if char.get("is_paranoid"):     assigned_roles.add("Paranoid")
+        if char.get("is_spy"):          assigned_roles.add("Spy")
+        if char.get("is_undertaker"):   assigned_roles.add("Undertaker")
+        if char.get("is_recluse"):      assigned_roles.add("Recluse")
+
+    # Weight toward "Innocent" — most killers should claim a plain innocent role
+    bluff_pool = ["Innocent", "Innocent", "Innocent"]
+    all_special = ["Investigator", "Drunk", "Paranoid", "Spy", "Undertaker"]
+    # Roles not in this game: safer bluff (no one can contradict by also claiming it)
+    bluff_pool += [r for r in all_special if r not in assigned_roles]
+    # Roles that are in the game: riskier but possible
+    bluff_pool += list(assigned_roles)
+
+    killers     = supabase.table("players").select("id").eq("game_id", game_id).eq("is_killer",     True).execute()
+    accomplices = supabase.table("players").select("id").eq("game_id", game_id).eq("is_accomplice", True).execute()
+
+    for p in killers.data + accomplices.data:
+        supabase.table("players").update({"bluff_role": random.choice(bluff_pool)}).eq("id", p["id"]).execute()
+
 
 # ── Prompt builder ────────────────────────────────────────────────────────────
 
@@ -152,16 +181,31 @@ def build_game_prompt(
        - {recluse}
        - {alibi}
        Every role above marked "EXACTLY ONE" MUST appear assigned to one of the {player_count} characters.
-    4. CLUE RULES — read every word carefully:
-       a) ALL clues must be written as first-person observations about a THIRD PARTY — never about oneself.
-       b) INNOCENT clues (true_content): subtle and indirect. Do NOT name the killer directly.
-          Describe suspicious behaviour, overheard conversation, or a physical detail.
-          Round 2 clues = something seen or heard. Round 3 clues = something physical found.
-       c) INNOCENT clues (poisoned_content): equally indirect, equally plausible, but pointing at a DIFFERENT innocent.
-       d) KILLER and ACCOMPLICE clues: convincing false alibis or observations framing an innocent.
-       e) NEVER use the words "killer", "accomplice", "murderer", "guilty", or "evidence" inside a clue.
-       f) POISONER: mark both "is_accomplice": true AND "is_poisoner": true on the SAME character.
+    4. CLUE RULES — clues must form a DETECTIVE'S WEB, not isolated facts:
+       a) SHARED OBSERVABLE EVENTS: Before writing any clues, establish 2-3 key moments in
+          the master story (an argument overheard, a door that opened, an object that moved,
+          a person seen somewhere unexpected). Multiple characters' clues MUST reference the
+          SAME underlying events from different angles.
+          Example: A's clue says they heard a door slam at midnight. B's clue says they saw
+          someone in the corridor at midnight. C's clue says they found mud near that door
+          in the morning. These three clues combined point somewhere — none alone is conclusive.
+       b) NEVER write a clue that names the killer directly or uses the words:
+          killer, accomplice, murderer, guilty, evidence, suspicious, crime.
+       c) INNOCENT clues (true_content): first-person observations about a THIRD PARTY.
+          Must be indirect enough that it requires combination with other clues to be conclusive.
+          Round 2 = something seen or heard. Round 3 = something physical found.
+       d) INNOCENT clues (poisoned_content): the same event described from a false angle,
+          implicating a different innocent. Indistinguishable in tone from the true version.
+       e) KILLER and ACCOMPLICE clues: a confident, specific, false account of the same
+          shared events — placing themselves elsewhere, or implicating an innocent in
+          the movements they actually made.
+       f) CROSS-REFERENCING REWARD: At least two pairs of characters must have clues that,
+          when compared, reveal a contradiction if one is lying. The detective work is finding
+          which version is consistent with everything else.
+       g) POISONER: mark both "is_accomplice": true AND "is_poisoner": true on the SAME character.
     5. PUBLIC CLUE: Only ONE public clue at Round 3 (the final round only). No Round 2 public clue.
+       It should resolve one of the shared observable events from Rule 4a — confirming or
+       contradicting what players have been claiming. It is the final piece that makes the web coherent.
     6. GHOST CLUE RULES — every character must have a meaningful ghost_clue:
        a) Ghost clues are revealed ONLY after that character is eliminated — treat them as a final confession or dying revelation.
        b) INNOCENT characters: their ghost_clue MUST name a specific suspicious act directly involving the killer or an accomplice
@@ -169,6 +213,12 @@ def build_game_prompt(
        c) KILLER and ACCOMPLICE characters: their ghost_clue MUST frame a specific INNOCENT player with a believable but false accusation.
        d) NEVER write ghost clues like "trust no one", "look closer", or other content-free warnings.
           Every ghost clue must name a specific character and a specific observable act.
+
+    7. BLUFF REGISTER — the app assigns the specific role automatically; do NOT include it in JSON:
+       Every killer and accomplice role_description MUST contain this exact line:
+       "• Cover Story: If asked your role in conversation, you may claim to be an innocent role.
+       Prepare a believable story about what that role's clue supposedly told you."
+       This gives them strategic guidance. The app will separately assign the specific role to claim.
 
     BEFORE RETURNING verify:
     [ ] characters array has exactly {player_count} objects
@@ -200,7 +250,7 @@ def build_game_prompt(
                 "is_spy": false, "is_fool": false, "is_jester": false,
                 "is_undertaker": false, "is_recluse": false,
                 "ghost_clue": "A revealing clue about the killer or accomplice, only unlocked after this character is murdered.",
-                "alibi": "(include only if alibi cards enabled — else omit this field)",
+                '{"alibi": "You were [specific true or false location]." }' if include_alibi_cards else "",
                 "clues": [
                     {{
                         "round": 2,

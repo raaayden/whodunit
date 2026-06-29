@@ -23,7 +23,7 @@ gemini_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 supabase: Client = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
 
 fn.init_clients(supabase, gemini_client)
-ps.init_preset_clients(supabase, fn.generate_key)
+ps.init_preset_clients(supabase, fn.generate_key, fn.assign_bluff_roles)
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -345,7 +345,7 @@ async def get_player_dashboard(access_key: str):
         "id, character_name, public_summary, claimed_by_user, is_dead, death_round, "
         "is_killer, is_accomplice, is_investigator, is_drunk, is_poisoner, is_paranoid, "
         "is_spy, is_fool, is_jester, is_undertaker, is_recluse, "
-        "voted_for, poison_target, spy_used, spy_result, is_exiled"
+        "voted_for, poison_target, spy_used, spy_result, is_exiled, bluff_role"
     ).eq("game_id", game_id).execute()
 
     received_ghost_clues = supabase.table("players").select(
@@ -403,6 +403,7 @@ async def get_player_dashboard(access_key: str):
             "is_recluse":      p.get("is_recluse",      False),
             "is_dead":         p.get("is_dead",         False),
             "is_exiled":       p.get("is_exiled",       False),
+            "bluff_role":      p.get("bluff_role",      None),
         } for p in all_players.data]
         reveal_data = {
             "master_story":    master_story,
@@ -443,6 +444,7 @@ async def get_player_dashboard(access_key: str):
         "is_recluse":           player.get("is_recluse",      False),
         "undertaker_result":    player.get("undertaker_result", None),
         "alibi":                player.get("alibi",           None),
+        "bluff_role":           player.get("bluff_role",      None),
         "spy_used":             player.get("spy_used",        False),
         "spy_result":           player.get("spy_result",      ""),
         "poison_target":        player.get("poison_target"),

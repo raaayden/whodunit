@@ -124,6 +124,9 @@ def print_player_perspective(bot_name: str, access_key: str):
         print(f"  │  ⚰️  Undertaker: learns victim role after Round 2")
     if d.get("is_recluse"):
         print(f"  │  🎭 Recluse: innocent but registers as killer to detection")
+    bluff = d.get("bluff_role")
+    if bluff and (d.get("is_killer") or d.get("is_accomplice") or d.get("is_poisoner")):
+        print(f"  │  🎭 Bluff role  : Claiming to be '{bluff}'")
 
     # Role sheet
     desc = d.get("role_description", "").strip()
@@ -586,7 +589,8 @@ def run_simulation(game_id: str | None = None, preset: str | None = None):
                 if ident.get("is_exiled"):  extras.append("EXILED")
                 if ident.get("is_dead"):    extras.append("dead")
                 suffix = f"  [{', '.join(extras)}]" if extras else ""
-                print(f"   {badge}  {ident['name']:<32} ← {ident.get('player','—')}{suffix}")
+                bluff_note = f"  (claimed: {ident['bluff_role']})" if ident.get("bluff_role") and (ident.get("is_killer") or ident.get("is_accomplice")) else ""
+                print(f"   {badge}  {ident['name']:<32} ← {ident.get('player','—')}{suffix}{bluff_note}")
 
             # Votes
             print("\n🗳️  Final Votes:")
