@@ -250,7 +250,7 @@ def build_game_prompt(
                 "is_spy": false, "is_fool": false, "is_jester": false,
                 "is_undertaker": false, "is_recluse": false,
                 "ghost_clue": "A revealing clue about the killer or accomplice, only unlocked after this character is murdered.",
-                '{"alibi": "You were [specific true or false location]." }' if include_alibi_cards else "",
+                {'"alibi": "You were [specific true or false location].",' if include_alibi_cards else ""}
                 "clues": [
                     {{
                         "round": 2,
