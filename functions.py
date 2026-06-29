@@ -3,11 +3,14 @@ functions.py — All business logic for Whodunit.
 Imported by main.py. No FastAPI routes here.
 """
 import json
+import logging
 import random
 import string
 from fastapi import HTTPException, Header
 from google import genai
 from google.genai import types
+
+log = logging.getLogger(__name__)
 import os
 
 # ── Shared clients (initialised in main.py, passed in where needed) ───────────
@@ -111,7 +114,11 @@ def build_game_prompt(
     include_undertaker: bool = False, include_recluse: bool = False,
     include_alibi_cards: bool = False,
 ) -> str:
-    acc  = f"EXACTLY {accomplice_count} character(s) MUST have 'is_accomplice': true."
+    acc  = (
+        f"EXACTLY {accomplice_count} character(s) MUST have 'is_accomplice': true. "
+        f"There must be {accomplice_count} separate character objects each with \"is_accomplice\": true. "
+        f"Count them before returning — if you see fewer than {accomplice_count}, you have made an error."
+    )
     drunk = (
         "EXACTLY ONE innocent character MUST have 'is_drunk': true. "
         "ALL of their clues (both true_content and poisoned_content) must be completely FALSE."
@@ -122,9 +129,10 @@ def build_game_prompt(
         "'Either [Killer Name] or [Innocent Name] is guilty.' Delivered at the final round."
     ) if include_investigator else "NO characters may have 'is_investigator': true."
     poi = (
-        f"One of the {accomplice_count} accomplice character(s) MUST have both 'is_accomplice': true AND "
-        "'is_poisoner': true simultaneously on the SAME character object. "
-        "This is not a new character — it is an existing accomplice who also has the poisoner role. "
+        f"ONE of those {accomplice_count} accomplice characters must ADDITIONALLY have 'is_poisoner': true. "
+        f"This does NOT reduce the accomplice count — you still need EXACTLY {accomplice_count} characters with 'is_accomplice': true. "
+        "The Poisoner is an accomplice with an extra ability, not a separate character type. "
+        "Set both flags on the SAME character object: \"is_accomplice\": true AND \"is_poisoner\": true. "
         "In their role_description add: '• Poisoner Ability: Each round you may secretly corrupt one player\\'s evidence on your device.'"
     ) if include_poisoner and accomplice_count > 0 else "NO characters may have 'is_poisoner': true."
     par = (
@@ -223,6 +231,7 @@ def build_game_prompt(
     BEFORE RETURNING verify:
     [ ] characters array has exactly {player_count} objects
     [ ] Exactly 1 has "is_killer": true
+    [ ] Exactly {accomplice_count} have "is_accomplice": true (poisoner does NOT reduce this count)
     [ ] Every role marked "EXACTLY ONE" above is assigned
     [ ] is_poisoner and is_accomplice are both true on the SAME character object
     [ ] No clue text contains: killer, accomplice, murderer, guilty, evidence
@@ -271,12 +280,23 @@ def build_game_prompt(
 
 def generate_game_with_ai(prompt: str) -> dict:
     """Call Gemini and return parsed game data."""
-    response = gemini.models.generate_content(
-        model=GEMINI_MODEL,
-        contents=prompt,
-        config=types.GenerateContentConfig(response_mime_type="application/json"),
-    )
-    return json.loads(response.text)
+    log.info("[AI FORGE] Sending prompt to Gemini | model=%s | prompt_len=%d", GEMINI_MODEL, len(prompt))
+    try:
+        response = gemini.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=prompt,
+            config=types.GenerateContentConfig(response_mime_type="application/json"),
+        )
+        data = json.loads(response.text)
+        char_count = len(data.get("characters", []))
+        log.info("[AI FORGE] OK | title=%r | characters=%d", data.get("theme_title"), char_count)
+        return data
+    except json.JSONDecodeError as e:
+        log.error("[AI FORGE] FAILED | error=JSONDecodeError: %s | raw_preview=%r", e, (response.text or "")[:200])
+        raise
+    except Exception as e:
+        log.error("[AI FORGE] FAILED | error=%s: %s", type(e).__name__, e)
+        raise
 
 
 # ── Undertaker result (called from release-round after Round 2) ──────────────
@@ -319,6 +339,7 @@ def apply_poison_swap(game_id: str, round_num: int):
         "game_id", game_id).eq("is_poisoner", True).execute()
 
     if not poisoner_res.data or not poisoner_res.data[0].get("poison_target"):
+        log.info("[POISON] No target set | game=%s | round=%d", game_id, round_num)
         return
 
     target_name = poisoner_res.data[0]["poison_target"]
@@ -335,6 +356,11 @@ def apply_poison_swap(game_id: str, round_num: int):
                 "content":     clue_res.data[0]["poisoned_content"],
                 "is_poisoned": True,
             }).eq("id", clue_res.data[0]["id"]).execute()
+            log.info("[POISON] Swapped clue for %r at R%d | game=%s", target_name, round_num, game_id)
+        else:
+            log.warning("[POISON] No poisoned_content found for %r at R%d | game=%s", target_name, round_num, game_id)
+    else:
+        log.warning("[POISON] Target %r not found in game=%s", target_name, game_id)
 
     # Reset — poisoner must re-select each round
     supabase.table("players").update({"poison_target": None}).eq(
@@ -352,7 +378,8 @@ def build_recap(game_id: str) -> str:
 
     game_row    = game_res.data[0]
     if game_row.get("is_preset"):
-        return ""   # Preset games have hardcoded stories — no AI recap needed
+        log.info("[RECAP] Skipped — preset game | game=%s", game_id)
+        return ""
 
     theme_title = game_row.get("theme_title", "the manor")
     try:    master_story = json.loads(game_row["master_story"])
@@ -420,10 +447,13 @@ def build_recap(game_id: str) -> str:
     - The true story: {master_story.get("the_solution", "")}
     """
 
+    log.info("[RECAP] Generating | game=%s | killer=%r | outcome=%s", game_id, killer_name, outcome_text)
     try:
         resp = gemini.models.generate_content(model=GEMINI_MODEL, contents=prompt)
+        log.info("[RECAP] OK | game=%s | length=%d chars", game_id, len(resp.text))
         return resp.text.strip()
-    except Exception:
+    except Exception as e:
+        log.error("[RECAP] FAILED | game=%s | error=%s: %s", game_id, type(e).__name__, e)
         return (
             f"The night of secrets finally came to an end at {theme_title}. "
             f"{killer_name} had woven an intricate web of lies — and "
