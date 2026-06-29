@@ -458,7 +458,7 @@
 <!-- Refresh bar -->
 <div class="refresh-bar">
     <div class="sync-dot"></div>
-    <span id="syncCountdown" style="font-size:12px; color:var(--muted); flex:1;">Auto-sync in 180s</span>
+    <span id="syncCountdown" style="font-size:12px; color:var(--muted); flex:1;">Auto-sync in 30s</span>
     <button class="refresh-btn" onclick="fetchData()">↻ Sync now</button>
 </div>
 
@@ -478,6 +478,11 @@
             .then(data => {
                 document.getElementById('loadingScreen').style.display = 'none';
                 document.getElementById('content').style.display = 'block';
+
+                // Seed ping baseline so first ping 30s from now doesn't spuriously re-fetch
+                lastRound  = data.current_round;
+                lastStatus = data.game_status;
+                lastIsDead = data.is_dead;
 
                 // Story modal
                 if (data.active_story) {
@@ -1032,16 +1037,41 @@
         fetchData();
     }
 
+    // ── Ping state baseline (seeded after first full fetch) ─────────────────
+    let lastRound   = null;
+    let lastStatus  = null;
+    let lastIsDead  = null;
+    let pingInterval = null;
+
+    async function pingAndSync() {
+        try {
+            const res  = await fetch(`/player/ping/${accessKey}`);
+            if (!res.ok) return;
+            const ping = await res.json();
+            const changed = ping.round   !== lastRound
+                         || ping.status  !== lastStatus
+                         || ping.is_dead !== lastIsDead;
+            if (changed) {
+                lastRound  = ping.round;
+                lastStatus = ping.status;
+                lastIsDead = ping.is_dead;
+                fetchData();
+            }
+            if (ping.status === 'finished') clearInterval(pingInterval);
+        } catch (e) {}
+        countdown = PING_MS / 1000;
+    }
+
     // ── Boot ────────────────────────────────────────────────────────────────
     fetchData();
-    const SYNC_MS = 3 * 60 * 1000; // 3 minutes
-    let countdown = SYNC_MS / 1000;
-    setInterval(fetchData, SYNC_MS);
+    const PING_MS = 30 * 1000;
+    let countdown = PING_MS / 1000;
+    pingInterval = setInterval(pingAndSync, PING_MS);
     setInterval(() => {
         countdown = Math.max(0, countdown - 1);
         const el = document.getElementById('syncCountdown');
         if (el) el.innerText = countdown > 0 ? `Auto-sync in ${countdown}s` : 'Syncing…';
-        if (countdown === 0) countdown = SYNC_MS / 1000;
+        if (countdown === 0) countdown = PING_MS / 1000;
     }, 1000);
 </script>
 </body>

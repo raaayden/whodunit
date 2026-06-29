@@ -272,6 +272,22 @@ async def resolve_crisis(game_id: str):
                 "dangerous_won": True, "tally": tally}
 
 
+# ── Player: Ping (lightweight state check) ───────────────────────────────────
+
+@app.get("/player/ping/{access_key}")
+async def player_ping(access_key: str):
+    from fastapi import HTTPException
+    res = supabase.table("players").select("game_id, is_dead").eq(
+        "access_key", access_key).execute()
+    if not res.data:
+        raise HTTPException(status_code=404, detail="Invalid access key")
+    p    = res.data[0]
+    game = supabase.table("games").select("current_round, status").eq(
+        "id", p["game_id"]).execute()
+    g    = game.data[0]
+    return {"round": g["current_round"], "status": g["status"], "is_dead": p["is_dead"]}
+
+
 # ── Player: Join room ─────────────────────────────────────────────────────────
 
 @app.post("/api/room/{game_id}/join")
