@@ -9,6 +9,7 @@ from fastapi.responses import FileResponse
 from supabase import create_client, Client
 from google import genai
 import json
+import logging
 import os
 from dotenv import load_dotenv
 
@@ -16,6 +17,11 @@ import functions as fn
 import presets   as ps
 
 load_dotenv()
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
 
 # ── Clients ───────────────────────────────────────────────────────────────────
 
@@ -86,15 +92,13 @@ async def create_game(
     include_investigator: bool = False, include_poisoner: bool = False,
     include_paranoid: bool = False, include_spy: bool = False, include_fool: bool = False,
     include_undertaker: bool = False, include_recluse: bool = False,
-    include_alibi_cards: bool = False,
 ):
-    prompt    = fn.build_game_prompt(
+    game_data = fn.generate_game_with_ai_layered(
         theme, player_count, accomplice_count,
         include_drunk, include_investigator, include_poisoner,
         include_paranoid, include_spy, include_fool,
-        include_undertaker, include_recluse, include_alibi_cards,
+        include_undertaker, include_recluse,
     )
-    game_data = fn.generate_game_with_ai(prompt)
 
     supabase.table("game_templates").insert({
         "theme":             theme,
@@ -110,7 +114,6 @@ async def create_game(
         "has_fool":          include_fool,
         "has_undertaker":    include_undertaker,
         "has_recluse":       include_recluse,
-        "has_alibi_cards":   include_alibi_cards,
         "master_story":      game_data["master_story"],
         "characters":        game_data["characters"],
     }).execute()
@@ -148,6 +151,7 @@ async def release_clues(game_id: str, round_num: int):
         fn.apply_poison_swap(game_id, round_num)
         if round_num == 2:
             fn.apply_undertaker_result(game_id)
+            fn.apply_killer_awakening(game_id)
         supabase.table("clues").update({"is_released": True}).eq(
             "game_id", game_id).eq("round_number", round_num).execute()
 
@@ -444,7 +448,11 @@ async def get_player_dashboard(access_key: str):
         "is_recluse":           player.get("is_recluse",      False),
         "undertaker_result":    player.get("undertaker_result", None),
         "alibi":                player.get("alibi",           None),
+        "objective":            player.get("objective",       None),
         "bluff_role":           player.get("bluff_role",      None),
+        "is_amnesia_game":      game_row.get("is_amnesia_game",  False),
+        "is_awakened":          player.get("is_awakened",        False),
+        "memory_fragments":     player.get("memory_fragments",   []) or [],
         "spy_used":             player.get("spy_used",        False),
         "spy_result":           player.get("spy_result",      ""),
         "poison_target":        player.get("poison_target"),
@@ -598,6 +606,35 @@ async def exile_status(game_id: str):
 
 
 # ── Player: Spy ───────────────────────────────────────────────────────────────
+
+@app.post("/player/send-memory/{access_key}")
+async def send_memory_fragment(access_key: str, fragment: str):
+    from fastapi import HTTPException
+    player_res = supabase.table("players").select("game_id, is_accomplice, is_poisoner").eq(
+        "access_key", access_key).execute()
+    if not player_res.data:
+        raise HTTPException(status_code=404, detail="Invalid access key.")
+    p = player_res.data[0]
+    if not p.get("is_accomplice") and not p.get("is_poisoner"):
+        raise HTTPException(status_code=403, detail="Only accomplices can send memory fragments.")
+    game = supabase.table("games").select("current_round, is_amnesia_game").eq(
+        "id", p["game_id"]).execute().data[0]
+    if not game.get("is_amnesia_game"):
+        raise HTTPException(status_code=400, detail="Not an amnesia game.")
+    if game["current_round"] != 1:
+        raise HTTPException(status_code=400, detail="Memory fragments can only be sent during Round 1.")
+    killer = supabase.table("players").select("id, memory_fragments").eq(
+        "game_id", p["game_id"]).eq("is_killer", True).execute()
+    if not killer.data:
+        raise HTTPException(status_code=404, detail="Killer not found.")
+    current = killer.data[0].get("memory_fragments") or []
+    if len(current) >= 3:
+        raise HTTPException(status_code=400, detail="Maximum 3 memory fragments already sent.")
+    updated = current + [fragment]
+    supabase.table("players").update({"memory_fragments": updated}).eq(
+        "id", killer.data[0]["id"]).execute()
+    return {"message": f"Memory fragment delivered. {len(updated)}/3 sent."}
+
 
 @app.post("/player/spy/{access_key}")
 async def spy_peek(access_key: str, target_character: str):

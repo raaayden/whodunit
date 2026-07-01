@@ -383,20 +383,6 @@
                     </label>
                 </div>
 
-                <div class="role-row">
-                    <div class="role-left">
-                        <span class="role-icon">📋</span>
-                        <div>
-                            <div class="role-name">Alibi Cards</div>
-                            <div class="role-desc">Every player gets a private alibi — only the killer's is false</div>
-                        </div>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" id="incAlibiCards">
-                        <div class="toggle-track"></div>
-                        <div class="toggle-thumb"></div>
-                    </label>
-                </div>
             </div>
 
             <button class="btn btn-primary" id="generateBtn" onclick="createGame()">Generate Mystery</button>
@@ -660,7 +646,6 @@
             include_fool:         document.getElementById('incFool').checked,
             include_undertaker:   document.getElementById('incUndertaker').checked,
             include_recluse:      document.getElementById('incRecluse').checked,
-            include_alibi_cards:  document.getElementById('incAlibiCards').checked,
         });
 
         try {
@@ -718,7 +703,6 @@
             if (t.has_fool)         tags.push(`<span class="tag tag-special">🃏 Fool (10+)</span>`);
             if (t.has_undertaker)   tags.push(`<span class="tag tag-special">⚰️ Undertaker</span>`);
             if (t.has_recluse)      tags.push(`<span class="tag tag-special">🎭 Recluse</span>`);
-            if (t.has_alibi_cards)  tags.push(`<span class="tag tag-special">📋 Alibi Cards</span>`);
             tags.push(`<span class="tag">👤 ${t.player_count}p</span>`);
 
             list.innerHTML += `

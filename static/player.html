@@ -250,6 +250,14 @@
                 <li><strong>Role claims are not proof.</strong> Anyone can claim any role. What matters is whether their claimed knowledge is consistent with what that role should actually know.</li>
             </ul>
 
+            <strong style="display:block;margin:14px 0 8px;color:var(--text);">🎯 Private Objectives</strong>
+            <ul>
+                <li>Every player has a secret personal goal shown on their device — separate from finding the killer.</li>
+                <li>Objectives might ask you to protect a specific person, steer suspicion toward someone, or discover what another player knows.</li>
+                <li>Pursuing your objective may make you look suspicious even if you are innocent. This is intentional — it creates misdirection that has nothing to do with the killer.</li>
+                <li>The app never reveals objectives, even at the end. Whether you achieved yours is between you and your conscience.</li>
+            </ul>
+
             <strong style="display:block;margin:14px 0 8px;color:var(--text);">💀 Eliminated Players</strong>
             <ul>
                 <li>You can still talk in person — use that.</li>
@@ -360,12 +368,21 @@
                 <div class="card-body"><div id="roleDesc" class="role-sheet"></div></div>
             </div>
 
-            <!-- Alibi card (shown when game has alibi cards) -->
+            <!-- Alibi card (always shown when alibi is present) -->
             <div id="alibiCard" style="display:none;" class="card">
                 <div class="card-header">📋 Your Alibi</div>
                 <div class="card-body">
                     <p id="alibiText" style="font-size:14px;color:var(--text);line-height:1.7;font-style:italic;"></p>
                     <p style="font-size:11px;color:var(--muted);margin-top:8px;">Share it, guard it, or use it to trap someone in a lie — but keep your story straight.</p>
+                </div>
+            </div>
+
+            <!-- Secondary objective — private goal -->
+            <div id="objectiveCard" style="display:none;" class="card">
+                <div class="card-header">🎯 Your Private Objective</div>
+                <div class="card-body">
+                    <p id="objectiveText" style="font-size:14px;color:var(--text);line-height:1.7;font-weight:500;"></p>
+                    <p style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6;">This goal is yours alone. The app does not track it — you decide if you achieved it. Pursuing it may make you look suspicious. That is the point.</p>
                 </div>
             </div>
 
@@ -384,6 +401,18 @@
                     <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">If asked your role in conversation, you may claim to be:</p>
                     <div id="bluffRoleDisplay" style="font-size:20px;font-weight:700;color:var(--text);text-align:center;padding:14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border2);margin-bottom:10px;"></div>
                     <p style="font-size:12px;color:var(--muted);line-height:1.6;">This is your prepared lie. You know what this role is supposed to know. Make your story consistent — and remember, the real holder of this role (if there is one) may also be claiming it.</p>
+                </div>
+            </div>
+
+            <!-- Amnesia: accomplice plants memory fragments (Round 1 only) -->
+            <div id="memoryFragmentPanel" style="display:none;" class="card">
+                <div class="card-header" style="color:var(--warn);">🌫️ Plant a Memory</div>
+                <div class="card-body">
+                    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">You know what happened. They don't. Send up to 3 memory fragments — real sensory details from the night that will surface in their mind. Be subtle. Do not reveal the act directly.</p>
+                    <input type="text" id="memoryFragInput" placeholder="A sensory memory — smell, sound, texture, emotion…"
+                           style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px;font-family:var(--sans);outline:none;margin-bottom:10px;">
+                    <button class="btn" style="background:rgba(255,179,71,0.12);color:var(--warn);border:1px solid rgba(255,179,71,0.3);" onclick="sendMemoryFragment()">Send memory fragment</button>
+                    <div id="memoryFragConfirm" style="font-size:12px;font-weight:600;color:var(--warn);margin-top:8px;text-align:center;"></div>
                 </div>
             </div>
 
@@ -650,8 +679,15 @@
                 document.getElementById('charName').innerText = data.character_name;
 
                 let alerts = '';
-                if (data.is_killer)
+                if (data.is_killer && data.is_amnesia_game && !data.is_awakened) {
+                    alerts += `<div class="alert" style="border-color:rgba(157,124,255,0.3);background:rgba(157,124,255,0.05);color:var(--accent);"><div class="alert-title">🌫️ Something is wrong</div>You have no memory of last night after 11pm. You feel certain you are innocent. Play normally — and wait.</div>`;
+                    if (data.memory_fragments && data.memory_fragments.length > 0) {
+                        const frags = data.memory_fragments.map(f => `<li>${f}</li>`).join('');
+                        alerts += `<div class="alert" style="border-color:rgba(255,179,71,0.3);background:rgba(255,179,71,0.05);color:var(--warn);"><div class="alert-title">🌫️ A memory surfaces</div><ul style="margin:8px 0 0 16px;font-size:13px;line-height:1.8;">${frags}</ul></div>`;
+                    }
+                } else if (data.is_killer && (data.is_awakened || !data.is_amnesia_game)) {
                     alerts += `<div class="alert alert-killer"><div class="alert-title">⚠️ You are the Killer</div>Deflect suspicion. You do not know who your accomplice is.</div>`;
+                }
                 if (data.is_poisoner)
                     alerts += `<div class="alert alert-accomplice"><div class="alert-title">☠️ You are the Poisoner</div>Corrupt the evidence. Protect the killer.<div class="alert-secret">Killer: <u>${data.known_killer}</u></div></div>`;
                 else if (data.is_accomplice)
@@ -693,12 +729,25 @@
                 const bluffCard = document.getElementById('bluffRegisterCard');
                 if (bluffCard) {
                     const isEvil = data.is_killer || data.is_accomplice || data.is_poisoner;
-                    if (isEvil && data.bluff_role && !data.is_dead) {
-                        bluffCard.style.display = 'block';
-                        document.getElementById('bluffRoleDisplay').innerText = data.bluff_role;
-                    } else {
-                        bluffCard.style.display = 'none';
-                    }
+                    const showBluff = isEvil && data.bluff_role && !data.is_dead &&
+                        (!data.is_amnesia_game || data.is_awakened || !data.is_killer);
+                    bluffCard.style.display = showBluff ? 'block' : 'none';
+                    if (showBluff) document.getElementById('bluffRoleDisplay').innerText = data.bluff_role;
+                }
+
+                // Objective card
+                const objCard = document.getElementById('objectiveCard');
+                if (objCard) {
+                    objCard.style.display = data.objective ? 'block' : 'none';
+                    if (data.objective) document.getElementById('objectiveText').innerText = data.objective;
+                }
+
+                // Amnesia: memory fragment sender (accomplice, Round 1 only)
+                const memPanel = document.getElementById('memoryFragmentPanel');
+                if (memPanel) {
+                    memPanel.style.display = (data.is_amnesia_game &&
+                        (data.is_accomplice || data.is_poisoner) &&
+                        data.current_round === 1 && !data.is_dead) ? 'block' : 'none';
                 }
 
                 // Save/restore select values
@@ -771,9 +820,10 @@
                 if (prevGhost  && ghostSel)  ghostSel.value  = prevGhost;
                 if (prevPoison && poisonSel) poisonSel.value = prevPoison;
 
-                // Killer panel
-                document.getElementById('killerPanel').style.display =
-                    (data.is_killer && !data.is_dead) ? 'block' : 'none';
+                // Killer panel (hidden for amnesia killer until awakened at Round 2)
+                const killerReady = data.is_killer && !data.is_dead &&
+                    (!data.is_amnesia_game || data.is_awakened);
+                document.getElementById('killerPanel').style.display = killerReady ? 'block' : 'none';
 
                 // Extra kill panel (separate crisis bonus — only when dangerous won and crisis resolved)
                 const extraKillPanel = document.getElementById('extraKillPanel');
@@ -932,6 +982,21 @@
     }
 
     // ── Game actions ────────────────────────────────────────────────────────
+    async function sendMemoryFragment() {
+        const fragment = document.getElementById('memoryFragInput').value.trim();
+        if (!fragment) return;
+        const res  = await fetch(`/player/send-memory/${accessKey}?fragment=${encodeURIComponent(fragment)}`, { method: 'POST' });
+        const data = await res.json();
+        const conf = document.getElementById('memoryFragConfirm');
+        if (res.ok) {
+            conf.innerText = `✓ ${data.message}`;
+            document.getElementById('memoryFragInput').value = '';
+        } else {
+            conf.style.color = 'var(--danger)';
+            conf.innerText = data.detail;
+        }
+    }
+
     async function lockExtraKill() {
         const target = document.getElementById('extraKillTarget').value;
         if (!target) return;

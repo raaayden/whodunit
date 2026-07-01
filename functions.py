@@ -13,6 +13,28 @@ from google.genai import types
 log = logging.getLogger(__name__)
 import os
 
+# ── Objective pool ────────────────────────────────────────────────────────────
+# Reference constant — mirrored in build_characters_prompt for Gemini.
+# Objectives create innocent misdirection without changing the win condition.
+OBJECTIVE_POOL = {
+    "deflection": [
+        "Before Round 3, ensure at least one other player has publicly named {target} as a suspect.",
+        "Do not let {target} go an entire round without being questioned by someone at the table.",
+    ],
+    "protection": [
+        "Ensure {target} is not voted for at the final vote.",
+        "By Round 2, convince at least one other player that {target} could not have done this.",
+    ],
+    "information": [
+        "Discover what role {target} claims to be before the final vote.",
+        "Find out what {target}'s alibi is before Round 3.",
+    ],
+    "self_preservation": [
+        "Do not be named as a suspect by more than two players during the entire game.",
+        "Ensure at least one other player publicly accepts your alibi before the final vote.",
+    ],
+}
+
 # ── Shared clients (initialised in main.py, passed in where needed) ───────────
 # These are set by main.py on startup via init_clients()
 supabase = None
@@ -62,6 +84,7 @@ def insert_players_and_clues(game_id: str, characters: list):
             "is_undertaker":    char.get("is_undertaker",   False),
             "is_recluse":       char.get("is_recluse",      False),
             "alibi":            char.get("alibi",           None),
+            "objective":        char.get("objective",       None),
         }).execute().data[0]["id"]
 
         clues = [{
@@ -105,171 +128,243 @@ def assign_bluff_roles(game_id: str, characters: list):
         supabase.table("players").update({"bluff_role": random.choice(bluff_pool)}).eq("id", p["id"]).execute()
 
 
-# ── Prompt builder ────────────────────────────────────────────────────────────
+# ── Layered prompt builders (Call 1 + Call 2) ────────────────────────────────
 
-def build_game_prompt(
-    theme: str, player_count: int, accomplice_count: int,
-    include_drunk: bool, include_investigator: bool, include_poisoner: bool,
-    include_paranoid: bool, include_spy: bool, include_fool: bool,
-    include_undertaker: bool = False, include_recluse: bool = False,
-    include_alibi_cards: bool = False,
+def build_skeleton_prompt(theme: str, player_count: int) -> str:
+    """Call 1 of 2: Generate the story skeleton — timeline, evidence, motive only."""
+    return f"""
+    You are constructing the structural skeleton of a murder mystery.
+    Do NOT write characters or clues yet. Only the underlying truth.
+
+    Theme: {theme}
+    Players: {player_count}
+
+    Answer all five sections and return as JSON.
+
+    SECTION 1 — "timeline"
+    A list of 6-8 events from the evening in chronological order.
+    Written as if a detective is reconstructing the night from physical evidence.
+    Each event: {{"time": "22:15", "location": "specific named place", "event": "what exactly happened"}}
+    The murder must appear at a specific time and place.
+    At least 3 events must involve multiple characters being near each other.
+
+    SECTION 2 — "motive"
+    {{"grievance": "long-standing reason (months or years before tonight)",
+      "trigger": "what happened TONIGHT that made waiting impossible"}}
+
+    SECTION 3 — "physical_evidence"
+    A list of exactly 5 specific objects or locations physically present in the setting.
+    These anchor ALL clues — every clue must reference at least one item from this list.
+    Each item: {{"name": "specific name", "location": "exactly where found",
+                 "significance": "what it proves about the murder"}}
+
+    SECTION 4 — "faction_knowledge"
+    {{"killer_knows": "complete truth the killer knows about their crime",
+      "accomplice_knows": "what the killer told the accomplice — may be slightly incomplete",
+      "innocents_missed": "2-3 things innocents were near but didn't understand at the time"}}
+
+    SECTION 5 — "damning_evidence"
+    The single most conclusive piece of evidence against the killer.
+    {{"what": "describe precisely",
+      "why_missed": "why it was overlooked until Round 3",
+      "recontextualises": "what earlier information this changes the meaning of"}}
+    This becomes the Round 3 public clue.
+
+    NO PLACEHOLDERS. Every field must contain specific, named, real content.
+    Return ONLY valid JSON with keys: timeline, motive, physical_evidence, faction_knowledge, damning_evidence.
+    """
+
+
+def build_characters_prompt(
+    theme: str,
+    player_count: int,
+    accomplice_count: int,
+    skeleton: dict,
+    include_drunk: bool,
+    include_investigator: bool,
+    include_poisoner: bool,
+    include_paranoid: bool,
+    include_spy: bool,
+    include_fool: bool,
+    include_undertaker: bool = False,
+    include_recluse: bool = False,
 ) -> str:
-    acc  = (
+    """Call 2 of 2: Generate characters and clues grounded in the skeleton."""
+    acc        = (
         f"EXACTLY {accomplice_count} character(s) MUST have 'is_accomplice': true. "
-        f"There must be {accomplice_count} separate character objects each with \"is_accomplice\": true. "
-        f"Count them before returning — if you see fewer than {accomplice_count}, you have made an error."
+        f"There must be {accomplice_count} separate character objects each with 'is_accomplice': true. "
+        f"Count them before returning — if fewer than {accomplice_count}, you have made an error."
     )
-    drunk = (
-        "EXACTLY ONE innocent character MUST have 'is_drunk': true. "
-        "ALL of their clues (both true_content and poisoned_content) must be completely FALSE."
-    ) if include_drunk else "NO characters may have 'is_drunk': true."
-    inv = (
-        "EXACTLY ONE innocent character MUST have 'is_investigator': true. "
-        "Their Round 3 true_content MUST name two specific suspects: "
-        "'Either [Killer Name] or [Innocent Name] is guilty.' Delivered at the final round."
-    ) if include_investigator else "NO characters may have 'is_investigator': true."
-    poi = (
-        f"ONE of those {accomplice_count} accomplice characters must ADDITIONALLY have 'is_poisoner': true. "
-        f"This does NOT reduce the accomplice count — you still need EXACTLY {accomplice_count} characters with 'is_accomplice': true. "
-        "The Poisoner is an accomplice with an extra ability, not a separate character type. "
-        "Set both flags on the SAME character object: \"is_accomplice\": true AND \"is_poisoner\": true. "
-        "In their role_description add: '• Poisoner Ability: Each round you may secretly corrupt one player\\'s evidence on your device.'"
-    ) if include_poisoner and accomplice_count > 0 else "NO characters may have 'is_poisoner': true."
-    par = (
-        "EXACTLY ONE innocent character MUST have 'is_paranoid': true. "
-        "ALL their clues must point suspiciously at a specific OTHER innocent player, never the killer. "
-        "In their role_description add: '• Paranoid Instinct: Your gut tells you that [name a specific innocent] is the killer — and it never lies.'"
-    ) if include_paranoid else "NO characters may have 'is_paranoid': true."
-    spy = (
-        "EXACTLY ONE innocent character MUST have 'is_spy': true. "
-        "In their role_description add: '• Spy Ability: Once per game you may secretly learn the true role of one other player. Use it wisely.'"
-    ) if include_spy else "NO characters may have 'is_spy': true."
-    fool = (
-        "EXACTLY ONE innocent character MUST have 'is_fool': true. "
-        "Write their role_description exactly like a killer — believable motive and a plan — "
-        "but set 'is_killer': false and 'is_fool': true. Their clues are normal innocent clues. "
-        "Only valid for 10+ player games."
-    ) if include_fool and player_count >= 10 else "NO characters may have 'is_fool': true."
-    undertaker = (
-        "EXACTLY ONE innocent character MUST have 'is_undertaker': true. "
-        "In their role_description add: '• Undertaker Ability: After the murder is revealed "
-        "in Round 2, you will privately learn the true role of the victim.'"
-    ) if include_undertaker else "NO characters may have 'is_undertaker': true."
-    recluse = (
-        "EXACTLY ONE innocent character MUST have 'is_recluse': true. "
-        "This character IS innocent — set all evil flags to false. "
-        "In their role_description add: '• Recluse: You are innocent, but something about "
-        "you sets off every alarm. Detection abilities will misread you as guilty.'"
-    ) if include_recluse else "NO characters may have 'is_recluse': true."
-    alibi = (
-        "Every character MUST have an 'alibi' field — one sentence describing where they were "
-        "at the time of the murder. Write as first person ('You were…'). "
-        "Innocent alibis must be true and consistent with the master story. "
-        "The killer's and accomplice alibis must be false and contradict physical evidence."
-    ) if include_alibi_cards else "Do NOT include an 'alibi' field on any character."
+    drunk      = ("EXACTLY ONE innocent MUST have 'is_drunk': true. ALL their clues (true and poisoned) must be FALSE."
+                  ) if include_drunk else "NO characters may have 'is_drunk': true."
+    inv        = ("EXACTLY ONE innocent MUST have 'is_investigator': true. Their Round 3 true_content MUST name "
+                  "exactly two suspects: 'Either [Name] or [Name] is responsible.'"
+                  ) if include_investigator else "NO characters may have 'is_investigator': true."
+    poi        = (f"ONE of those {accomplice_count} accomplice characters must ADDITIONALLY have 'is_poisoner': true. "
+                  f"Does NOT reduce the accomplice count — still need EXACTLY {accomplice_count} with 'is_accomplice': true. "
+                  "Add to role_description: '• Poisoner Ability: Each round you may secretly corrupt one player\\'s evidence on your device.'"
+                  ) if include_poisoner and accomplice_count > 0 else "NO characters may have 'is_poisoner': true."
+    par        = ("EXACTLY ONE innocent MUST have 'is_paranoid': true. ALL clues point at a specific OTHER innocent. "
+                  "Add: '• Paranoid Instinct: Your gut tells you that [specific innocent name] is responsible.'"
+                  ) if include_paranoid else "NO characters may have 'is_paranoid': true."
+    spy        = ("EXACTLY ONE innocent MUST have 'is_spy': true. "
+                  "Add: '• Spy Ability: Once per game, secretly learn one other player\\'s true role on your device.'"
+                  ) if include_spy else "NO characters may have 'is_spy': true."
+    fool       = ("EXACTLY ONE innocent MUST have 'is_fool': true. Write role_description like a killer but set "
+                  "is_killer: false, is_fool: true. Normal innocent clues. Only for 10+ player games."
+                  ) if include_fool and player_count >= 10 else "NO characters may have 'is_fool': true."
+    undertaker = ("EXACTLY ONE innocent MUST have 'is_undertaker': true. "
+                  "Add: '• Undertaker Ability: After Round 2 murder is revealed, you privately learn the victim\\'s true role.'"
+                  ) if include_undertaker else "NO characters may have 'is_undertaker': true."
+    recluse    = ("EXACTLY ONE innocent MUST have 'is_recluse': true. All evil flags false. "
+                  "Add: '• Recluse: You are innocent, but detection abilities misread you as guilty. Never told this is happening.'"
+                  ) if include_recluse else "NO characters may have 'is_recluse': true."
+
+    evidence_list = "\n".join(
+        f"  {i+1}. {e['name']} (at {e['location']}) — {e['significance']}"
+        for i, e in enumerate(skeleton.get("physical_evidence", []))
+    )
+    timeline_str = "\n".join(
+        f"  {t['time']} [{t['location']}] {t['event']}"
+        for t in skeleton.get("timeline", [])
+    )
+    damning = skeleton.get("damning_evidence", {}).get("what", "A conclusive piece of physical evidence.")
 
     return f"""
-    Create a highly interactive social deduction murder mystery for {player_count} players. Theme: {theme}.
+    You are writing characters and clues for a murder mystery.
+    The story skeleton below is FIXED — build within it exactly. Do not contradict it.
 
-    --- STRICT RULES ---
-    1. NO PLACEHOLDERS. Fill every detail. Never write "[Name]", "[Killer]", "[Motive]" etc.
-    2. TOTAL CHARACTERS: The "characters" array MUST contain EXACTLY {player_count} objects.
-       Count them before returning. {player_count} characters. Not {player_count + 1}. Not {player_count + 2}. Exactly {player_count}.
-       Special roles are LABELS applied to characters that already exist. They are NOT new characters.
-    3. ROLE COUNTS — every role marked "EXACTLY ONE" is MANDATORY. Skipping one is a failure:
-       - EXACTLY 1 character must have "is_killer": true.
-       - {acc}
-       - {drunk}
-       - {inv}
-       - {poi}
-       - {par}
-       - {spy}
-       - {fool}
-       - {undertaker}
-       - {recluse}
-       - {alibi}
-       Every role above marked "EXACTLY ONE" MUST appear assigned to one of the {player_count} characters.
-    4. CLUE RULES — clues must form a DETECTIVE'S WEB, not isolated facts:
-       a) SHARED OBSERVABLE EVENTS: Before writing any clues, establish 2-3 key moments in
-          the master story (an argument overheard, a door that opened, an object that moved,
-          a person seen somewhere unexpected). Multiple characters' clues MUST reference the
-          SAME underlying events from different angles.
-          Example: A's clue says they heard a door slam at midnight. B's clue says they saw
-          someone in the corridor at midnight. C's clue says they found mud near that door
-          in the morning. These three clues combined point somewhere — none alone is conclusive.
-       b) NEVER write a clue that names the killer directly or uses the words:
-          killer, accomplice, murderer, guilty, evidence, suspicious, crime.
-       c) INNOCENT clues (true_content): first-person observations about a THIRD PARTY.
-          Must be indirect enough that it requires combination with other clues to be conclusive.
-          Round 2 = something seen or heard. Round 3 = something physical found.
-       d) INNOCENT clues (poisoned_content): the same event described from a false angle,
-          implicating a different innocent. Indistinguishable in tone from the true version.
-       e) KILLER and ACCOMPLICE clues: a confident, specific, false account of the same
-          shared events — placing themselves elsewhere, or implicating an innocent in
-          the movements they actually made.
-       f) CROSS-REFERENCING REWARD: At least two pairs of characters must have clues that,
-          when compared, reveal a contradiction if one is lying. The detective work is finding
-          which version is consistent with everything else.
-       g) POISONER: mark both "is_accomplice": true AND "is_poisoner": true on the SAME character.
-    5. PUBLIC CLUE: Only ONE public clue at Round 3 (the final round only). No Round 2 public clue.
-       It should resolve one of the shared observable events from Rule 4a — confirming or
-       contradicting what players have been claiming. It is the final piece that makes the web coherent.
-    6. GHOST CLUE RULES — every character must have a meaningful ghost_clue:
-       a) Ghost clues are revealed ONLY after that character is eliminated — treat them as a final confession or dying revelation.
-       b) INNOCENT characters: their ghost_clue MUST name a specific suspicious act directly involving the killer or an accomplice
-          (use their actual character name). Never vague. Example: "I saw [Killer Name] pocketing the missing key minutes after the body was found."
-       c) KILLER and ACCOMPLICE characters: their ghost_clue MUST frame a specific INNOCENT player with a believable but false accusation.
-       d) NEVER write ghost clues like "trust no one", "look closer", or other content-free warnings.
-          Every ghost clue must name a specific character and a specific observable act.
+    Theme: {theme} | Players: {player_count}
 
-    7. BLUFF REGISTER — the app assigns the specific role automatically; do NOT include it in JSON:
-       Every killer and accomplice role_description MUST contain this exact line:
-       "• Cover Story: If asked your role in conversation, you may claim to be an innocent role.
-       Prepare a believable story about what that role's clue supposedly told you."
-       This gives them strategic guidance. The app will separately assign the specific role to claim.
+    ══ FIXED SKELETON ══════════════════════════════════════════════
 
-    BEFORE RETURNING verify:
+    TIMELINE (what actually happened):
+{timeline_str}
+
+    PHYSICAL EVIDENCE (every clue MUST reference at least one):
+{evidence_list}
+
+    KILLER'S MOTIVE:
+    Grievance: {skeleton.get('motive', {}).get('grievance', '')}
+    Trigger:   {skeleton.get('motive', {}).get('trigger', '')}
+
+    DAMNING EVIDENCE (becomes Round 3 public clue):
+    {damning}
+
+    ══ ROLE ASSIGNMENTS ════════════════════════════════════════════
+
+    TOTAL CHARACTERS: Exactly {player_count}. Count before returning.
+    Special roles are labels on existing characters — NOT extra characters.
+
+    - EXACTLY 1 character: "is_killer": true
+    - {acc}
+    - {drunk}
+    - {inv}
+    - {poi}
+    - {par}
+    - {spy}
+    - {fool}
+    - {undertaker}
+    - {recluse}
+
+    ══ CHARACTER REQUIREMENTS ══════════════════════════════════════
+
+    For each character write:
+
+    1. "name" and "public_summary" (1 sentence, what everyone knows)
+
+    2. "role_description" with EXACTLY these four bullets:
+       • Personality: how to perform this character at the table
+       • Connection: relationship to the victim
+       • Dark Secret: something personal hidden UNRELATED to the murder
+       • Tonight's Agenda: what they personally wanted from being here tonight
+       Killer and accomplice role_description MUST also include:
+       • Cover Story: If asked your role, you may claim to be an innocent role.
+         Prepare a believable story about what that role's clue supposedly told you.
+
+    3. "alibi": ONE sentence, first person ("You were…"), referencing a REAL location
+       and REAL time window from the skeleton timeline.
+       REQUIREMENT: At least two pairs of characters must share the same location or
+       time window — one confirming, one contradicting the other.
+       Killer and accomplice alibis are false and contradict physical evidence.
+
+    4. "objective": ONE private goal. Replace {{target}} with a specific character name.
+       Assign objectives so at least two innocent pairs have conflicting objectives
+       (one protecting someone the other is steering suspicion toward).
+
+       DEFLECTION: "Before Round 3, ensure at least one other player has publicly named {{target}} as a suspect."
+                   "Do not let {{target}} go an entire round without being questioned by someone."
+       PROTECTION: "Ensure {{target}} is not voted for at the final vote."
+                   "By Round 2, convince at least one other player that {{target}} could not have done this."
+       INFORMATION: "Discover what role {{target}} claims to be before the final vote."
+                    "Find out what {{target}}'s alibi is before Round 3."
+       SELF-PRESERVATION: "Do not be named as a suspect by more than two players during the game."
+                          "Ensure at least one other player publicly accepts your alibi before the final vote."
+       Killer objective: "Ensure {{specific innocent}} receives at least one vote at the final count."
+       Accomplice objective: "Before Round 3, make at least one innocent player publicly doubt {{target}}."
+
+    5. "ghost_clue": First person, from beyond death.
+       Must reference a SPECIFIC item from the physical evidence list.
+       Must name a specific character and a specific observable act.
+       NEVER write vague ghost clues like "trust no one" or "look closer."
+       Innocent ghost clues expose something about the killer or accomplice.
+       Killer/accomplice ghost clues frame a specific innocent.
+
+    6. "clues": Round 2 and Round 3.
+       CLUE WEB — before writing, identify 2-3 shared moments from the timeline where
+       multiple characters were near each other or near the same evidence.
+       Write clues as different perspectives on THOSE SAME MOMENTS.
+       Each clue MUST reference at least one item from the physical evidence list.
+       At least two pairs must have directly contradicting clues about the same event.
+       NEVER use: killer, accomplice, murderer, guilty, evidence, suspect
+       NEVER write a clue about the character themselves.
+
+    ══ VERIFICATION BEFORE RETURNING ═══════════════════════════════
+
     [ ] characters array has exactly {player_count} objects
     [ ] Exactly 1 has "is_killer": true
     [ ] Exactly {accomplice_count} have "is_accomplice": true (poisoner does NOT reduce this count)
-    [ ] Every role marked "EXACTLY ONE" above is assigned
-    [ ] is_poisoner and is_accomplice are both true on the SAME character object
-    [ ] No clue text contains: killer, accomplice, murderer, guilty, evidence
-    [ ] No clue is about the character themselves
+    [ ] Every mandatory role is assigned
+    [ ] is_poisoner and is_accomplice both true on SAME character
+    [ ] Every alibi references a real location from the timeline
+    [ ] At least 2 character pairs have alibis referencing the same place/time
+    [ ] Every clue references at least 1 item from the physical evidence list
+    [ ] At least 2 character pairs have directly contradicting clues
+    [ ] At least 2 innocent pairs have conflicting objectives
+    [ ] No clue contains: killer, accomplice, murderer, guilty, evidence
 
-    Return ONLY a JSON object with this exact structure:
+    Return ONLY a JSON object:
     {{
         "theme_title": "A catchy 2-4 word title",
-        "short_description": "A dark atmospheric 2-sentence description of the setting and tension.",
+        "short_description": "A dark atmospheric 2-sentence description.",
         "master_story": {{
-            "background": "• Point 1\\n• Point 2",
-            "the_murder": "• Point 1\\n• Point 2",
-            "the_solution": "• Point 1\\n• Point 2",
-            "public_clues": [
-                {{"round": 3, "content": "A single dramatic public clue revealed to ALL players at Round 3."}}
-            ]
+            "background": "• Point 1\\n• Point 2\\n• Point 3",
+            "the_murder": "• Point 1\\n• Point 2\\n• Point 3",
+            "the_solution": "• Point 1\\n• Point 2\\n• Point 3",
+            "public_clues": [{{"round": 3, "content": "{damning}"}}]
         }},
         "characters": [
             {{
                 "name": "Character Name",
-                "public_summary": "1-sentence summary of what everyone knows about this person.",
-                "role_description": "• Personality: (how to act)\\n• Connection: (to the victim)\\n• Dark Secret: (something they hide)",
+                "public_summary": "1-sentence public summary.",
+                "role_description": "• Personality: ...\\n• Connection: ...\\n• Dark Secret: ...\\n• Tonight's Agenda: ...",
                 "is_killer": false, "is_accomplice": false, "is_investigator": false,
                 "is_drunk": false, "is_poisoner": false, "is_paranoid": false,
                 "is_spy": false, "is_fool": false, "is_jester": false,
                 "is_undertaker": false, "is_recluse": false,
-                "ghost_clue": "A revealing clue about the killer or accomplice, only unlocked after this character is murdered.",
-                {'"alibi": "You were [specific true or false location].",' if include_alibi_cards else ""}
+                "alibi": "You were [location] at [time] — [what you were doing].",
+                "objective": "One private goal with a specific character name filled in for {{target}}.",
+                "ghost_clue": "First person, names a character, references a physical evidence item.",
                 "clues": [
                     {{
                         "round": 2,
-                        "true_content": "You noticed that [specific other character name] [concrete observable action pointing toward killer].",
-                        "poisoned_content": "You noticed that [different innocent name] [false but plausible observable detail]."
+                        "true_content": "You [observed/heard] [character name] [action] near [evidence item] at [time from timeline].",
+                        "poisoned_content": "You [observed/heard] [different innocent name] [false plausible action] near [same location]."
                     }},
                     {{
                         "round": 3,
-                        "true_content": "You found [specific physical evidence] connecting to something suspicious about [another character name].",
-                        "poisoned_content": "You found [fabricated evidence] near [innocent character name]'s belongings."
+                        "true_content": "You found [evidence item] [detail connecting it to a character].",
+                        "poisoned_content": "You found [same/related evidence item] [false detail pointing at an innocent]."
                     }}
                 ]
             }}
@@ -278,25 +373,72 @@ def build_game_prompt(
     """
 
 
-def generate_game_with_ai(prompt: str) -> dict:
-    """Call Gemini and return parsed game data."""
-    log.info("[AI FORGE] Sending prompt to Gemini | model=%s | prompt_len=%d", GEMINI_MODEL, len(prompt))
+def generate_game_with_ai_layered(
+    theme: str,
+    player_count: int,
+    accomplice_count: int,
+    include_drunk: bool,
+    include_investigator: bool,
+    include_poisoner: bool,
+    include_paranoid: bool,
+    include_spy: bool,
+    include_fool: bool,
+    include_undertaker: bool = False,
+    include_recluse: bool = False,
+) -> dict:
+    """
+    Two-call Gemini generation.
+    Call 1: story skeleton (timeline, evidence, motive).
+    Call 2: characters and clues grounded in the skeleton.
+    """
+    # ── Call 1: Skeleton ──────────────────────────────────────────────────────
+    log.info("[AI FORGE] Call 1/2 — skeleton | theme=%r | players=%d", theme, player_count)
+    skeleton_prompt = build_skeleton_prompt(theme, player_count)
+    skel_resp = gemini.models.generate_content(
+        model=GEMINI_MODEL, contents=skeleton_prompt,
+        config=types.GenerateContentConfig(response_mime_type="application/json"),
+    )
     try:
-        response = gemini.models.generate_content(
-            model=GEMINI_MODEL,
-            contents=prompt,
-            config=types.GenerateContentConfig(response_mime_type="application/json"),
-        )
-        data = json.loads(response.text)
-        char_count = len(data.get("characters", []))
-        log.info("[AI FORGE] OK | title=%r | characters=%d", data.get("theme_title"), char_count)
-        return data
+        skeleton = json.loads(skel_resp.text)
     except json.JSONDecodeError as e:
-        log.error("[AI FORGE] FAILED | error=JSONDecodeError: %s | raw_preview=%r", e, (response.text or "")[:200])
+        log.error("[AI FORGE] Skeleton JSON failed | error=%s | preview=%r", e, skel_resp.text[:200])
         raise
-    except Exception as e:
-        log.error("[AI FORGE] FAILED | error=%s: %s", type(e).__name__, e)
+    log.info("[AI FORGE] Skeleton OK | timeline=%d events | evidence=%d items",
+             len(skeleton.get("timeline", [])), len(skeleton.get("physical_evidence", [])))
+
+    # ── Call 2: Characters ────────────────────────────────────────────────────
+    log.info("[AI FORGE] Call 2/2 — characters | player_count=%d", player_count)
+    chars_prompt = build_characters_prompt(
+        theme, player_count, accomplice_count, skeleton,
+        include_drunk, include_investigator, include_poisoner,
+        include_paranoid, include_spy, include_fool,
+        include_undertaker, include_recluse,
+    )
+    chars_resp = gemini.models.generate_content(
+        model=GEMINI_MODEL, contents=chars_prompt,
+        config=types.GenerateContentConfig(response_mime_type="application/json"),
+    )
+    try:
+        game_data = json.loads(chars_resp.text)
+    except json.JSONDecodeError as e:
+        log.error("[AI FORGE] Characters JSON failed | error=%s | preview=%r", e, chars_resp.text[:200])
         raise
+    evil = [c["name"] for c in game_data.get("characters", []) if c.get("is_killer") or c.get("is_accomplice")]
+    log.info("[AI FORGE] OK | title=%r | characters=%d | evil=%s",
+             game_data.get("theme_title"), len(game_data.get("characters", [])), evil)
+    return game_data
+
+
+# ── Killer awakening (amnesia games — called from release_clues at Round 2) ──
+
+def apply_killer_awakening(game_id: str):
+    """For amnesia games: set is_awakened=True on the killer at Round 2."""
+    game = supabase.table("games").select("is_amnesia_game").eq("id", game_id).execute()
+    if not game.data or not game.data[0].get("is_amnesia_game"):
+        return
+    supabase.table("players").update({"is_awakened": True}).eq(
+        "game_id", game_id).eq("is_killer", True).execute()
+    log.info("[AMNESIA] Killer awakened | game=%s", game_id)
 
 
 # ── Undertaker result (called from release-round after Round 2) ──────────────

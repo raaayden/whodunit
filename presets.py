@@ -34,8 +34,9 @@ def spawn_preset_game(request: Request, preset_id: str) -> dict:
     if preset_id not in PRESET_REGISTRY:
         raise HTTPException(status_code=404, detail=f"Preset '{preset_id}' not found.")
 
-    template  = PRESET_REGISTRY[preset_id]
-    is_crisis = template.get("is_crisis", False)
+    template   = PRESET_REGISTRY[preset_id]
+    is_crisis  = template.get("is_crisis",  False)
+    is_amnesia = template.get("is_amnesia", False)
 
     game_insert = supabase.table("games").insert({
         "theme":             template["theme_title"],
@@ -43,6 +44,7 @@ def spawn_preset_game(request: Request, preset_id: str) -> dict:
         "short_description": template["short_description"],
         "master_story":      json.dumps(template["master_story"]),
         "is_crisis_game":    is_crisis,
+        "is_amnesia_game":   is_amnesia,
         "is_preset":         True,
     }).execute()
     game_id = game_insert.data[0]["id"]
@@ -67,6 +69,9 @@ def spawn_preset_game(request: Request, preset_id: str) -> dict:
             "is_undertaker":    char.get("is_undertaker",   False),
             "is_recluse":       char.get("is_recluse",      False),
             "alibi":            char.get("alibi",           None),
+            "objective":        char.get("objective",       None),
+            "is_awakened":      False,
+            "memory_fragments": [],
         }).execute().data[0]["id"]
 
         clues = [{
@@ -115,6 +120,7 @@ _register("cursed_galleon", {
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "is_undertaker": False, "is_recluse": False,
             "alibi": "You were in your cabin reviewing the course charts for the final stretch to port — but the helmsman knows you left your station for over twenty minutes during the height of the storm.",
+            "objective": "Ensure Blind Pete the Bosun receives at least one vote at the final count.",
             "ghost_clue": "The night Diego died, he slipped a note under my cabin door. It read: 'I know what you took from the chest. Meet me at the bow at midnight or I go to the crew.' I burned it at dawn.",
             "clues": [
                 {"round": 2, "true_content": "You heard the surgeon muttering that the wound on Diego's head was consistent with a belaying pin — and you made sure to act surprised.", "poisoned_content": "You saw the cook scrubbing something off the galley floor the morning after the storm."},
@@ -129,6 +135,7 @@ _register("cursed_galleon", {
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "is_undertaker": False, "is_recluse": False,
             "alibi": "You were at the navigation table charting the course all night without interruption — but you left your post for nearly an hour around midnight, and the helmsman saw you go.",
+            "objective": "Before Round 3, make at least one player publicly question Copper Jenny the Cook's alibi.",
             "ghost_clue": "Scarlett Vane helped the captain throw something overboard before sunrise. I saw her from the crow's nest but said nothing — I was afraid.",
             "clues": [
                 {"round": 2, "true_content": "You helped the captain adjust the ship's log to show Diego was on watch duty during the storm — a lie, but a useful one.", "poisoned_content": "You noticed the gunpowder master acting strangely nervous during the morning headcount."},
@@ -143,6 +150,7 @@ _register("cursed_galleon", {
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "is_undertaker": False, "is_recluse": False,
             "alibi": "You were in your bunk below decks for the entire storm, as any sensible man would be — you heard nothing unusual, which tells you nothing useful.",
+            "objective": "Ensure Dr. Silas Crowe is not voted for at the final vote.",
             "ghost_clue": "Old Pete was the last one I trusted. His clue is false — the rum has clouded everything he thinks he saw.",
             "clues": [
                 {"round": 2, "true_content": "You swear you heard the surgeon and the gunpowder master arguing near the hold the night Diego died, but the rum makes everything blurry.", "poisoned_content": "You are certain you saw Mad Meg climbing back from the bow just before the storm peaked, soaking wet and out of breath."},
@@ -157,6 +165,7 @@ _register("cursed_galleon", {
             "is_poisoner": False, "is_paranoid": True, "is_spy": False, "is_fool": False, "is_jester": False,
             "is_undertaker": False, "is_recluse": False,
             "alibi": "You were at the powder stores from dusk to dawn securing the barrels against the storm — three of the crew can confirm you did not leave that section of the hold.",
+            "objective": "Do not let Dr. Silas Crowe go an entire round without being questioned by someone at the table.",
             "ghost_clue": "Meg had nothing to do with my death. But she knows something she is not saying about who visited the captain's cabin the night I died.",
             "clues": [
                 {"round": 2, "true_content": "You are absolutely convinced the ship's surgeon did it — the way he examined the body was too calm, too practiced, like he had seen it before.", "poisoned_content": "You are certain the cook is behind it — the man had Diego's blood on his boots the morning after, you are sure of it."},
@@ -171,6 +180,7 @@ _register("cursed_galleon", {
             "is_poisoner": False, "is_paranoid": False, "is_spy": True, "is_fool": False, "is_jester": False,
             "is_undertaker": False, "is_recluse": False,
             "alibi": "You were in your surgery writing case notes by lantern light throughout the storm — you heard the rain and nothing else until the body was found at dawn.",
+            "objective": "Discover what role Copper Jenny the Cook claims to be before the final vote.",
             "ghost_clue": "Dr. Crowe examined my body with surgical precision. He noted the angle of the blow — something that only someone trained in anatomy would understand the significance of.",
             "clues": [
                 {"round": 2, "true_content": "During your examination of Diego's body, you noticed a faint smudge of tar on his collar that matches the belaying pin storage rack near the captain's cabin.", "poisoned_content": "You noticed that the navigator's logbook had a page torn out — the entry for the night of the murder is missing."},
@@ -185,6 +195,7 @@ _register("cursed_galleon", {
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": True,
             "is_undertaker": False, "is_recluse": False,
             "alibi": "You were in the galley all night keeping the fire banked against the storm — the cook's fire never went out, and anyone who came for food will tell you so.",
+            "objective": "Ensure at least one other player publicly accepts your alibi before the final vote.",
             "ghost_clue": "Jenny always laughed too easily. But she heard everything that happened near the galley that night — more than she has admitted.",
             "clues": [
                 {"round": 2, "true_content": "You noticed the captain came down to the galley around midnight during the storm — unusual, as he never leaves the helm during bad weather — and helped himself to a cloth and bucket of water.", "poisoned_content": "You saw the surgeon slipping out of Diego's quarters very early in the morning with something tucked under his coat."},
@@ -199,6 +210,7 @@ _register("cursed_galleon", {
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "is_undertaker": False, "is_recluse": False,
             "alibi": "You were at the helm for the entire storm without relief — a fact the captain logged and the ship's wheel bearings can confirm.",
+            "objective": "By Round 2, convince at least one other player that Luca Bones the Deckhand could not have done this.",
             "ghost_clue": "Finnegan saw two people near the bow that night. He stayed quiet to protect himself. His silence cost me my life.",
             "clues": [
                 {"round": 2, "true_content": "You noticed the navigator was absent from her post for nearly an hour around midnight — you covered for her because you were afraid of what she might do if you told the captain.", "poisoned_content": "You saw the cook carrying something heavy wrapped in canvas towards the stern during the height of the storm."},
@@ -213,6 +225,7 @@ _register("cursed_galleon", {
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "is_undertaker": False, "is_recluse": False,
             "alibi": "You were in your hammock in the forecastle the entire night — two other deckhands slept beside you and neither of them stirred.",
+            "objective": "Before Round 3, ensure at least one other player has publicly named Mad Meg the Gunpowder Master as a suspect.",
             "ghost_clue": "Luca was the last person to see me alive. He was crying. He knew something was wrong that night but did not say anything until it was too late.",
             "clues": [
                 {"round": 2, "true_content": "You saw the captain pacing near the bow very late during the storm — alone, which was strange because the captain always has someone with him in bad weather.", "poisoned_content": "You overheard Mad Meg muttering to herself about making someone pay, right before the storm started."},
@@ -248,6 +261,7 @@ _register("the_last_carriage", {
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "is_undertaker": False, "is_recluse": False,
             "alibi": "You were in your private compartment the entire evening reviewing documents — but your coat was damp when you returned to the dining car, and it had not been raining inside the train.",
+            "objective": "Ensure Mira Osten receives at least one vote at the final count.",
             "ghost_clue": "Victor had written a name on a matchbook before he died. The name was Helena Voss. It was in his left breast pocket. Nobody has thought to look there yet.",
             "clues": [
                 {"round": 2, "true_content": "You told the journalist you were in your compartment the entire time, but you noticed Helena's coat was damp when she returned to the dining car — it had not been raining inside the train.", "poisoned_content": "You saw the journalist pacing the corridor near the luggage car entrance around the time of the incident, far from where she claimed to be."},
@@ -262,6 +276,7 @@ _register("the_last_carriage", {
             "is_poisoner": True, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "is_undertaker": False, "is_recluse": False,
             "alibi": "You were in the dining car the entire time, in full view of the steward — except for a brief absence around 02:00 that you described as retrieving your medical bag.",
+            "objective": "Before Round 3, make at least one player publicly doubt Ferris Crane's alibi.",
             "ghost_clue": "The doctor was the last person to bring Victor a drink. Victor accepted it because he trusted him. Doctors are good at being trusted.",
             "clues": [
                 {"round": 2, "true_content": "You fabricated a timeline that places you in the dining car throughout the incident, but the steward remembers you leaving briefly just before the tunnel — you told him you needed your medical bag.", "poisoned_content": "You observed the diplomat making two separate trips to the rear of the train before the tunnel, which is unusual given she claimed to have been asleep."},
@@ -276,6 +291,7 @@ _register("the_last_carriage", {
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "is_undertaker": False, "is_recluse": False,
             "alibi": "You were in your private compartment with the door latched from 01:30 until the brake alarm sounded — the steward can confirm he did not see you in the corridor during that window.",
+            "objective": "Ensure Pascal Renaud is not voted for at the final vote.",
             "ghost_clue": "Yeva saw everything. She just does not yet know the significance of what she saw. Give her time.",
             "clues": [
                 {"round": 2, "true_content": "You observed Helena and Dr. Sorel exchange a brief, deliberate look when the brake failure was announced — not panic, not surprise. Recognition.", "poisoned_content": "You noticed the journalist's hands were shaking badly when the alarm sounded — far more than simple fear would explain."},
@@ -290,6 +306,7 @@ _register("the_last_carriage", {
             "is_poisoner": False, "is_paranoid": True, "is_spy": False, "is_fool": False, "is_jester": False,
             "is_undertaker": False, "is_recluse": False,
             "alibi": "You were moving between the dining car and the forward corridor taking notes — visible to at least three people, though none of them can confirm your exact location at 02:11.",
+            "objective": "Do not let Ambassador Yeva Kalinova go an entire round without being questioned by someone at the table.",
             "ghost_clue": "Mira is looking in the wrong direction but for the right reasons. The notebook she is hiding has a name in it that matters — just not the name she thinks.",
             "clues": [
                 {"round": 2, "true_content": "You are certain the ambassador arranged this — everything about her calm is performative and the diplomatic bag she guards so carefully is the key to all of it.", "poisoned_content": "You are equally convinced the steward is involved — the way he avoided the rear carriage after the alarm is exactly what someone does when they already know what is back there."},
@@ -304,6 +321,7 @@ _register("the_last_carriage", {
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "is_undertaker": False, "is_recluse": False,
             "alibi": "You were making your regular rounds through the forward carriages from 01:30 to 02:20 — your punch-card log shows each compartment check in sequence and places you nowhere near the luggage car.",
+            "objective": "Find out what Mira Osten's alibi is before Round 3.",
             "ghost_clue": "Ferris noticed the pharmaceutical kit was moved between 01:45 and 02:00. He thought nothing of it at the time. Doctors move their kits. Except the doctor had not asked for it.",
             "clues": [
                 {"round": 2, "true_content": "You noticed Dr. Sorel's pharmaceutical kit was in a different position on the luggage rack after the tunnel than it was when you last checked the carriage at 01:45.", "poisoned_content": "You observed the journalist enter the rear luggage area at 02:08 — six minutes before the estimated time of death — without a plausible reason to be there."},
@@ -318,6 +336,7 @@ _register("the_last_carriage", {
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "is_undertaker": False, "is_recluse": False,
             "alibi": "You were in your compartment with the door locked, unable to sleep because of the mountain curves — you did not open your door until you heard the brake alarm.",
+            "objective": "Do not be named as a suspect by more than two players during the game.",
             "ghost_clue": "Pascal heard raised voices from the luggage car at 02:09. He told himself it was the train noise. He was wrong and he knows it.",
             "clues": [
                 {"round": 2, "true_content": "You heard a brief raised voice from the direction of the luggage car at approximately 02:09 — you assumed it was the train noise but the tone was wrong for mechanical sound.", "poisoned_content": "You saw the steward speaking quietly and urgently to the ambassador near the rear door at 02:05 — they separated quickly when you appeared."},
@@ -351,6 +370,7 @@ _register("operation_nusantara", {
             "role_description": "• Personality: Controlled and precise — never raise your voice, never show emotion, let others fill the silence\n• Connection: Azman burned three of your operatives by selling their identities — one did not come home\n• Dark Secret: You synthesised the compound yourself using the medical kit and administered it during the coffee service",
             "is_killer": True, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "objective": "Ensure Pak Wirawan Santoso receives at least one vote at the final count.",
             "ghost_clue": "The last person who refilled my cup was the security coordinator. I thought nothing of it at the time. I should have.",
             "clues": [
                 {"round": 2, "true_content": "You told the forensics team the medical kit had not been opened all evening, but the access log tells a different story that you have not yet been asked about.", "poisoned_content": "You noticed the Indonesian delegate Pak Wirawan leave the corridor during the recess and return with a different tie — as if he had changed quickly."},
@@ -363,6 +383,7 @@ _register("operation_nusantara", {
             "role_description": "• Personality: Helpful and deferential in public — you are very good at appearing transparent\n• Connection: Siti mentored you and you owe her your career — when she asked for a favour, you did not ask questions\n• Dark Secret: You deleted seven minutes of corridor footage and planted a forged document in the Indonesian delegation's folder\n• Poisoner Ability: Each round you may secretly corrupt one player's evidence on your device.",
             "is_killer": False, "is_accomplice": True, "is_investigator": False, "is_drunk": False,
             "is_poisoner": True, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "objective": "Before Round 3, make at least one player publicly doubt Agent Nurul Ain Hamzah's alibi.",
             "ghost_clue": "Someone with deep system access erased exactly the footage that would have identified the killer. That level of precision does not come from panic — it was planned.",
             "clues": [
                 {"round": 2, "true_content": "You told the room you were running a network diagnostic during the recess, which explains why you were at the server terminal — but nobody asked you to run a diagnostic.", "poisoned_content": "You noticed Pak Wirawan accessing something on his phone during the closed session, which is a clear security violation ignored by the Indonesian side."},
@@ -375,6 +396,7 @@ _register("operation_nusantara", {
             "role_description": "• Personality: Bureaucratic and thorough — you document everything and trust nothing you cannot verify\n• Connection: You had a private meeting with Azman two hours before his death about a suspected leak in the Malaysian delegation\n• Dark Secret: You agreed to keep that meeting off the official record, which now looks very suspicious",
             "is_killer": False, "is_accomplice": False, "is_investigator": True, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "objective": "Ensure Dr. Ayu Permatasari is not voted for at the final vote.",
             "ghost_clue": "Lim knows more than he has said. He promised me discretion. I hope it was not his discretion that got me killed.",
             "clues": [
                 {"round": 2, "true_content": "You documented in your private notes that Azman mentioned the security coordinator by name during your off-record meeting — he said she had been asking unusual questions about the agent identity files.", "poisoned_content": "Your notes from the pre-summit briefing show that the Indonesian technical advisor requested access to the medical facility twice, which seemed excessive."},
@@ -387,6 +409,7 @@ _register("operation_nusantara", {
             "role_description": "• Personality: Professionally warm but intensely alert — you notice everything and share almost nothing\n• Connection: You suspected Azman was compromised six months ago but lacked the evidence to act\n• Dark Secret: You have been running an unofficial parallel investigation into Azman without authorisation from BID",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": True, "is_fool": False, "is_jester": False,
+            "objective": "Discover what role Agent Khairi Zulkifli claims to be before the final vote.",
             "ghost_clue": "Nurul knew. She had been watching me for months. If she had moved faster, I might still be alive — or I might have had her silenced too.",
             "clues": [
                 {"round": 2, "true_content": "During the recess, you observed the security coordinator approach the coffee service station from an angle that did not match her stated path to the thermostat — the trajectories are inconsistent.", "poisoned_content": "You intercepted a brief encrypted transmission originating from inside the building during the recess — the signal profile matches equipment carried by the Indonesian technical team."},
@@ -399,6 +422,7 @@ _register("operation_nusantara", {
             "role_description": "• Personality: Expansive and diplomatic in public — you create the impression of openness while saying very little of substance\n• Connection: Azman owed you a favour from a joint operation in 2019 that you have never collected on\n• Dark Secret: You came to this summit with a private agenda to acquire the Malaysian agent list, not realising someone else had the same idea with more violent intentions",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": True, "is_jester": False,
+            "objective": "Do not be named as a suspect by more than two players during the game.",
             "ghost_clue": "Wirawan wanted the list but not my death. He is guilty of many things — just not this particular one.",
             "clues": [
                 {"round": 2, "true_content": "You noticed the young Malaysian analyst authenticating to the security system during the recess for far longer than any routine maintenance should require.", "poisoned_content": "You saw the Singapore director leaving the corridor during the recess through the secondary exit, which is supposed to be alarmed."},
@@ -411,6 +435,7 @@ _register("operation_nusantara", {
             "role_description": "• Personality: Academic and detail-oriented, you tend to over-explain things which makes people trust you less than they should\n• Connection: You were asked to inspect the medical kit earlier in the day and noted everything was in order\n• Dark Secret: You failed to log the second inspection properly and your signature was forged on the compliance sheet",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "objective": "Find out what Agent Farid Osman's alibi is before Round 3.",
             "ghost_clue": "The chemical safety officer inspected the kit. But the second access was not hers. Someone knew her schedule and moved during her gap.",
             "clues": [
                 {"round": 2, "true_content": "You noticed the access log entry at 23:47 used a master key rather than your personal credentials — your inspection used your own badge, which means the second entry was someone else entirely.", "poisoned_content": "You observed Pak Wirawan handling a small sealed container during the pre-summit briefing that he quickly put away when others entered the room."},
@@ -423,6 +448,7 @@ _register("operation_nusantara", {
             "role_description": "• Personality: Blunt and impatient with process — you say what you think and expect others to do the same\n• Connection: You worked directly under Azman on a joint operation in 2021 and saw firsthand how he operated\n• Dark Secret: You warned Singapore headquarters three months ago that Azman was compromised — they told you to stand down",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "objective": "Before Round 3, ensure at least one other player has publicly named Dr. Ayu Permatasari as a suspect.",
             "ghost_clue": "Marcus knew I was dirty. He reported it and was silenced. He came to this summit expecting a confrontation — not a funeral.",
             "clues": [
                 {"round": 2, "true_content": "During the coffee break you watched the security coordinator circle the conference table twice before sitting — she was checking who had touched which cup, not socialising.", "poisoned_content": "You watched Agent Nurul step outside the secure perimeter during the recess to use her personal phone, which is a clear protocol breach she has not been asked to explain."},
@@ -435,6 +461,7 @@ _register("operation_nusantara", {
             "role_description": "• Personality: Eager and efficient — you have worked extremely hard to be in this room\n• Connection: You handled Azman's coffee order every morning for six months and knew exactly how he took it\n• Dark Secret: Azman had been pressuring you to pass internal documents to him outside official channels — you refused twice and were terrified of what came next",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "objective": "Ensure Agent Khairi Zulkifli is not voted for at the final vote.",
             "ghost_clue": "Zara brought me my last coffee as always. But she did not pour it herself this time. She handed it to me from the side table without looking me in the eye.",
             "clues": [
                 {"round": 2, "true_content": "You saw Agent Farid at the server terminal during the recess for an unusually long time and when you walked past, he minimised the screen immediately.", "poisoned_content": "You noticed Pak Wirawan pass a folded note to Dr. Ayu under the table during the session — she palmed it so quickly you might have imagined it, but you did not."},
@@ -447,6 +474,7 @@ _register("operation_nusantara", {
             "role_description": "• Personality: Smooth and reassuring — you have spent thirty years making difficult things sound manageable\n• Connection: You sponsored Azman's appointment as director five years ago and have been quietly regretting it ever since\n• Dark Secret: You received a warning two weeks ago that Azman was about to be publicly exposed — you said nothing",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": True,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "objective": "Before Round 3, ensure at least one other player has publicly named Pak Wirawan Santoso as a suspect.",
             "ghost_clue": "Halim knew I was going to be exposed. He chose to do nothing. His silence was not loyalty — it was self-preservation.",
             "clues": [
                 {"round": 2, "true_content": "You are quite certain the Indonesian deputy director was behaving suspiciously during the recess — lingering near the document table and watching the door.", "poisoned_content": "You believe the Singapore colonel is involved — his manner is too controlled, too unsurprised by the death of a man he supposedly respected."},
@@ -459,6 +487,7 @@ _register("operation_nusantara", {
             "role_description": "• Personality: Understated and precise — you observe more than you speak and you have trained yourself to be forgettable\n• Connection: You noticed the security coordinator accessing the medical kit during your routine sweep and logged it in your private notes\n• Dark Secret: You did not report the irregular access because you were testing whether it would be flagged by the Malaysian system",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "objective": "Do not let Agent Zara Putri Nabilah go an entire round without being questioned by someone at the table.",
             "ghost_clue": "The Indonesian agent swept the corridor twice. He saw the security coordinator at the medical kit and said nothing. His silence was professional. It was also fatal — for me.",
             "clues": [
                 {"round": 2, "true_content": "During your counter-surveillance sweep at 23:49, you observed Colonel Siti accessing the medical kit storage near the briefing room annex — her body language suggested she was checking whether she had been observed.", "poisoned_content": "Your sweep documented Agent Farid entering the server room during the recess — but he was inside four minutes longer than any diagnostic routine requires."},
@@ -471,6 +500,7 @@ _register("operation_nusantara", {
             "role_description": "• Personality: Formal and commanding — people defer to you and you have learned to use that silence as a tool\n• Connection: You authorised the summit's security arrangements, which means the footage gap is technically your responsibility\n• Dark Secret: You are motivated to ensure the investigation does not go in a direction that exposes your oversight failures",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "objective": "Ensure at least one other player publicly accepts your alibi before the final vote.",
             "ghost_clue": "Rosnah will try to control this investigation. Not because she is guilty — but because the truth will reveal how comprehensively she failed to prevent it.",
             "clues": [
                 {"round": 2, "true_content": "You noticed Agent Farid requested a system access extension at 23:45 — you approved it remotely without checking the reason, which you now realise was a significant lapse in protocol.", "poisoned_content": "During the post-discovery briefing, you observed Pak Wirawan consulting a document on his phone that he immediately locked when you looked his way."},
@@ -483,6 +513,7 @@ _register("operation_nusantara", {
             "role_description": "• Personality: Nervous under authority and prone to over-explaining — you know more than your rank suggests you should\n• Connection: You were the one who configured the electronic door lock and you know exactly how the seven-minute footage gap could have been created\n• Dark Secret: Someone senior told you to ignore an access anomaly earlier in the evening and you complied",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": True, "is_spy": False, "is_fool": False, "is_jester": False,
+            "objective": "Do not let Agent Zara Putri Nabilah go an entire round without being questioned by someone at the table.",
             "ghost_clue": "The duty officer knew how the footage gap was created. He was told to stay quiet. He is telling the truth when he says he does not know who ordered it — but the order came through the security division.",
             "clues": [
                 {"round": 2, "true_content": "You are utterly convinced that Pak Wirawan is orchestrating this — the way he positioned himself near the commissioner during the post-discovery briefing was textbook misdirection.", "poisoned_content": "You are certain Agent Zara is hiding something — the way she described handing Azman his coffee was too rehearsed, too precise."},
@@ -516,6 +547,7 @@ _register("dead_on_air", {
             "role_description": "• Personality: Controlled under pressure, quick to delegate blame to the technical crew\n• Connection: Marcus was running a quiet audit of supplier invoices — yours specifically — and had a post-show confrontation scheduled\n• Dark Secret: You have been routing fraudulent supplier payments through a shell company for two years. You went to Marcus's booth at 22:41 with a veterinary sedative kit you carry for your horse. You told yourself it was just to slow him down.",
             "is_killer": True, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "objective": "Ensure Rico DaSilva receives at least one vote at the final count.",
             "ghost_clue": "Dominic came to my booth at 22:41. He said it was about the floor monitors. Check his tablet access logs for 22:43 — the booth's local network authentication. That entry will tell you everything.",
             "clues": [
                 {"round": 2,
@@ -532,6 +564,7 @@ _register("dead_on_air", {
             "role_description": "• Personality: Professional and measured — you never raise your voice and you never panic where anyone can see\n• Connection: You have been taking twenty percent of Dominic's invoice scheme for eighteen months — you are as exposed as he is\n• Dark Secret: While Dominic handled Marcus directly, you authenticated to the archive server from the production hallway terminal at 22:43 and deleted the invoice backup. Your network login is in the system.",
             "is_killer": False, "is_accomplice": True, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "objective": "Before Round 3, make at least one player publicly doubt Yuki Tanaka's alibi.",
             "ghost_clue": "Petra authenticated to the archive server at 22:43 from the production hallway terminal — not her workstation. The network login record will confirm this. Ask the IT team for the hallway terminal authentication log.",
             "clues": [
                 {"round": 2,
@@ -548,6 +581,7 @@ _register("dead_on_air", {
             "role_description": "• Personality: Precise and methodical — you notice discrepancies for a living and you document everything\n• Connection: You had already flagged a supplier invoice anomaly in this week's budget sheet before the show went live\n• Dark Secret: Marcus asked you to say nothing about the irregularities until after the broadcast — a private meeting at 18:00 that only the two of you know about",
             "is_killer": False, "is_accomplice": False, "is_investigator": True, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "objective": "Ensure Yuki Tanaka is not voted for at the final vote.",
             "ghost_clue": "Elena had already identified the shell company before tonight. Her notes are on her phone under the label 'floor check.' She was waiting for my signal to act. She never got it.",
             "clues": [
                 {"round": 2,
@@ -564,6 +598,7 @@ _register("dead_on_air", {
             "role_description": "• Personality: Charismatic and theatrical — you are always 'on,' and tonight you are especially on\n• Connection: Marcus had your contract under review for a clause that would have ended your hosting deal without severance, effective after this season\n• Dark Secret: You slipped to the loading bay at 22:39 for a personal phone call you cannot explain in polite company — gone for eight minutes, no camera coverage\n• Jester Goal: Get everyone to vote for YOU. Play your suspicious absence hard. Let the contract motive breathe. Make them believe you had every reason to want Marcus gone — because you did, just not in this particular way.",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": True,
+            "objective": "Do not let Yuki Tanaka go an entire round without being questioned by someone at the table.",
             "ghost_clue": "The call Rico took in the loading bay was from someone inside this studio. He looked frightened when he hung up. He is not the killer. But whoever called him knew what was happening in that booth.",
             "clues": [
                 {"round": 2,
@@ -580,6 +615,7 @@ _register("dead_on_air", {
             "role_description": "• Personality: Quiet and technical — you express yourself in facts, frequencies, and things you have actually heard\n• Connection: You were calibrating boom mics in the control corridor during the commercial break, closer to the director's booth than your station required\n• Dark Secret: You heard something through the acoustic panel gap at 22:41 that you did not fully understand until Marcus was found dead — and you have been deciding whether to say it aloud",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "objective": "Discover what role Petra Vogel claims to be before the final vote.",
             "ghost_clue": "Yuki heard Dominic's voice through the acoustic panel gap at 22:41. She heard the words clearly: 'It needs to be done before the break ends, not after.' She needs to say this out loud.",
             "clues": [
                 {"round": 2,
@@ -617,6 +653,7 @@ _register("coastal_protocol", {
             "role_description": "• Personality: Quietly confident, accustomed to being the expert in the room — deeply rattled by any challenge to your methodology\n• Connection: Director Wiese commissioned the peer review that is about to destroy your career and retroactively invalidate seven years of funding\n• Dark Secret: You activated the specimen pool's secondary temperature override at 22:51 from the equipment room. The conditions you created caused cardiac arrest within nine minutes. Only you hold the active certification for that control panel.",
             "is_killer": True, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "objective": "Ensure Samuel Torres receives at least one vote at the final count.",
             "ghost_clue": "Only one researcher at this station is certified to operate the secondary pool controls. The certification register is in Drawer 3 of the main filing cabinet. That researcher is Dr. Regan Cross.",
             "clues": [
                 {"round": 2,
@@ -633,6 +670,7 @@ _register("coastal_protocol", {
             "role_description": "• Personality: Professionally warm and commercially calculating — you think in terms of exposure and liability at all times\n• Connection: Your company has 2.3 million in active commitments tied to Regan's published research. If the data fraud surfaces, your regulatory exposure ends careers — yours included\n• Dark Secret: You provided Regan with your corporate access card at 21:47. Your phone's internal network beacon places you near the equipment corridor at 22:44 — not the dining lounge where your card was not swiped until 23:08.\n• Poisoner Ability: Each round you may secretly corrupt one player's evidence on your device.",
             "is_killer": False, "is_accomplice": True, "is_investigator": False, "is_drunk": False,
             "is_poisoner": True, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "objective": "Before Round 3, make at least one player publicly doubt Zoe Hallett's alibi.",
             "ghost_clue": "Nadia gave Regan her corporate card at 21:47. She was not at the equipment room herself. But her phone was near that corridor at 22:44 — and her dining lounge card swipe did not occur until 23:08.",
             "clues": [
                 {"round": 2,
@@ -649,6 +687,7 @@ _register("coastal_protocol", {
             "role_description": "• Personality: Methodical and deliberate — forty years of peer review have taught you that patience surfaces everything eventually\n• Connection: You delivered your preliminary findings to Director Wiese two hours before dinner. The findings were serious enough that Wiese asked you to say nothing to the group until morning\n• Dark Secret: You were walking toward the specimen pool to find Wiese when the temperature alarm triggered on your monitoring app at 22:44. You were in the equipment corridor. You saw the door closing.",
             "is_killer": False, "is_accomplice": False, "is_investigator": True, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "objective": "Ensure Zoe Hallett is not voted for at the final vote.",
             "ghost_clue": "Emmett was walking to find me when the temperature alarm triggered. He was in the equipment corridor at 22:44 and saw the door closing. He heard footsteps on the far side. He knows exactly what he witnessed.",
             "clues": [
                 {"round": 2,
@@ -665,6 +704,7 @@ _register("coastal_protocol", {
             "role_description": "• Personality: Eager and well-meaning — you want to be helpful and you have genuinely convinced yourself your observations are reliable\n• Connection: You had a long conversation with Director Wiese at dinner and he seemed distracted, checking his tablet repeatedly\n• Dark Secret: You shared two glasses of the station's limited wine supply during the evening session. Your timeline and observations from the key window are, though you are completely unaware of it, significantly unreliable.",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": True,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "objective": "Before Round 3, ensure at least one other player has publicly named Samuel Torres as a suspect.",
             "ghost_clue": "Everything Zoe observed tonight is wrong. She believes it completely and sincerely. Please use the badge access logs instead of her testimony.",
             "clues": [
                 {"round": 2,
@@ -681,6 +721,7 @@ _register("coastal_protocol", {
             "role_description": "• Personality: Methodical and quietly authoritative — you run a tight station and you notice when your systems are interfered with\n• Connection: You had been compiling the daily badge access report when you noticed an anomaly in the equipment room log entry at 21:47\n• Dark Secret: When you went to document the anomaly this morning, the entry had already been archived using your administrative override code — code that only you are supposed to hold, and that you did not use",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "objective": "Ensure at least one other player publicly accepts your alibi before the final vote.",
             "ghost_clue": "Someone used Samuel's administrative override code to archive the 21:47 badge entry before he could flag it. Samuel did not do it. Check who accessed the station administration terminal between 22:30 and 23:00.",
             "clues": [
                 {"round": 2,
@@ -697,6 +738,7 @@ _register("coastal_protocol", {
             "role_description": "• Personality: Formal and precise — you apply protocols because you have seen what happens when they are skipped\n• Connection: Your afternoon inspection of the specimen pool facility identified a monitoring anomaly you logged but planned to raise with Director Wiese in the morning\n• Dark Secret: The anomaly you identified was the same temperature override sequence that killed Wiese — you had it in your inspection log two hours before anyone called it a murder",
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "objective": "Find out what Nadia Volkov's alibi is before Round 3.",
             "ghost_clue": "Ingrid logged the pool temperature anomaly at 23:09. Two hours before anyone called it suspicious. Her inspection notes include the secondary control certification field. That field matters more than she realised.",
             "clues": [
                 {"round": 2,
@@ -736,6 +778,7 @@ _register("seance_blackwood", {
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "is_undertaker": False, "is_recluse": False,
             "alibi": "You were seated at the head of the table in direct spiritual contact with Madame Renard throughout the darkened session — but you rose once, briefly, claiming to retrieve a dropped glove.",
+            "objective": "Ensure Father Ignatius Crane receives at least one vote at the final count.",
             "ghost_clue": "Edmund rose from his seat during the darkened session. He told everyone it was a dropped glove. Look at his coat pocket. The glove was never missing — and the poison vial is not there either, because he was careful. But his seat is closest to mine.",
             "clues": [
                 {"round": 2,
@@ -754,6 +797,7 @@ _register("seance_blackwood", {
             "is_poisoner": True, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "is_undertaker": False, "is_recluse": False,
             "alibi": "You were positioned directly beside Madame Renard throughout, managing the table materials and the candle arrangement — but the candle modification you made ensured no one could see your hands at the critical moment.",
+            "objective": "Before Round 3, make at least one player publicly doubt Beatrice Holt's alibi.",
             "ghost_clue": "Clara modified the candles. She was the only one who handled them before the séance. Ask her why the leftmost candle produced a distinctly different flame quality for three minutes during the contact session. She will have an answer. It will not be true.",
             "clues": [
                 {"round": 2,
@@ -772,6 +816,7 @@ _register("seance_blackwood", {
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "is_undertaker": False, "is_recluse": False,
             "alibi": "You were seated directly across from Edmund Voss for the entirety of the darkened session and did not leave your chair.",
+            "objective": "Ensure Dr. Leopold Marsh is not voted for at the final vote.",
             "ghost_clue": "Aldous Grey is not here by coincidence. He received a letter from me two days ago naming the person I intended to expose tonight. That letter is in his inside coat pocket. He has not acted on it because he was waiting for me to speak first.",
             "clues": [
                 {"round": 2,
@@ -790,6 +835,7 @@ _register("seance_blackwood", {
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "is_undertaker": True, "is_recluse": False,
             "alibi": "You were standing at the door to the séance room for the entirety of the evening — you entered the room only when the screaming started.",
+            "objective": "Ensure Father Ignatius Crane is not voted for at the final vote.",
             "ghost_clue": "The candle anomaly was not accidental. Clara Nightshade handled those candles alone for forty minutes before the first guest arrived. I should have stopped her. I saw her at the candles. I thought nothing of it because she was always at the candles.",
             "clues": [
                 {"round": 2,
@@ -808,6 +854,7 @@ _register("seance_blackwood", {
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "is_undertaker": False, "is_recluse": True,
             "alibi": "You were at the far end of the table, as far from the medium as the seating arrangement permitted — you refused to hold hands with either of your neighbours when the contact session began.",
+            "objective": "Ensure at least one other player publicly accepts your alibi before the final vote.",
             "ghost_clue": "Father Crane did not do this. He refused my hand during the contact session, which made him conspicuous — but his refusal also meant his hands were visible above the table throughout. The person whose hands were not visible is the one you want.",
             "clues": [
                 {"round": 2,
@@ -826,6 +873,7 @@ _register("seance_blackwood", {
             "is_poisoner": False, "is_paranoid": True, "is_spy": False, "is_fool": False, "is_jester": False,
             "is_undertaker": False, "is_recluse": False,
             "alibi": "You were seated between the defrocked priest and the journalist, holding both their hands as the séance protocol required — though you noticed the journalist's grip loosened twice during the session.",
+            "objective": "Do not let Father Ignatius Crane go an entire round without being questioned by someone at the table.",
             "ghost_clue": "Lady Sylvia saw something during the darkened session that she has not disclosed because she does not fully understand what she saw. Ask her directly what happened when Edmund rose from his seat. She was watching him. She saw his hands.",
             "clues": [
                 {"round": 2,
@@ -844,6 +892,7 @@ _register("seance_blackwood", {
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": True,
             "is_undertaker": False, "is_recluse": False,
             "alibi": "You were directly beside Madame Renard on her left side for the entire séance — close enough that everyone in the room will assume the worst, and you find this enormously entertaining.",
+            "objective": "Do not let Dr. Leopold Marsh go an entire round without being questioned by someone at the table.",
             "ghost_clue": "Tobias did not do this. He was beside me because that was where I placed him — I needed his theatricality to keep the room's attention away from the other side of the table. He has no idea he was being used as a distraction.",
             "clues": [
                 {"round": 2,
@@ -862,6 +911,7 @@ _register("seance_blackwood", {
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "is_undertaker": False, "is_recluse": False,
             "alibi": "You were taking notes at the side table and did not approach the séance circle at any point during the contact session.",
+            "objective": "Find out what Edmund Voss's alibi is before Round 3.",
             "ghost_clue": "Beatrice Holt wrote a profile of Edmund Voss eighteen months ago. She noted irregularities in estate transfer records that her editor made her cut for legal reasons. Those notes still exist. They name the Blackwood estate specifically.",
             "clues": [
                 {"round": 2,
@@ -880,6 +930,7 @@ _register("seance_blackwood", {
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "is_undertaker": False, "is_recluse": False,
             "alibi": "You were standing near the window for the entire contact session, refusing to participate — you observed the group from a distance.",
+            "objective": "Discover what role Clara Nightshade claims to be before the final vote.",
             "ghost_clue": "Dr. Marsh noticed the residue on my cup. He has not said so because he is not certain enough. Tell him he does not need to be certain. Tell him what he observed is enough. The compound leaves a specific faint ring on ceramic. He knows what it is.",
             "clues": [
                 {"round": 2,
@@ -888,6 +939,161 @@ _register("seance_blackwood", {
                 {"round": 3,
                  "true_content": "After examining Madame Renard, you noticed a faint discolouration on the inner rim of her teacup — consistent with certain alkaloid compounds that are not found in standard tea preparations. You have not stated this aloud because you wanted to examine it more carefully before committing to a professional opinion. You are now prepared to commit.",
                  "poisoned_content": "You observed Clara Nightshade's hands during the period immediately following the discovery of the body — she was unusually deliberate about keeping them visible and at her sides, which is the opposite of the instinctive behaviour of someone who has just witnessed a death. People who have just seen a death reach out. She kept her hands down."}
+            ]
+        }
+    ]
+})
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PRESET 7 — The Forgetting (7 players, amnesia mechanics, no crisis)
+# ══════════════════════════════════════════════════════════════════════════════
+
+_register("the_forgetting", {
+    "is_crisis":  False,
+    "is_amnesia": True,
+    "theme_title": "The Forgetting",
+    "short_description": "Everyone at the Harthorn Neuroscience Field Station took a mandatory sedative at 22:30. By 06:00, a researcher is dead and the only person who knows what happened in the night has no memory of doing it.",
+    "master_story": {
+        "background": "• The Harthorn Field Station runs closed residential sleep studies on a rotating cohort of researchers and observers.\n• Every resident takes a standardised sedative dose at 22:30 as part of the study protocol — compliance is monitored by biometric wristband.\n• Dr. Alistair Fosse, the station's pharmacologist, was preparing a formal misconduct report against the station's senior researcher when he was killed.",
+        "the_murder": "• Dr. Fosse was found in the cold storage corridor at 06:00, dead from blunt force trauma. The monitoring equipment stand beside him had been used as the weapon.\n• The killer entered the cold storage corridor at approximately 01:00 and left by 01:15 — fourteen minutes without biometric evidence of waking, because their tolerance to the sedative had shifted without their knowledge.\n• The killer has no memory of the act. They are not concealing guilt. They genuinely do not know.",
+        "the_solution": "• Dr. Edmund Raith, the station's senior researcher, struck Dr. Fosse with the monitoring equipment stand while in a dissociative semi-conscious state caused by partial sedative tolerance.\n• Raith had been falsifying data in the joint sleep study paper — Fosse had discovered this three days earlier and filed a formal misconduct report to the station's ethics board.\n• Dr. Noor Khalil had secretly been replacing her sedative with a placebo for weeks to monitor other subjects. She witnessed Raith emerge from the cold corridor at 01:15 and did not report it.",
+        "public_clues": [
+            {"round": 3, "content": "The biometric wristband data for the night in question has been fully reconstructed. One wristband shows an anomalous gap in pulse-rate data between 00:58 and 01:17 — consistent with altered consciousness rather than sleep. The wristband belongs to Dr. Edmund Raith."}
+        ]
+    },
+    "characters": [
+        {
+            "name": "Dr. Edmund Raith",
+            "public_summary": "The station's senior researcher and study lead — methodical, decorated, and suddenly uncertain about what he did last night.",
+            "role_description": "• Personality: Methodical and calm — you are a professional and you trust your own judgement above everything\n• Connection: Dr. Fosse was your research partner and you had been arguing for weeks about the direction of the study\n• Dark Secret: You have been falsifying data in your section of the joint paper — Fosse discovered this three days ago\n• Tonight's Agenda: You took your sedative at 22:30 as required. You remember nothing until 05:15. Something is wrong but you do not know what.\n• ⚠ You have no memory of last night. Play as an innocent investigator until your device tells you otherwise.",
+            "is_killer": True, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were in your bunk from 22:30 onwards — your biometric wristband confirms a resting pulse until 06:00, when the morning alarm sounded.",
+            "objective": "Ensure Oliver Wrenn receives at least one vote at the final count.",
+            "ghost_clue": "I remember now. I remember all of it. The corridor. The door. I thought I was dreaming. I was not dreaming. The monitoring stand was cold in my hands.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You reviewed Dr. Fosse's workspace logs at 23:00 and noticed he had exported a substantial document to his personal USB drive — you assumed it was research data at the time.",
+                 "poisoned_content": "You overheard Prof. Marsh and Dr. Fosse speaking in raised voices near the cold storage entrance at approximately 23:00 — the words 'retract' and 'career' were distinct."},
+                {"round": 3,
+                 "true_content": "You have no conscious memory of the corridor, but your station boots show traces of the blue cleaning compound that is only applied in the cold storage area.",
+                 "poisoned_content": "You found that Prof. Marsh's access card had been used to enter the cold storage area at 23:47 — well after she claims to have been asleep."}
+            ]
+        },
+        {
+            "name": "Dr. Noor Khalil",
+            "public_summary": "The station's lab technician, known for meticulous monitoring records and an unusual habit of staying sharp when everyone else is sedated.",
+            "role_description": "• Personality: Helpful and deferential in professional settings — you are very good at appearing transparent\n• Connection: You have been secretly monitoring the other subjects' sedative responses for weeks using your own non-compliance as a baseline\n• Dark Secret: You saw Dr. Raith emerge from the cold corridor at 01:15 with something wrong in his manner — and you said nothing, because you were not supposed to be awake\n• Tonight's Agenda: Keep your non-compliance secret. If Raith is blamed, you will have to decide how much you knew.\n• Cover Story: If asked your role, you may claim to be an innocent role. Prepare a believable story about what that role's clue supposedly told you.\n• Amnesia Protocol: The killer has no memory of last night. Use your device during Round 1 to send memory fragments. Suggested: (1) 'The smell of the corridor — antiseptic and something else. Cold air from somewhere it should not have been.' (2) 'Your hands. You remember looking at your hands under the emergency lighting. They were shaking.' (3) 'A door. Heavy. You remember pushing it open and the resistance it gave.'",
+            "is_killer": False, "is_accomplice": True, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were monitoring subject readings in the observation bay from 22:30 onwards — but your station logs show a 40-minute gap between 01:00 and 01:40 that you have not explained to anyone.",
+            "objective": "Before Round 3, make at least one innocent player publicly doubt Prof. Cecelia Marsh's alibi.",
+            "ghost_clue": "Noor Khalil was not asleep last night. Her sedative compliance record is falsified. She was in the observation bay and she saw what came out of that corridor at 01:15. What she has not said aloud is the name.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You were updating overnight monitoring records when you heard footsteps in the east corridor at approximately 01:00 — measured, then slower, then a door opening and closing.",
+                 "poisoned_content": "You noticed Prof. Marsh's biometric wristband showed elevated activity around 23:40 — inconsistent with the sedative compliance she reported to the morning debrief."},
+                {"round": 3,
+                 "true_content": "Your observation bay logs show a 40-minute gap in the data record — equipment malfunction, as you noted for the file. The gap coincides precisely with the estimated time of death.",
+                 "poisoned_content": "The monitoring stand found near Dr. Fosse had traces of a substance only found in the preparation room — a room Prof. Marsh used regularly during the study week."}
+            ]
+        },
+        {
+            "name": "Prof. Cecelia Marsh",
+            "public_summary": "The station's research director and principal investigator — authoritative, thorough, and quietly furious that something has happened on her watch.",
+            "role_description": "• Personality: Unhurried and deliberate — you have spent thirty years reading rooms full of people concealing things\n• Connection: You approved the study protocol that mandated the sedative — you are aware of the liability this creates\n• Dark Secret: You received Fosse's misconduct report two days ago via the ethics board and have not yet formally acted on it",
+            "is_killer": False, "is_accomplice": False, "is_investigator": True, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were in your private office reviewing the funding application until 23:30, then took your sedative and were confirmed asleep by 23:45 per the study record.",
+            "objective": "Ensure Dr. Vann Sorrel is not voted for at the final vote.",
+            "ghost_clue": "Cecelia received my misconduct report. She has not acted on it. Ask her why. The answer will tell you everything about the institutional pressure that created the conditions for my death.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You noted in your morning review that Dr. Fosse had printed an unusually large document on the shared printer at 22:15 — substantially more pages than any standard research output.",
+                 "poisoned_content": "You observed Dr. Khalil returning to the observation bay at an unusual hour during your 23:30 medication review — her station showed activity that should not have been running during a sedative compliance window."},
+                {"round": 3,
+                 "true_content": "Your professional assessment is that either Dr. Edmund Raith or Dr. Noor Khalil is responsible — one of them had both the specific knowledge of Fosse's report and the proximity to the cold storage corridor.",
+                 "poisoned_content": "Your read of the morning debrief points to either June Takahashi or Oliver Wrenn — one of them gave a timeline that does not hold under scrutiny when compared against the access log records."}
+            ]
+        },
+        {
+            "name": "Dr. Vann Sorrel",
+            "public_summary": "A field anthropologist on sabbatical, attending as an external observer — here to watch how researchers under residential conditions behave, not to become a subject himself.",
+            "role_description": "• Personality: Quiet and methodical — forty years of fieldwork have trained you to observe more than you speak\n• Connection: You are a neutral observer with no prior relationship to any of the residents\n• Dark Secret: You woke briefly at 01:10 and heard the cold storage seal opening and closing from the east corridor. You did not investigate. You went back to sleep.\n• Undertaker Ability: After the murder is revealed in Round 2, you will privately learn the true role of the victim.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": True, "is_recluse": False,
+            "alibi": "You were in the shared dormitory from 22:30 with three other residents — confirmed sedative-compliant, biometric consistent with deep sleep until 06:00 with one brief gap at 01:10.",
+            "objective": "Discover what role Dr. Noor Khalil claims to be before the final vote.",
+            "ghost_clue": "Vann Sorrel heard the cold storage seal at 01:10. He logged it as a dormitory disturbance but did not report it because he assumed it was routine. Ask him what direction the sound came from.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You woke briefly at 01:10 and heard the cold storage corridor door opening and sealing, followed by footsteps heading back toward the residential wing — measured, not hurried.",
+                 "poisoned_content": "You woke at 01:10 and heard footsteps with a distinctive uneven gait moving past the dormitory corridor. Prof. Marsh walks that way. You have observed it during morning sessions."},
+                {"round": 3,
+                 "true_content": "Dr. Fosse's research notebook, open on his desk this morning, has a final entry that reads: 'Report filed to ethics board. USB backup with June. If anything happens before Thursday — Raith. The data was his, not mine.'",
+                 "poisoned_content": "The notebook's final entry had been partially erased and rewritten — the original text beneath is visible under oblique light and references a different name than the one currently legible."}
+            ]
+        },
+        {
+            "name": "Petra Haas",
+            "public_summary": "The station's study coordinator, responsible for scheduling and compliance records — a role that has given her an uncomfortable amount of insight into everyone's habits.",
+            "role_description": "• Personality: Organised and alert — you notice when things do not fit the established pattern, and you have been noticing a lot tonight\n• Connection: You processed the scheduling request that placed Dr. Fosse and Dr. Raith in overlapping study roles — a decision that now feels significant\n• Dark Secret: You are convinced Prof. Marsh arranged for Fosse to be silenced before the misconduct report could become public — your gut has never been wrong about institutional cover-ups.\n• Paranoid Instinct: Your gut tells you that Prof. Cecelia Marsh is responsible — and it will not let go of that instinct.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": True, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were in the communal kitchen at 23:15 — you could not sleep despite the sedative — and saw Prof. Marsh walking past the window heading toward the east wing.",
+            "objective": "Do not let Prof. Cecelia Marsh go an entire round without being questioned by someone at the table.",
+            "ghost_clue": "Petra is looking at the wrong person for the right institutional reasons. Prof. Marsh had every reason to suppress the report. But she did not kill me. The person who killed me did not know they were going to.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You saw Prof. Marsh walk past the communal kitchen window at 23:15 heading toward the east wing — you thought she was checking on Dr. Fosse, and assumed it was routine oversight.",
+                 "poisoned_content": "You are certain Prof. Marsh had been building a case against Dr. Fosse for months — the argument you overheard at lunch about the trial data was the final straw before something irreversible happened."},
+                {"round": 3,
+                 "true_content": "You know in your bones that Prof. Marsh orchestrated this — her behaviour since the body was found has been too composed, too managerial, as though she is managing a narrative rather than processing a shock.",
+                 "poisoned_content": "You recalled that Prof. Marsh was the last person to access the ethics board communication channels before the morning debrief — and the misconduct report Fosse filed does not appear in the current system record."}
+            ]
+        },
+        {
+            "name": "Oliver Wrenn",
+            "public_summary": "The station's medical ethics officer, here to audit the sedative compliance procedures — and now required to audit something considerably more serious.",
+            "role_description": "• Personality: Precise and professionally measured — you document everything and trust documentation over testimony\n• Connection: Dr. Fosse mentioned at dinner that he had 'filed something important' that would 'resolve a problem before the week was out'\n• Dark Secret: You hold a signed copy of the ethics board's preliminary receipt of Fosse's misconduct report — you have not disclosed this because you are uncertain of your obligations in a potential criminal matter",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were in your room from 22:30 to 06:00 — your door sensor logged no exits and your sedative compliance was confirmed by the monitoring system.",
+            "objective": "Ensure at least one other player publicly accepts your alibi before the final vote.",
+            "ghost_clue": "Oliver Wrenn has a document in his jacket pocket that names the person whose data was fraudulent. He has not shown it to anyone. It is past time.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "At dinner, Dr. Fosse mentioned he had completed a formal document before this study week began — he seemed relieved, as though a weight had been transferred somewhere else.",
+                 "poisoned_content": "You noticed Dr. Khalil handled her sedative dose with unusual care at the 22:30 compliance check — she appeared to palm something, and you thought at the time it was simply nervousness about the audit."},
+                {"round": 3,
+                 "true_content": "The boot prints in the cold storage corridor match station-issue footwear. The tread pattern and size eliminate three residents immediately. Of the remaining four, only two were not fully confirmed asleep at 01:00 by independent biometric record.",
+                 "poisoned_content": "The boot prints are consistent with the smaller station-issue sizes, ruling out three of the male residents and pointing toward either Prof. Marsh or Dr. Khalil based on foot size alone."}
+            ]
+        },
+        {
+            "name": "June Takahashi",
+            "public_summary": "The station's overnight observer on rotation — it is her job to be awake when everyone else is sedated, which means she was present during every hour the investigation cares about.",
+            "role_description": "• Personality: Quiet and precise — you express yourself in recorded observations and are uncomfortable being asked to interpret rather than report\n• Connection: Dr. Fosse handed you a USB drive at 22:15 and asked you to keep it somewhere secure until Thursday — you agreed without asking what was on it\n• Dark Secret: You found the cold storage door slightly ajar during your 01:00 rounds and logged it as a temperature compliance violation. You did not investigate further because that was not your protocol.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You completed your 23:00 observation rounds and returned to the rest room by 23:30 — your log sheet records all seven check-in points through the night.",
+            "objective": "Find out what Dr. Noor Khalil's alibi is before Round 3.",
+            "ghost_clue": "June has a USB drive I gave her at 22:15. She does not know what is on it. It contains the full data audit proving the falsification. Tell her it is time to hand it over.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "During your 01:00 rounds you found the cold storage door slightly ajar — a temperature compliance violation you logged but did not investigate, because your protocol requires logging and reporting, not entering.",
+                 "poisoned_content": "During your 01:00 rounds you passed Dr. Khalil's observation bay and it was unattended — her monitors were active but she was not at her post for the entire check window."},
+                {"round": 3,
+                 "true_content": "When you found Dr. Fosse at 06:00, the monitoring equipment stand beside him had been moved from its usual position near the door — the base showed impact marks consistent with deliberate force rather than an accidental fall.",
+                 "poisoned_content": "You recalled that the emergency lighting in the cold corridor had been switched off at the main panel at some point during the night — a panel accessible only to senior researchers and the study director."}
             ]
         }
     ]

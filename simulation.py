@@ -11,6 +11,7 @@ Usage:
     python simulation.py --preset=dead_on_air         [--token=PASSWORD]
     python simulation.py --preset=coastal_protocol    [--token=PASSWORD]
     python simulation.py --preset=seance_blackwood    [--token=PASSWORD]
+    python simulation.py --preset=the_forgetting      [--token=PASSWORD]
 
     # Create new AI game from first template:
     python simulation.py
@@ -142,6 +143,23 @@ def print_player_perspective(bot_name: str, access_key: str):
     if alibi:
         print(f"  │")
         print(f"  │  📋 Alibi: {alibi}")
+
+    # Objective
+    objective = d.get("objective")
+    if objective:
+        print(f"  │")
+        print(f"  │  🎯 Objective: {objective}")
+
+    # Amnesia fields
+    fragments = d.get("memory_fragments", [])
+    if fragments:
+        print(f"  │")
+        print(f"  │  🌫️ Memory fragments ({len(fragments)}):")
+        for frag in fragments:
+            print(f"  │     — {frag}")
+    if d.get("is_killer") and d.get("is_amnesia_game"):
+        status = "AWAKENED — knows they are the killer" if d.get("is_awakened") else "not yet awakened"
+        print(f"  │  🌫️ Amnesia status: {status}")
 
     # Undertaker result
     undertaker_result = d.get("undertaker_result")
@@ -591,6 +609,8 @@ def run_simulation(game_id: str | None = None, preset: str | None = None):
                 suffix = f"  [{', '.join(extras)}]" if extras else ""
                 bluff_note = f"  (claimed: {ident['bluff_role']})" if ident.get("bluff_role") and (ident.get("is_killer") or ident.get("is_accomplice")) else ""
                 print(f"   {badge}  {ident['name']:<32} ← {ident.get('player','—')}{suffix}{bluff_note}")
+                if ident.get("objective"):
+                    print(f"           🎯 {ident['objective']}")
 
             # Votes
             print("\n🗳️  Final Votes:")
