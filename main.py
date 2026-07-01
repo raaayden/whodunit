@@ -438,6 +438,7 @@ async def get_player_dashboard(access_key: str):
         "game_id":              game_id,
         "current_round":        current_round,
         "character_name":       player["character_name"],
+        "public_summary":       player.get("public_summary", ""),
         "theme_title":          theme_title,
         "short_description":    short_desc,
         "active_story": {

@@ -155,18 +155,9 @@
 
         <div class="error" id="errorMsg"></div>
 
-        <!-- Character reveal — shown after joining, before redirect -->
-        <div id="characterReveal" style="display:none;margin-top:20px;text-align:left;">
-            <div style="font-size:11px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Your Secret Identity</div>
-            <div id="revealName" style="font-size:22px;font-weight:700;color:var(--accent);margin-bottom:8px;"></div>
-            <div id="revealSummary" style="font-size:13px;color:#ccc;line-height:1.6;font-style:italic;padding:12px 14px;background:rgba(157,124,255,0.05);border:1px solid rgba(157,124,255,0.15);border-radius:8px;margin-bottom:14px;"></div>
-            <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">This is what everyone knows about you. Your full role sheet is on the next page — do not show anyone else.</div>
-            <button class="btn" id="proceedBtn" onclick="proceedToPlay()">Enter the Mystery →</button>
-        </div>
+        <hr class="divider">
 
-        <hr class="divider" id="hintDivider">
-
-        <p class="hint" id="hintText">
+        <p class="hint">
             <strong>How it works:</strong> you'll get a secret character with a role only you can see.
             Talk to other players in person, gather clues each round, and vote for who you think is the killer.
         </p>
@@ -174,7 +165,6 @@
 
     <script>
         const gameId = window.location.pathname.split('/').pop();
-        let pendingKey = null;
 
         async function joinGame() {
             const name = document.getElementById('playerName').value.trim();
@@ -191,15 +181,7 @@
                 const res  = await fetch(`/api/room/${gameId}/join?player_name=${encodeURIComponent(name)}`, { method: 'POST' });
                 const data = await res.json();
                 if (res.ok) {
-                    pendingKey = data.access_key;
-                    // Show character reveal instead of immediately redirecting
-                    document.getElementById('revealName').innerText    = data.character_name || '—';
-                    document.getElementById('revealSummary').innerText = data.public_summary || '';
-                    document.getElementById('characterReveal').style.display = 'block';
-                    document.getElementById('joinBtn').style.display  = 'none';
-                    document.getElementById('playerName').disabled     = true;
-                    document.getElementById('hintDivider').style.display = 'none';
-                    document.getElementById('hintText').style.display  = 'none';
+                    window.location.href = `/play?key=${data.access_key}`;
                 } else {
                     showError(data.detail || 'Could not join. The room may be full or already started.');
                     btn.disabled = false;
@@ -210,10 +192,6 @@
                 btn.disabled = false;
                 btn.innerHTML = 'Join the Room';
             }
-        }
-
-        function proceedToPlay() {
-            if (pendingKey) window.location.href = `/play?key=${pendingKey}`;
         }
 
         function showError(msg) {
