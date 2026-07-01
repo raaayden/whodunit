@@ -324,7 +324,7 @@ async def join_room(game_id: str, player_name: str):
     character = random.choice(unclaimed.data)
     supabase.table("players").update({"claimed_by_user": player_name}).eq(
         "id", character["id"]).execute()
-    return {"access_key": character["access_key"], "character_name": character["character_name"]}
+    return {"access_key": character["access_key"], "character_name": character["character_name"], "public_summary": character.get("public_summary", "")}
 
 
 # ── Player: Dashboard ─────────────────────────────────────────────────────────

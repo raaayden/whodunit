@@ -850,7 +850,7 @@
     async function advanceRound() {
         const pass    = document.getElementById('adminPass').value;
         const gameId  = document.getElementById('gameId').value;
-        const current = parseInt(document.getElementById('currentRoundDisplay').innerText) || 0;
+        const current = parseInt(document.getElementById('advanceRoundBtn').dataset.currentRound || '0');
         const btn     = document.getElementById('advanceRoundBtn');
         btn.disabled  = true;
         const res = await fetch(`/admin/release-round/${gameId}/${current+1}`, { method: 'POST', headers: { 'x-admin-token': pass } });
@@ -912,6 +912,7 @@
         } else if (round < 3) {
             advBtn.style.display = 'block'; endBtn.style.display = 'none'; closeBtn.style.display = 'none';
             advBtn.innerText = `Advance to Round ${round + 1}`;
+            advBtn.dataset.currentRound = round;
         } else {
             // Round 3 — show End Game directly, no "Advance to Round 4"
             advBtn.style.display = 'none'; endBtn.style.display = 'block'; closeBtn.style.display = 'none';
