@@ -198,6 +198,8 @@
 
         /* Crisis dilemma panel in right side */
         .crisis-panel { background: rgba(255,92,92,0.04); border: 1px solid rgba(255,92,92,0.2); border-radius: 10px; padding: 16px; grid-column: 1 / -1; }
+        .crisis-panel.unresolved { border-color: rgba(255,92,92,0.5); box-shadow: 0 0 0 1px rgba(255,92,92,0.15), 0 4px 16px rgba(255,92,92,0.08); animation: crisisPulse 3s ease-in-out infinite; }
+        @keyframes crisisPulse { 0%,100% { box-shadow: 0 0 0 1px rgba(255,92,92,0.15), 0 4px 16px rgba(255,92,92,0.08); } 50% { box-shadow: 0 0 0 2px rgba(255,92,92,0.3), 0 4px 20px rgba(255,92,92,0.15); } }
         .crisis-title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--danger); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
         .crisis-question { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 12px; line-height: 1.5; }
         .crisis-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
@@ -250,7 +252,7 @@
             <input type="text" id="theme" placeholder="e.g. 1920s speakeasy, corporate retreat…">
 
             <label class="field-label">Players</label>
-            <input type="number" id="playerCount" value="6" min="3" max="20" onchange="updateAccompliceLimit()">
+            <input type="number" id="playerCount" value="6" min="3" max="20" onchange="updateAccompliceLimit();validateRoleCount();">
 
             <div class="roles-section">
                 <div class="roles-header">Role Configuration</div>
@@ -385,13 +387,20 @@
 
             </div>
 
-            <button class="btn btn-primary" id="generateBtn" onclick="createGame()">Generate Mystery</button>
+            <div id="roleCountWarning" style="display:none;margin-top:12px;padding:10px 12px;background:rgba(255,92,92,0.07);border:1px solid rgba(255,92,92,0.25);border-radius:7px;font-size:12px;color:var(--danger);line-height:1.5;">
+                ⚠️ Too many special roles for <span id="roleCountNote"></span> players. Reduce roles or increase player count.
+            </div>
+
+            <button class="btn btn-primary" id="generateBtn" onclick="createGame()" style="margin-top:12px;">Generate Mystery</button>
 
             <div class="room-link-box" id="roomLinkContainer">
                 <div class="room-link-label">Room ready — share with players</div>
                 <div class="room-link-row">
                     <input type="text" id="roomLinkInput" class="room-link-input" readonly>
                     <button class="copy-btn" onclick="copyRoomLink()">Copy</button>
+                </div>
+                <div style="margin-top:8px;font-size:11px;color:var(--muted);">
+                    Tip: paste this link into <a href="https://qr.io" target="_blank" style="color:var(--accent);text-decoration:none;">qr.io</a> to generate a QR code players can scan.
                 </div>
             </div>
         </div>
@@ -526,8 +535,9 @@
             <input type="text" id="gameId" class="game-id-field" placeholder="Game ID — auto-filled on generate">
             <button class="refresh-btn" onclick="fetchGodMode()">↻ Refresh</button>
             <div class="round-control">
-                <span class="round-label">Round</span>
-                <span class="round-num" id="currentRoundDisplay">—</span>
+                <div id="gameStatusDisplay" style="display:flex;align-items:center;gap:4px;min-width:120px;">
+                    <span style="color:var(--muted);">—</span>
+                </div>
                 <button id="advanceRoundBtn" class="ctrl-btn ctrl-advance" onclick="advanceRound()" style="display:none;">Advance to Round 1</button>
                 <button id="revealTruthBtn"  class="ctrl-btn ctrl-end"     onclick="endGame()"     style="display:none;">End Game</button>
                 <button id="closeGameBtn"    class="ctrl-btn ctrl-close"   onclick="closeGame()"   style="display:none;">Clear</button>
@@ -561,6 +571,14 @@
 
             <div class="info-card full">
                 <div class="card-header"><div class="dot live"></div>Live Roster</div>
+                <div id="voteProgressBar" style="display:none;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--surface2);">
+                    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px;">
+                        <span>Votes cast</span><span id="voteProgressLabel">0 / 0</span>
+                    </div>
+                    <div style="height:3px;background:var(--border2);border-radius:2px;overflow:hidden;">
+                        <div id="voteProgressFill" style="height:100%;background:var(--accent);border-radius:2px;width:0%;transition:width 0.3s;"></div>
+                    </div>
+                </div>
                 <table class="roster-table">
                     <thead><tr><th>Character / Player</th><th>Role</th><th>Voted for</th></tr></thead>
                     <tbody id="rosterBody">
@@ -591,6 +609,21 @@
         if (tab === 'library') loadTemplates();
     }
 
+    function validateRoleCount() {
+        const players  = parseInt(document.getElementById('playerCount').value) || 0;
+        const acc      = parseInt(document.getElementById('accCount').value) || 0;
+        const specials = ['incInvestigator','incDrunk','incParanoid','incSpy','incFool','incUndertaker','incRecluse']
+                         .filter(id => document.getElementById(id)?.checked).length;
+        const totalRoles = 1 + acc + specials;
+        const warning = document.getElementById('roleCountWarning');
+        const note    = document.getElementById('roleCountNote');
+        if (warning && note) {
+            const tooMany = totalRoles > players;
+            warning.style.display = tooMany ? 'block' : 'none';
+            note.innerText = players;
+        }
+    }
+
     function stepAcc(delta) {
         const el  = document.getElementById('accCount');
         const max = parseInt(document.getElementById('playerCount').value) > 6 ? 2 : 1;
@@ -598,6 +631,7 @@
         el.value  = val;
         document.getElementById('poisonerSubopt').classList.toggle('visible', val > 0);
         if (val === 0) document.getElementById('incPoisoner').checked = false;
+        validateRoleCount();
     }
 
     function updateAccompliceLimit() {
@@ -617,6 +651,7 @@
         const max = parseInt(document.getElementById('playerCount').value) > 6 ? 2 : 1;
         const el  = document.getElementById('accCount');
         if (parseInt(el.value) > max) { el.value = max; stepAcc(0); }
+        validateRoleCount();
     }
 
     function showToast(msg) {
@@ -756,7 +791,10 @@
             const res  = await fetch(`/admin/crisis-dilemma/${gameId}`, { headers: { 'x-admin-token': pass } });
             if (!res.ok) return;
             const data = await res.json();
-            document.getElementById('crisisPanelContainer').style.display = 'block';
+            const crisisPanel = document.getElementById('crisisPanelContainer');
+            crisisPanel.style.display = 'block';
+            if (data.crisis_resolved) crisisPanel.classList.remove('unresolved');
+            else crisisPanel.classList.add('unresolved');
             document.getElementById('crisisQuestion').innerText    = data.dilemma.question || '';
             document.getElementById('crisisSafeBtn').innerText     = '✅ ' + (data.dilemma.safe || 'Safe option');
             document.getElementById('crisisDangerBtn').innerText   = '⚠️ ' + (data.dilemma.dangerous || 'Dangerous option');
@@ -852,7 +890,18 @@
         const round    = data.game.current_round || 0;
         const finished = data.game.status === 'finished';
 
-        document.getElementById('currentRoundDisplay').innerText = finished ? '✓' : (round || '—');
+        // Status display
+        const statusEl = document.getElementById('gameStatusDisplay');
+        if (statusEl) {
+            if (finished) {
+                statusEl.innerHTML = `<span style="color:var(--success);">✓ Finished</span>`;
+            } else if (round === 0) {
+                statusEl.innerHTML = `<span style="color:var(--muted);">Waiting for players</span>`;
+            } else {
+                const roundLabel = ['','Setup','Murder Night','Final Round'][round] || `Round ${round}`;
+                statusEl.innerHTML = `<span style="color:var(--muted);font-size:11px;">ROUND</span><span style="color:var(--accent2);font-size:20px;font-weight:600;margin:0 6px;">${round}</span><span style="color:var(--muted);font-size:12px;">${roundLabel}</span>`;
+            }
+        }
 
         const advBtn   = document.getElementById('advanceRoundBtn');
         const endBtn   = document.getElementById('revealTruthBtn');
@@ -864,7 +913,25 @@
             advBtn.style.display = 'block'; endBtn.style.display = 'none'; closeBtn.style.display = 'none';
             advBtn.innerText = `Advance to Round ${round + 1}`;
         } else {
+            // Round 3 — show End Game directly, no "Advance to Round 4"
             advBtn.style.display = 'none'; endBtn.style.display = 'block'; closeBtn.style.display = 'none';
+        }
+
+        // Vote progress bar (Round 3 only)
+        const voteBar   = document.getElementById('voteProgressBar');
+        const voteLabel = document.getElementById('voteProgressLabel');
+        const voteFill  = document.getElementById('voteProgressFill');
+        if (voteBar) {
+            if (round >= 3 && !finished) {
+                const totalPlayers = data.players.filter(p => !p.is_dead || p.death_round > round).length;
+                const votedCount   = data.players.filter(p => p.voted_for && !p.is_dead).length;
+                voteBar.style.display  = 'block';
+                voteLabel.innerText    = `${votedCount} / ${totalPlayers}`;
+                voteFill.style.width   = totalPlayers > 0 ? `${(votedCount/totalPlayers)*100}%` : '0%';
+                voteFill.style.background = votedCount === totalPlayers ? 'var(--success)' : 'var(--accent)';
+            } else {
+                voteBar.style.display = 'none';
+            }
         }
 
         // Load crisis dilemma panel if applicable

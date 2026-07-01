@@ -292,6 +292,20 @@ async def player_ping(access_key: str):
     return {"round": g["current_round"], "status": g["status"], "is_dead": p["is_dead"]}
 
 
+# ── Room: Public info (used by room.html before join) ─────────────────────────
+
+@app.get("/api/room/{game_id}/info")
+async def room_info(game_id: str):
+    from fastapi import HTTPException
+    game = supabase.table("games").select("theme_title, short_description, status").eq("id", game_id).execute()
+    if not game.data:
+        raise HTTPException(status_code=404, detail="Game not found.")
+    g = game.data[0]
+    if g["status"] == "finished":
+        raise HTTPException(status_code=410, detail="This game has already ended.")
+    return {"theme_title": g.get("theme_title", ""), "short_description": g.get("short_description", "")}
+
+
 # ── Player: Join room ─────────────────────────────────────────────────────────
 
 @app.post("/api/room/{game_id}/join")

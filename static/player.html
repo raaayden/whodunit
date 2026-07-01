@@ -179,6 +179,49 @@
         .modal-body ul { padding-left: 18px; }
 
         .loading-screen { text-align: center; padding: 80px 20px; color: var(--muted); font-size: 14px; }
+
+        /* ── Round progress dots ── */
+        .round-dots { display: flex; align-items: center; gap: 5px; }
+        .rdot { width: 7px; height: 7px; border-radius: 50%; background: var(--border2); transition: background 0.3s, box-shadow 0.3s; }
+        .rdot.done    { background: var(--accent); }
+        .rdot.current { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+
+        /* ── Clue unread badge ── */
+        .card-header-badge { margin-left: auto; background: var(--danger); color: white; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; animation: pulse 2s infinite; }
+
+        /* ── Objective card ── */
+        .objective-card { border-left: 3px solid rgba(157,124,255,0.5); background: rgba(157,124,255,0.04); border-color: rgba(157,124,255,0.25); }
+        .objective-mission-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+        .objective-text { font-size: 15px; font-weight: 500; color: var(--text); line-height: 1.6; }
+        .objective-footnote { font-size: 11px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+
+        /* ── Bluff register card ── */
+        .bluff-card { border: 1px solid rgba(255,179,71,0.25); background: rgba(255,179,71,0.03); border-radius: var(--radius); overflow: hidden; margin-bottom: 12px; }
+        .bluff-card-header { padding: 10px 16px; background: rgba(255,179,71,0.06); border-bottom: 1px solid rgba(255,179,71,0.15); font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--warn); }
+        .bluff-role-display { font-family: var(--mono); font-size: 22px; font-weight: 500; color: var(--text); text-align: center; padding: 16px; letter-spacing: 0.04em; border-bottom: 1px solid rgba(255,179,71,0.1); }
+        .bluff-card-body { padding: 12px 16px; font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+        /* ── Ghost fade in ── */
+        .ghost-box { background: rgba(77,216,158,0.05); border: 1px dashed rgba(77,216,158,0.3); border-radius: 8px; padding: 14px; text-align: left; margin-top: 4px; animation: ghostFadeIn 0.6s ease 0.3s both; }
+        @keyframes ghostFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ── Modal — full-height mobile sheet ── */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; justify-content: center; align-items: flex-end; padding: 0; }
+        .modal.open { display: flex; }
+        .modal-sheet { background: var(--surface); border: 1px solid var(--border); border-radius: 16px 16px 0 0; width: 100%; max-width: 560px; height: 92vh; max-height: 92vh; overflow-y: auto; padding-top: 0; }
+        .modal-sheet::before { content: ''; display: block; width: 36px; height: 4px; background: var(--border2); border-radius: 2px; margin: 10px auto 0; }
+        .modal-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--surface); z-index: 1; }
+        .modal-title { font-weight: 700; font-size: 16px; }
+        .modal-close { background: var(--surface2); border: 1px solid var(--border2); color: var(--muted); width: 28px; height: 28px; border-radius: 6px; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .modal-body { padding: 18px 20px 40px; font-size: 14px; line-height: 1.75; color: #ccc; }
+        .modal-body strong { color: var(--text); }
+        .modal-body li { margin-bottom: 10px; }
+        .modal-body ul { padding-left: 0; list-style: none; }
+        .modal-body h3 { font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); margin: 18px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+        .modal-body h3:first-child { margin-top: 0; }
+        .modal-body li { padding: 6px 0; border-bottom: 1px solid var(--border); padding-left: 0; }
+        .modal-body li:last-child { border-bottom: none; }
+        .modal-body li strong { color: var(--text); display: block; margin-bottom: 2px; }
     </style>
 </head>
 <body>
@@ -186,6 +229,11 @@
 <!-- Top bar -->
 <div class="top-bar">
     <div class="top-bar-title">🕵️ <span>Whodunit</span></div>
+    <div class="round-dots" id="roundDots" style="display:none;">
+        <span class="rdot" id="rdot1"></span>
+        <span class="rdot" id="rdot2"></span>
+        <span class="rdot" id="rdot3"></span>
+    </div>
     <button class="icon-btn" onclick="openModal('storyModal')" title="Story so far">📖</button>
     <button class="icon-btn" onclick="openModal('helpModal')" title="How to play">❓</button>
 </div>
@@ -218,62 +266,61 @@
                 <li><strong>Jester wins</strong> — if the Jester tricks the majority into voting for them, everyone else loses.</li>
             </ul>
 
-            <strong style="display:block;margin:14px 0 8px;color:var(--text);">🃏 Roles</strong>
+            <h3>🃏 Roles</h3>
             <ul>
-                <li><strong>😇 Innocent</strong> — receive genuine clues. Share them, misrepresent them, or stay silent.</li>
-                <li><strong>🔪 Killer</strong> — secretly queue one elimination per round. You have a prepared cover story. You do not know your accomplice.</li>
-                <li><strong>🤝 Accomplice</strong> — you know the killer. Protect them. You also have a prepared cover story.</li>
-                <li><strong>☠️ Poisoner</strong> — an accomplice who secretly corrupts one player's clues each round on their device. The victim never knows.</li>
-                <li><strong>🔎 Investigator</strong> — your Round 3 clue names exactly two suspects. One is the killer. Use it carefully.</li>
-                <li><strong>🍺 Drunk</strong> — you believe you're innocent. All your clues are false. You have no way of knowing.</li>
-                <li><strong>🧠 Paranoid</strong> — your gut tells you a specific person is the killer. Your gut is pointing at an innocent.</li>
-                <li><strong>🕵️ Spy</strong> — once per game, secretly learn one other player's true role on your device.</li>
-                <li><strong>🃏 Fool</strong> — you think you're the killer but you're not. Play your role sheet exactly as written.</li>
-                <li><strong>🎭 Jester</strong> — you are neither killer nor innocent. Get the majority to vote for YOU. Act suspicious on purpose.</li>
-                <li><strong>⚰️ Undertaker</strong> — after the Round 2 murder is revealed, you privately learn the victim's true role.</li>
-                <li><strong>🎭 Recluse</strong> — you are innocent, but every detection ability reads you as the killer. You will never be told this is happening.</li>
-                <li><strong>📋 Alibi Cards</strong> — every player has a private alibi for the time of the murder. Only the killer's is false.</li>
+                <li><strong>😇 Innocent</strong>Receive genuine clues. Share them, misrepresent them, or stay silent.</li>
+                <li><strong>🔪 Killer</strong>Secretly queue one elimination per round. You have a prepared cover story. You do not know your accomplice.</li>
+                <li><strong>🤝 Accomplice</strong>You know the killer. Protect them. You also have a prepared cover story.</li>
+                <li><strong>☠️ Poisoner</strong>An accomplice who secretly corrupts one player's clues each round on their device. The victim never knows.</li>
+                <li><strong>🔎 Investigator</strong>Your Round 3 clue names exactly two suspects. One is the killer. Use it carefully.</li>
+                <li><strong>🍺 Drunk</strong>You believe you're innocent. All your clues are false. You have no way of knowing.</li>
+                <li><strong>🧠 Paranoid</strong>Your gut tells you a specific person is the killer. Your gut is pointing at an innocent.</li>
+                <li><strong>🕵️ Spy</strong>Once per game, secretly learn one other player's true role on your device.</li>
+                <li><strong>🃏 Fool</strong>You think you're the killer but you're not. Play your role sheet exactly as written.</li>
+                <li><strong>🎭 Jester</strong>You are neither killer nor innocent. Get the majority to vote for YOU. Act suspicious on purpose.</li>
+                <li><strong>⚰️ Undertaker</strong>After the Round 2 murder is revealed, you privately learn the victim's true role.</li>
+                <li><strong>🎭 Recluse</strong>You are innocent, but every detection ability reads you as the killer. You will never be told this is happening.</li>
+                <li><strong>📋 Alibi</strong>Every player has a private alibi for the time of the murder. Only the killer's is false.</li>
             </ul>
 
-            <strong style="display:block;margin:14px 0 8px;color:var(--text);">🎭 The Bluff Register</strong>
+            <h3>🎭 The Bluff Register</h3>
             <ul>
-                <li>The killer and their accomplices are given a <strong>prepared cover role</strong> on their device — a fake innocent role they may claim in conversation.</li>
-                <li>The killer has thought about what this role would have seen. Their story will be consistent. Do not assume someone is innocent because they sound convincing.</li>
-                <li>If two people claim the same role, one is lying. This is a clue.</li>
+                <li><strong>Cover identity on your device</strong>The killer and accomplices receive a fake innocent role to claim in conversation.</li>
+                <li><strong>Their story is prepared</strong>Do not assume someone is innocent because they sound convincing.</li>
+                <li><strong>Contradiction is a clue</strong>If two people claim the same role, one is lying.</li>
             </ul>
 
-            <strong style="display:block;margin:14px 0 8px;color:var(--text);">🕵️ Playing Like a Detective</strong>
+            <h3>🕵️ Playing Like a Detective</h3>
             <ul>
-                <li><strong>You never have to reveal your real role.</strong> Claiming to be "just a guest" when you're the Investigator is legal and sometimes the right move.</li>
-                <li><strong>Clues form a web.</strong> Multiple players will have seen the same events from different angles. Find the version of events where all the clues fit simultaneously — that is the coherent narrative.</li>
-                <li><strong>Contradictions are evidence.</strong> If two players describe the same event differently, one of them is lying. Figure out which version is consistent with everything else you know.</li>
-                <li><strong>Role claims are not proof.</strong> Anyone can claim any role. What matters is whether their claimed knowledge is consistent with what that role should actually know.</li>
+                <li><strong>You never have to reveal your role</strong>Claiming to be "just a guest" when you're the Investigator is legal and sometimes the right move.</li>
+                <li><strong>Clues form a web</strong>Multiple players saw the same events from different angles. Find the version where all the clues fit simultaneously.</li>
+                <li><strong>Contradictions are evidence</strong>If two players describe the same event differently, one is lying. Figure out which version is consistent.</li>
+                <li><strong>Role claims are not proof</strong>What matters is whether their claimed knowledge is consistent with what that role should actually know.</li>
             </ul>
 
-            <strong style="display:block;margin:14px 0 8px;color:var(--text);">🎯 Private Objectives</strong>
+            <h3>🎯 Private Objectives</h3>
             <ul>
-                <li>Every player has a secret personal goal shown on their device — separate from finding the killer.</li>
-                <li>Objectives might ask you to protect a specific person, steer suspicion toward someone, or discover what another player knows.</li>
-                <li>The app never reveals objectives, even at the end. Whether you achieved yours is between you and your conscience.</li>
+                <li><strong>Your personal goal</strong>Separate from finding the killer — shown only on your device.</li>
+                <li><strong>Types</strong>Protect someone, steer suspicion, discover what someone knows, or manage your own standing.</li>
+                <li><strong>Never revealed</strong>The app does not track it. Whether you achieved it is between you and your conscience.</li>
             </ul>
 
-            <strong style="display:block;margin:14px 0 8px;color:var(--text);">💀 Eliminated Players</strong>
+            <h3>💀 Eliminated Players</h3>
             <ul>
-                <li>You can still talk in person — use that.</li>
-                <li>You lose your final vote.</li>
-                <li>Send one ghost clue to a living player's device from beyond the grave.</li>
+                <li><strong>You can still talk in person</strong>Use that.</li>
+                <li><strong>You lose your final vote</strong>But you can send one ghost clue from beyond the grave.</li>
             </ul>
 
-            <strong style="display:block;margin:14px 0 8px;color:var(--text);">⚖️ Exile Vote (Round 2)</strong>
+            <h3>⚖️ Exile Vote (Round 2)</h3>
             <ul>
-                <li>Nominate someone for public removal before the final round. Majority agreement exiles them.</li>
-                <li>Exiling an innocent helps the killer.</li>
+                <li><strong>Nominate someone for public removal</strong>Majority agreement exiles them before Round 3.</li>
+                <li><strong>Exiling an innocent helps the killer</strong>Choose carefully.</li>
             </ul>
 
-            <strong style="display:block;margin:14px 0 8px;color:var(--text);">⚡ Crisis Dilemma (special games)</strong>
+            <h3>⚡ Crisis Dilemma (special games)</h3>
             <ul>
-                <li>At Round 2, everyone votes on a critical decision. Majority wins.</li>
-                <li>If the dangerous option wins, consequences apply immediately — check your device.</li>
+                <li><strong>Everyone votes on a critical decision at Round 2</strong>Majority wins.</li>
+                <li><strong>Dangerous option wins</strong>Consequences apply immediately — check your device.</li>
             </ul>
         </div>
     </div>
@@ -293,6 +340,7 @@
                 <div class="identity-box">
                     <div class="identity-label">Your Secret Identity</div>
                     <div class="identity-name" id="waitChar">—</div>
+                    <div id="waitCharSummary" style="display:none;font-size:13px;color:var(--muted);margin-top:8px;font-style:italic;line-height:1.5;"></div>
                 </div>
                 <div class="matchup-row">
                     <div class="matchup-pill matchup-killer" id="kCount"></div>
@@ -377,11 +425,11 @@
             </div>
 
             <!-- Secondary objective — private goal -->
-            <div id="objectiveCard" style="display:none;" class="card">
-                <div class="card-header">🎯 Your Private Objective</div>
+            <div id="objectiveCard" class="card objective-card" style="display:none;">
                 <div class="card-body">
-                    <p id="objectiveText" style="font-size:14px;color:var(--text);line-height:1.7;font-weight:500;"></p>
-                    <p style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6;">This goal is yours alone. The app does not track it — you decide if you achieved it.</p>
+                    <div class="objective-mission-label">🎯 Your Private Objective</div>
+                    <div class="objective-text" id="objectiveText"></div>
+                    <div class="objective-footnote">The app does not track this. Whether you achieved it is between you and your conscience — and everyone else at the table.</div>
                 </div>
             </div>
 
@@ -394,13 +442,10 @@
             </div>
 
             <!-- Bluff Register (shown only to killer and accomplices) -->
-            <div id="bluffRegisterCard" style="display:none;" class="card">
-                <div class="card-header" style="color:var(--accent);">🎭 Your Cover Story</div>
-                <div class="card-body">
-                    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">If asked your role in conversation, you may claim to be:</p>
-                    <div id="bluffRoleDisplay" style="font-size:20px;font-weight:700;color:var(--text);text-align:center;padding:14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border2);margin-bottom:10px;"></div>
-                    <p style="font-size:12px;color:var(--muted);line-height:1.6;">This is your prepared lie. You know what this role is supposed to know. Make your story consistent — and remember, the real holder of this role (if there is one) may also be claiming it.</p>
-                </div>
+            <div id="bluffRegisterCard" class="bluff-card" style="display:none;">
+                <div class="bluff-card-header">🎭 Cover Identity</div>
+                <div class="bluff-role-display" id="bluffRoleDisplay">—</div>
+                <div class="bluff-card-body">If asked your role, claim to be this. Know what this role would have seen and heard. The real holder of this role, if there is one, may claim the same thing. That contradiction is your problem to manage.</div>
             </div>
 
             <!-- Amnesia: accomplice plants memory fragments (Round 1 only) -->
@@ -475,13 +520,13 @@
 
             <!-- Public clues -->
             <div class="card" id="publicCluesBox" style="display:none;">
-                <div class="card-header">📢 Public Announcements</div>
+                <div class="card-header">📢 Public Evidence</div>
                 <div class="card-body-flush" id="publicCluesContainer"></div>
             </div>
 
             <!-- Private clues -->
             <div class="card">
-                <div class="card-header">🔍 Your Evidence</div>
+                <div class="card-header">🔍 Your Evidence <span id="cluesBadge" class="card-header-badge" style="display:none;">NEW</span></div>
                 <div class="card-body-flush" id="cluesContainer">
                     <div class="clue-empty">No evidence yet. Mingle and roleplay.</div>
                 </div>
@@ -493,9 +538,9 @@
                 <div id="notebookContainer"></div>
             </div>
 
-            <!-- Voting -->
+            <!-- Voting (shown in Round 3 only — JS moves it above clues in R3) -->
             <div class="card" id="votingSection">
-                <div class="card-header">🗳️ Final Accusation</div>
+                <div class="card-header">🗳️ Final Accusation <span style="margin-left:auto;font-size:10px;color:var(--muted);font-weight:400;letter-spacing:0;">Round 3 only</span></div>
                 <div class="card-body">
                     <div id="quarantineNotice" style="display:none; color:var(--danger); font-size:13px; font-weight:600; text-align:center; padding:4px 0 8px;">⚠️ You are quarantined — your vote has been suppressed by the crisis outcome.</div>
                     <select id="suspectList"></select>
@@ -570,6 +615,23 @@
                         banner.className = "winner-banner win-killer";
                     }
 
+                    // Objective reveal — show player's own objective as conversation piece
+                    if (data.objective) {
+                        const objReveal = document.getElementById('objectiveRevealCard');
+                        if (!objReveal) {
+                            const oc = document.createElement('div');
+                            oc.id = 'objectiveRevealCard';
+                            oc.className = 'card';
+                            oc.style.cssText = 'border-color:rgba(157,124,255,0.2);background:rgba(157,124,255,0.03);margin-bottom:12px;';
+                            oc.innerHTML = `<div class="card-body">
+                                <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;">🎯 Your Private Objective Was</div>
+                                <div style="font-size:14px;color:var(--text);line-height:1.6;margin-bottom:10px;">${data.objective}</div>
+                                <div style="font-size:12px;color:var(--muted);">Did you achieve it? Compare with the others at the table.</div>
+                            </div>`;
+                            document.getElementById('winnerBanner').insertAdjacentElement('afterend', oc);
+                        }
+                    }
+
                     // Recap
                     const recap = data.reveal_data.recap || '';
                     if (recap) {
@@ -634,6 +696,8 @@
                     document.getElementById('waitChar').innerText  = data.character_name;
                     document.getElementById('kCount').innerText = `🔪 ${data.killers_count} Killer${data.killers_count!==1?'s':''}`;
                     document.getElementById('aCount').innerText = `🤝 ${data.accomplice_count} Accomplice${data.accomplice_count!==1?'s':''}`;
+                    const summaryEl = document.getElementById('waitCharSummary');
+                    if (summaryEl && data.public_summary) { summaryEl.innerText = `"${data.public_summary}"`; summaryEl.style.display = 'block'; }
                     return;
                 }
 
@@ -673,6 +737,22 @@
                             </div>`;
                     });
                 } else { gcBox.style.display = 'none'; }
+
+                // Round progress dots
+                updateRoundDots(data.current_round, data.game_status);
+
+                // Vote panel — only show in Round 3, and reorder to top
+                const votingSection = document.getElementById('votingSection');
+                if (votingSection) {
+                    if (data.current_round >= 3 && !data.is_dead) {
+                        votingSection.style.display = 'block';
+                        // Move vote panel above clues in Round 3
+                        const activeGame = document.getElementById('activeGame');
+                        if (activeGame) activeGame.insertBefore(votingSection, activeGame.firstChild);
+                    } else {
+                        votingSection.style.display = 'none';
+                    }
+                }
 
                 // Character name + alerts
                 document.getElementById('charName').innerText = data.character_name;
@@ -770,11 +850,17 @@
                 if (exileSel)   exileSel.innerHTML   = "<option value=''>Select player…</option>";
                 if (extKillSel) extKillSel.innerHTML = "<option value=''>Select target…</option>";
 
-                // Notebook
+                // Notebook — sort sus to top, alright to bottom, dead last
                 const nbContainer = document.getElementById('notebookContainer');
                 nbContainer.innerHTML = '';
+                const statusOrder = { 'sus': 0, 'neutral': 1, 'alright fam': 2, 'alright': 2 };
+                const sortedNotebook = [...data.notebook].sort((a, b) => {
+                    const aDead = a.is_publicly_dead ? 1 : 0, bDead = b.is_publicly_dead ? 1 : 0;
+                    if (aDead !== bDead) return aDead - bDead;
+                    return (statusOrder[a.my_note?.status || 'neutral'] ?? 1) - (statusOrder[b.my_note?.status || 'neutral'] ?? 1);
+                });
 
-                data.notebook.forEach((p, i) => {
+                sortedNotebook.forEach((p, i) => {
                     const status   = p.my_note.status || 'neutral';
                     const dotClass = status === 'sus' ? 'sus' : status === 'alright fam' ? 'alright' : '';
                     const isDead   = p.is_publicly_dead;
@@ -900,8 +986,8 @@
                     active.forEach(c => {
                         pubCont.innerHTML += `
                             <div class="pub-clue-item">
-                                <span class="pub-clue-round">R${c.round}</span>
-                                <span class="clue-text">${c.content}</span>
+                                <span class="pub-clue-round">📢 Public</span>
+                                <div><span class="clue-text">${c.content}</span><div style="font-size:11px;color:var(--muted);margin-top:6px;">Everyone received this simultaneously. It cannot be fabricated.</div></div>
                             </div>`;
                     });
                 } else { pubBox.style.display = 'none'; }
@@ -920,6 +1006,7 @@
                                 <span class="clue-text">${text}</span>
                             </div>`;
                     });
+                    checkNewClues(data.current_round);
                 }
 
                 // Vote state
@@ -1165,6 +1252,48 @@
         } catch (e) {}
         countdown = PING_MS / 1000;
     }
+
+    // ── Utility functions ─────────────────────────────────────────────────────
+
+    function updateRoundDots(round, status) {
+        const dotsEl = document.getElementById('roundDots');
+        if (!dotsEl) return;
+        if (status === 'waiting') { dotsEl.style.display = 'none'; return; }
+        dotsEl.style.display = 'flex';
+        [1, 2, 3].forEach(n => {
+            const dot = document.getElementById('rdot' + n);
+            if (!dot) return;
+            dot.className = 'rdot';
+            if (status === 'finished')  dot.classList.add('done');
+            else if (n < round)         dot.classList.add('done');
+            else if (n === round)       dot.classList.add('current');
+        });
+    }
+
+    function checkNewClues(currentRound) {
+        const lastSeen = parseInt(localStorage.getItem('whodunit_lastSeenRound') || '0');
+        const hasNew   = currentRound > lastSeen;
+        const badge    = document.getElementById('cluesBadge');
+        if (badge) badge.style.display = hasNew ? 'inline' : 'none';
+        if (hasNew) {
+            setTimeout(() => {
+                localStorage.setItem('whodunit_lastSeenRound', currentRound);
+                if (badge) badge.style.display = 'none';
+            }, 4000);
+        }
+    }
+
+    function enableSwipeToClose(modalId) {
+        const sheet = document.querySelector(`#${modalId} .modal-sheet`);
+        if (!sheet) return;
+        let startY = 0;
+        sheet.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, {passive: true});
+        sheet.addEventListener('touchend', e => {
+            if (e.changedTouches[0].clientY - startY > 80) closeModal(modalId);
+        }, {passive: true});
+    }
+    enableSwipeToClose('storyModal');
+    enableSwipeToClose('helpModal');
 
     // ── Boot ────────────────────────────────────────────────────────────────
     fetchData();

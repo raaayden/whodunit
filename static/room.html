@@ -130,11 +130,18 @@
             line-height: 1.6;
         }
         .hint strong { color: var(--text); }
+        @media (max-height: 600px) {
+            body { align-items: flex-start; padding-top: 20px; }
+            .card { padding: 24px 20px; }
+            .divider, .hint { display: none; }
+        }
     </style>
 </head>
 <body>
     <div class="card">
         <div class="logo">🕵️ <span>Whodunit</span></div>
+        <div id="gameThemeTitle" style="display:none;font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:0.06em;font-weight:500;margin-bottom:16px;"></div>
+        <div id="gameThemeDesc" style="display:none;font-size:12px;color:var(--muted);font-style:italic;line-height:1.6;margin-bottom:20px;padding:10px 14px;background:rgba(157,124,255,0.04);border:1px solid rgba(157,124,255,0.12);border-radius:8px;"></div>
         <h1>Enter the Mystery</h1>
         <p class="subtitle">Enter your real name to be assigned your secret identity. Don't share it with anyone.</p>
 
@@ -192,6 +199,21 @@
             el.innerText = msg;
             el.style.display = 'block';
         }
+
+        async function loadGameInfo() {
+            try {
+                const res  = await fetch(`/api/room/${gameId}/info`);
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data.theme_title) {
+                    const titleEl = document.getElementById('gameThemeTitle');
+                    const descEl  = document.getElementById('gameThemeDesc');
+                    if (titleEl) { titleEl.innerText = data.theme_title; titleEl.style.display = 'block'; }
+                    if (descEl && data.short_description) { descEl.innerText = data.short_description; descEl.style.display = 'block'; }
+                }
+            } catch(e) {}
+        }
+        loadGameInfo();
     </script>
 </body>
 </html>
