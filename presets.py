@@ -548,6 +548,7 @@ _register("dead_on_air", {
             "is_killer": True, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "objective": "Ensure Rico DaSilva receives at least one vote at the final count.",
+            "alibi": "You were on Floor B overseeing monitor maintenance during the commercial break — but your tablet authenticated to the director's booth local network at 22:43, a detail the IT team has not yet been asked about.",
             "ghost_clue": "Dominic came to my booth at 22:41. He said it was about the floor monitors. Check his tablet access logs for 22:43 — the booth's local network authentication. That entry will tell you everything.",
             "clues": [
                 {"round": 2,
@@ -565,6 +566,7 @@ _register("dead_on_air", {
             "is_killer": False, "is_accomplice": True, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "objective": "Before Round 3, make at least one player publicly doubt Yuki Tanaka's alibi.",
+            "alibi": "You were at your production workstation throughout the break — but your credentials authenticated to the archive server from the production hallway terminal at 22:43, not from your desk.",
             "ghost_clue": "Petra authenticated to the archive server at 22:43 from the production hallway terminal — not her workstation. The network login record will confirm this. Ask the IT team for the hallway terminal authentication log.",
             "clues": [
                 {"round": 2,
@@ -582,6 +584,7 @@ _register("dead_on_air", {
             "is_killer": False, "is_accomplice": False, "is_investigator": True, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "objective": "Ensure Yuki Tanaka is not voted for at the final vote.",
+            "alibi": "You were in the green room corridor throughout the break reviewing script continuity notes — visible to the floor crew when they passed.",
             "ghost_clue": "Elena had already identified the shell company before tonight. Her notes are on her phone under the label 'floor check.' She was waiting for my signal to act. She never got it.",
             "clues": [
                 {"round": 2,
@@ -599,6 +602,7 @@ _register("dead_on_air", {
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": True,
             "objective": "Do not let Yuki Tanaka go an entire round without being questioned by someone at the table.",
+            "alibi": "You slipped to the loading bay at 22:39 for a private phone call — no camera coverage on that exit — and were gone approximately eight minutes before returning.",
             "ghost_clue": "The call Rico took in the loading bay was from someone inside this studio. He looked frightened when he hung up. He is not the killer. But whoever called him knew what was happening in that booth.",
             "clues": [
                 {"round": 2,
@@ -616,6 +620,7 @@ _register("dead_on_air", {
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "objective": "Discover what role Petra Vogel claims to be before the final vote.",
+            "alibi": "You were calibrating boom microphones in the control corridor throughout the commercial break — within forty feet of the director's booth the entire time.",
             "ghost_clue": "Yuki heard Dominic's voice through the acoustic panel gap at 22:41. She heard the words clearly: 'It needs to be done before the break ends, not after.' She needs to say this out loud.",
             "clues": [
                 {"round": 2,
@@ -654,6 +659,7 @@ _register("coastal_protocol", {
             "is_killer": True, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "objective": "Ensure Samuel Torres receives at least one vote at the final count.",
+            "alibi": "You were in your cabin reviewing data all evening — your door card supports this — but the equipment room access log has your badge code entering at 21:47, which you will need an explanation for.",
             "ghost_clue": "Only one researcher at this station is certified to operate the secondary pool controls. The certification register is in Drawer 3 of the main filing cabinet. That researcher is Dr. Regan Cross.",
             "clues": [
                 {"round": 2,
@@ -671,6 +677,7 @@ _register("coastal_protocol", {
             "is_killer": False, "is_accomplice": True, "is_investigator": False, "is_drunk": False,
             "is_poisoner": True, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "objective": "Before Round 3, make at least one player publicly doubt Zoe Hallett's alibi.",
+            "alibi": "You were in the dining lounge all evening — your card swipe confirms arrival at 23:08 — but your phone's internal network beacon places you near the equipment corridor at 22:44, not inside.",
             "ghost_clue": "Nadia gave Regan her corporate card at 21:47. She was not at the equipment room herself. But her phone was near that corridor at 22:44 — and her dining lounge card swipe did not occur until 23:08.",
             "clues": [
                 {"round": 2,
@@ -688,6 +695,7 @@ _register("coastal_protocol", {
             "is_killer": False, "is_accomplice": False, "is_investigator": True, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "objective": "Ensure Zoe Hallett is not voted for at the final vote.",
+            "alibi": "You were walking toward the specimen pool to find Director Wiese when your monitoring app triggered a temperature alert at 22:44 — placing you already in the equipment corridor at that moment.",
             "ghost_clue": "Emmett was walking to find me when the temperature alarm triggered. He was in the equipment corridor at 22:44 and saw the door closing. He heard footsteps on the far side. He knows exactly what he witnessed.",
             "clues": [
                 {"round": 2,
@@ -705,6 +713,7 @@ _register("coastal_protocol", {
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": True,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "objective": "Before Round 3, ensure at least one other player has publicly named Samuel Torres as a suspect.",
+            "alibi": "You were in the common room all evening keeping yourself to a single glass of wine with dinner — or so you believe, though your recall of events after 22:30 is rather less sharp than you realise.",
             "ghost_clue": "Everything Zoe observed tonight is wrong. She believes it completely and sincerely. Please use the badge access logs instead of her testimony.",
             "clues": [
                 {"round": 2,
@@ -722,6 +731,7 @@ _register("coastal_protocol", {
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "objective": "Ensure at least one other player publicly accepts your alibi before the final vote.",
+            "alibi": "You were at your workstation compiling the daily badge access report all evening — but you discovered this morning that your administrative override code was used remotely while you were ostensibly at your desk.",
             "ghost_clue": "Someone used Samuel's administrative override code to archive the 21:47 badge entry before he could flag it. Samuel did not do it. Check who accessed the station administration terminal between 22:30 and 23:00.",
             "clues": [
                 {"round": 2,
@@ -739,6 +749,7 @@ _register("coastal_protocol", {
             "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
             "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
             "objective": "Find out what Nadia Volkov's alibi is before Round 3.",
+            "alibi": "You completed your compliance inspection of the station outbuildings and signed back in at the reception terminal at 22:30 — your inspection log accounts for every hour of the evening.",
             "ghost_clue": "Ingrid logged the pool temperature anomaly at 23:09. Two hours before anyone called it suspicious. Her inspection notes include the secondary control certification field. That field matters more than she realised.",
             "clues": [
                 {"round": 2,
