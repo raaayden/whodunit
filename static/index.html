@@ -443,8 +443,8 @@
                     <button class="filter-chip" data-filter="role" data-value="drunk">🍺</button>
                     <button class="filter-chip" data-filter="role" data-value="paranoid">🧠</button>
                     <button class="filter-chip" data-filter="role" data-value="undertaker">⚰️</button>
-                    <button class="filter-chip" data-filter="role" data-value="recluse">🎭</button>
-                    <button class="filter-chip" data-filter="role" data-value="jester">🃏</button>
+                    <button class="filter-chip" data-filter="role" data-value="recluse">🎭 Recluse</button>
+                    <button class="filter-chip" data-filter="role" data-value="jester">🃏 Jester</button>
                     <button class="filter-chip" data-filter="role" data-value="fool">🃏 Fool</button>
                 </div>
             </div>
@@ -900,7 +900,7 @@
         applyLibraryFilters();
     }
 
-    const libFilters = { players: 'all', role: 'all' };
+    const libFilters = { players: 'all', roles: new Set() };
 
     function applyLibraryFilters() {
         const search = (document.getElementById('libSearch')?.value || '').toLowerCase().trim();
@@ -917,7 +917,8 @@
                 || (libFilters.players === 'medium' && p >= 7 && p <= 9)
                 || (libFilters.players === 'large'  && p >= 10);
 
-            const rMatch = libFilters.role === 'all' || roles.includes(libFilters.role);
+            const rMatch = libFilters.roles.size === 0
+                || [...libFilters.roles].every(r => roles.includes(r));
             const sMatch = !search || title.includes(search);
 
             const show = pMatch && rMatch && sMatch;
@@ -930,14 +931,34 @@
             ? `Showing ${visible} of ${cards.length} games` : `${cards.length} games`;
     }
 
+    function syncLibRoleChips() {
+        document.querySelectorAll('[data-libfilter="role"]').forEach(c => {
+            const v = c.dataset.value;
+            if (v === 'all') c.classList.toggle('active', libFilters.roles.size === 0);
+            else             c.classList.toggle('active', libFilters.roles.has(v));
+        });
+    }
+
     // Library filter chip clicks (delegated so it works after templates load)
     document.addEventListener('click', e => {
         const chip = e.target.closest('[data-libfilter]');
         if (!chip) return;
         const group = chip.dataset.libfilter;
-        libFilters[group] = chip.dataset.value;
-        document.querySelectorAll(`[data-libfilter="${group}"]`).forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
+        const value = chip.dataset.value;
+
+        if (group === 'role') {
+            if (value === 'all') {
+                libFilters.roles.clear();
+            } else {
+                if (libFilters.roles.has(value)) libFilters.roles.delete(value);
+                else libFilters.roles.add(value);
+            }
+            syncLibRoleChips();
+        } else {
+            libFilters[group] = value;
+            document.querySelectorAll(`[data-libfilter="${group}"]`).forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+        }
         applyLibraryFilters();
     });
 
@@ -1170,7 +1191,7 @@
     }
 
     // ── Experimental Lab filter ───────────────────────────────────────────────
-    const labFilters = { players: 'all', type: 'all', role: 'all' };
+    const labFilters = { players: 'all', type: 'all', roles: new Set() };
 
     function applyLabFilters() {
         document.querySelectorAll('#viewExperimental .preset-card').forEach(card => {
@@ -1182,17 +1203,38 @@
                 || (labFilters.players === 'medium' && p >= 7 && p <= 9)
                 || (labFilters.players === 'large'  && p >= 10);
             const tMatch = labFilters.type === 'all' || labFilters.type === t;
-            const rMatch = labFilters.role === 'all' || roles.includes(labFilters.role);
+            const rMatch = labFilters.roles.size === 0
+                || [...labFilters.roles].every(r => roles.includes(r));
             card.style.display = (pMatch && tMatch && rMatch) ? 'block' : 'none';
+        });
+    }
+
+    function syncLabRoleChips() {
+        document.querySelectorAll('[data-filter="role"]').forEach(c => {
+            const v = c.dataset.value;
+            if (v === 'all') c.classList.toggle('active', labFilters.roles.size === 0);
+            else             c.classList.toggle('active', labFilters.roles.has(v));
         });
     }
 
     document.querySelectorAll('.filter-chip').forEach(chip => {
         chip.addEventListener('click', () => {
             const group = chip.dataset.filter;
-            labFilters[group] = chip.dataset.value;
-            document.querySelectorAll(`[data-filter="${group}"]`).forEach(c => c.classList.remove('active'));
-            chip.classList.add('active');
+            const value = chip.dataset.value;
+
+            if (group === 'role') {
+                if (value === 'all') {
+                    labFilters.roles.clear();
+                } else {
+                    if (labFilters.roles.has(value)) labFilters.roles.delete(value);
+                    else labFilters.roles.add(value);
+                }
+                syncLabRoleChips();
+            } else {
+                labFilters[group] = value;
+                document.querySelectorAll(`[data-filter="${group}"]`).forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+            }
             applyLabFilters();
         });
     });
