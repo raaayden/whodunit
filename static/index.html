@@ -103,7 +103,10 @@
         .copy-btn:hover { background: rgba(77,216,158,0.22); }
 
         /* Template library */
-        .template-filter { margin-bottom: 14px; }
+        .lib-search { width: 100%; background: var(--surface2); border: 1px solid var(--border2); color: var(--text); padding: 9px 12px; border-radius: 8px; font-size: 13px; font-family: var(--sans); outline: none; margin-bottom: 10px; }
+        .lib-search:focus { border-color: var(--accent); }
+        .lib-filters { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+        .lib-count { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
         .template-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
         .template-card:hover { border-color: var(--border2); }
         .tc-title { font-weight: 600; font-size: 14px; color: var(--accent2); margin-bottom: 3px; }
@@ -431,10 +434,23 @@
                     <button class="filter-chip" data-filter="type" data-value="crisis">⚡ Crisis</button>
                     <button class="filter-chip" data-filter="type" data-value="amnesia">🌫️ Amnesia</button>
                 </div>
+                <div class="filter-group">
+                    <span class="filter-label">Roles</span>
+                    <button class="filter-chip active" data-filter="role" data-value="all">All</button>
+                    <button class="filter-chip" data-filter="role" data-value="investigator">🔎</button>
+                    <button class="filter-chip" data-filter="role" data-value="poisoner">☠️</button>
+                    <button class="filter-chip" data-filter="role" data-value="spy">🕵️</button>
+                    <button class="filter-chip" data-filter="role" data-value="drunk">🍺</button>
+                    <button class="filter-chip" data-filter="role" data-value="paranoid">🧠</button>
+                    <button class="filter-chip" data-filter="role" data-value="undertaker">⚰️</button>
+                    <button class="filter-chip" data-filter="role" data-value="recluse">🎭</button>
+                    <button class="filter-chip" data-filter="role" data-value="jester">🃏</button>
+                    <button class="filter-chip" data-filter="role" data-value="fool">🃏 Fool</button>
+                </div>
             </div>
 
             <!-- Preset: The Last Carriage -->
-            <div class="preset-card" data-players="6" data-type="crisis">
+            <div class="preset-card" data-players="6" data-type="crisis" data-roles="poisoner investigator paranoid">
                 <div class="preset-badge" style="background:rgba(77,216,158,0.1);color:var(--success);border:1px solid rgba(77,216,158,0.25);">🚂 Thriller · 6 Players</div>
                 <div class="preset-title">The Last Carriage</div>
                 <div class="preset-desc">The brakes on the Midnight Meridian have been sabotaged and the liaison is dead. Six passengers, one killer, and a moving train with no way to stop. Best starting preset for new groups.</div>
@@ -451,7 +467,7 @@
             </div>
 
             <!-- Preset: The Coastal Protocol -->
-            <div class="preset-card" data-players="6" data-type="crisis">
+            <div class="preset-card" data-players="6" data-type="crisis" data-roles="poisoner investigator drunk">
                 <div class="preset-badge" style="background:rgba(109,184,255,0.1);color:var(--accent2);border:1px solid rgba(109,184,255,0.25);">🌊 Marine Research · 6 Players</div>
                 <div class="preset-title">The Coastal Protocol</div>
                 <div class="preset-desc">A marine research conference ends in disaster when the station director is found drowned in the specimen pool — with no water in his lungs. Crisis Dilemma with contaminated broadcast penalty.</div>
@@ -469,7 +485,7 @@
             </div>
 
             <!-- Preset: The Forgetting -->
-            <div class="preset-card" data-players="7" data-type="amnesia">
+            <div class="preset-card" data-players="7" data-type="amnesia" data-roles="investigator undertaker paranoid">
                 <div class="preset-badge" style="background:rgba(157,124,255,0.07);color:var(--accent);border:1px solid rgba(157,124,255,0.2);">🌫️ Psychological · 7 Players</div>
                 <div class="preset-title">The Forgetting</div>
                 <div class="preset-desc">Everyone at the Harthorn Neuroscience Field Station took a mandatory sedative at 22:30. By 06:00, a researcher is dead — and the killer has no memory of doing it. The accomplice knows. The killer doesn't.</div>
@@ -486,7 +502,7 @@
             </div>
 
             <!-- Preset: The Cursed Galleon -->
-            <div class="preset-card" data-players="8" data-type="standard">
+            <div class="preset-card" data-players="8" data-type="standard" data-roles="investigator drunk paranoid spy jester">
                 <div class="preset-badge badge-pirate">🏴‍☠️ Pirate · 8 Players</div>
                 <div class="preset-title">The Cursed Galleon</div>
                 <div class="preset-desc">A body found on deck at dawn. The crew of the Serpent's Fury must find the killer before they reach port — but one of them doesn't want to be found, and one desperately wants to be caught.</div>
@@ -504,7 +520,7 @@
             </div>
 
             <!-- Preset: Pawagam Cahaya -->
-            <div class="preset-card" data-players="8" data-type="standard">
+            <div class="preset-card" data-players="8" data-type="standard" data-roles="investigator drunk paranoid spy undertaker">
                 <div class="preset-badge" style="background:rgba(255,179,71,0.1);color:var(--warn);border:1px solid rgba(255,179,71,0.25);">🎬 Heritage Cinema · 8 Players · 🇲🇾</div>
                 <div class="preset-title">Pawagam Cahaya</div>
                 <div class="preset-desc">The owner of the last heritage cinema in Chow Kit was found dead in the projection room during a private screening. The film kept playing. Nobody heard anything over the orchestra track.</div>
@@ -522,7 +538,7 @@
             </div>
 
             <!-- Preset: The Séance at Blackwood Hall -->
-            <div class="preset-card" data-players="9" data-type="crisis">
+            <div class="preset-card" data-players="9" data-type="crisis" data-roles="poisoner investigator undertaker recluse paranoid jester">
                 <div class="preset-badge" style="background:rgba(157,124,255,0.1);color:var(--accent);border:1px solid rgba(157,124,255,0.25);">🕯️ Victorian Gothic · 9 Players</div>
                 <div class="preset-title">The Séance at Blackwood Hall</div>
                 <div class="preset-desc">A spiritualist medium is found dead mid-séance in a Victorian manor. Every guest claims they were communing with the dead — making alibis almost impossible to verify. Undertaker and Recluse included.</div>
@@ -542,7 +558,7 @@
             </div>
 
             <!-- Preset: Night in the Tower -->
-            <div class="preset-card" data-players="10" data-type="crisis">
+            <div class="preset-card" data-players="10" data-type="crisis" data-roles="poisoner investigator drunk paranoid spy jester undertaker">
                 <div class="preset-badge" style="background:rgba(109,184,255,0.1);color:var(--accent2);border:1px solid rgba(109,184,255,0.25);">🏙️ Corporate KL · 10 Players · 🇲🇾</div>
                 <div class="preset-title">Night in the Tower</div>
                 <div class="preset-desc">The CEO of NexaCore Technologies was found dead in the private boardroom during his own company's anniversary dinner on the 88th floor of Menara Axiom. Eighty-eight floors of glass and steel. No way down without being seen.</div>
@@ -563,7 +579,7 @@
             </div>
 
             <!-- Preset: Dead on Air -->
-            <div class="preset-card" data-players="5" data-type="crisis">
+            <div class="preset-card" data-players="5" data-type="crisis" data-roles="investigator jester">
                 <div class="preset-badge" style="background:rgba(255,92,92,0.1);color:var(--danger);border:1px solid rgba(255,92,92,0.25);">📺 Live Broadcast · 5 Players</div>
                 <div class="preset-title">Dead on Air</div>
                 <div class="preset-desc">The Pinnacle Awards is live before ten million viewers when the executive producer is found dead during the commercial break. The cameras are still rolling. Crisis Dilemma with vote suppression penalty.</div>
@@ -580,7 +596,7 @@
             </div>
 
             <!-- Preset: Operation Nusantara -->
-            <div class="preset-card" data-players="12" data-type="crisis">
+            <div class="preset-card" data-players="12" data-type="crisis" data-roles="poisoner investigator drunk paranoid spy fool jester">
                 <div class="preset-badge badge-espionage">🌏 Espionage · 12 Players</div>
                 <div class="preset-title">Operation Nusantara</div>
                 <div class="preset-desc">A senior double agent is found dead during a classified trilateral intelligence summit. Operatives from Malaysia, Singapore, and Indonesia must identify the killer — every delegation has something to hide.</div>
@@ -601,7 +617,7 @@
             </div>
 
             <!-- Preset: Hujan di Bukit Larut -->
-            <div class="preset-card" data-players="12" data-type="crisis">
+            <div class="preset-card" data-players="12" data-type="crisis" data-roles="poisoner investigator drunk paranoid spy fool jester undertaker recluse">
                 <div class="preset-badge" style="background:rgba(109,184,255,0.08);color:var(--accent2);border:1px solid rgba(109,184,255,0.2);">🌧️ Government Retreat · 12 Players · 🇲🇾</div>
                 <div class="preset-title">Hujan di Bukit Larut</div>
                 <div class="preset-desc">A landslide has blocked the only road down from Bukit Larut. Inside the colonial rest house, among twelve members of a Perak state government retreat, someone has killed the Deputy Director of Land Development.</div>
@@ -626,7 +642,28 @@
 
         <!-- Library -->
         <div class="panel-body" id="viewLibrary" style="display:none;">
-            <select id="themeFilter" class="template-filter" onchange="applyFilter()"></select>
+            <input type="text" class="lib-search" id="libSearch" placeholder="Search by title…" oninput="applyLibraryFilters()">
+            <div class="lib-filters">
+                <div class="filter-group">
+                    <span class="filter-label">Players</span>
+                    <button class="filter-chip active" data-libfilter="players" data-value="all">All</button>
+                    <button class="filter-chip" data-libfilter="players" data-value="small">4–6</button>
+                    <button class="filter-chip" data-libfilter="players" data-value="medium">7–9</button>
+                    <button class="filter-chip" data-libfilter="players" data-value="large">10+</button>
+                </div>
+                <div class="filter-group">
+                    <span class="filter-label">Roles</span>
+                    <button class="filter-chip active" data-libfilter="role" data-value="all">All</button>
+                    <button class="filter-chip" data-libfilter="role" data-value="investigator">🔎</button>
+                    <button class="filter-chip" data-libfilter="role" data-value="poisoner">☠️</button>
+                    <button class="filter-chip" data-libfilter="role" data-value="spy">🕵️</button>
+                    <button class="filter-chip" data-libfilter="role" data-value="drunk">🍺</button>
+                    <button class="filter-chip" data-libfilter="role" data-value="paranoid">🧠</button>
+                    <button class="filter-chip" data-libfilter="role" data-value="undertaker">⚰️</button>
+                    <button class="filter-chip" data-libfilter="role" data-value="recluse">🎭</button>
+                </div>
+            </div>
+            <div class="lib-count" id="libCount"></div>
             <div id="templateList"><p class="empty-state">Enter your password to load templates.</p></div>
         </div>
     </aside>
@@ -816,18 +853,24 @@
         const data = await res.json();
 
         const list = document.getElementById('templateList');
-        const filter = document.getElementById('themeFilter');
-        let cats = new Set();
         list.innerHTML = '';
 
         if (!data.templates.length) {
             list.innerHTML = '<p class="empty-state">No templates yet. Generate one first.</p>';
+            document.getElementById('libCount').innerText = '';
             return;
         }
 
         data.templates.forEach(t => {
-            const cat = (t.theme || 'custom').trim().toLowerCase().split(' ')[0];
-            cats.add(cat);
+            const roles = [];
+            if (t.has_poisoner)     roles.push('poisoner');
+            if (t.has_investigator) roles.push('investigator');
+            if (t.has_drunk)        roles.push('drunk');
+            if (t.has_paranoid)     roles.push('paranoid');
+            if (t.has_spy)          roles.push('spy');
+            if (t.has_fool)         roles.push('fool');
+            if (t.has_undertaker)   roles.push('undertaker');
+            if (t.has_recluse)      roles.push('recluse');
 
             const tags = [];
             tags.push(`<span class="tag tag-killer">🔪 ×1</span>`);
@@ -843,7 +886,10 @@
             tags.push(`<span class="tag">👤 ${t.player_count}p</span>`);
 
             list.innerHTML += `
-                <div class="template-card" data-category="${cat}">
+                <div class="template-card"
+                     data-players="${t.player_count}"
+                     data-roles="${roles.join(' ')}"
+                     data-title="${(t.theme_title || '').toLowerCase()}">
                     <div class="tc-title">${t.theme_title}</div>
                     <div class="tc-desc">${t.short_description}</div>
                     <div class="tc-tags">${tags.join('')}</div>
@@ -851,16 +897,49 @@
                 </div>`;
         });
 
-        filter.innerHTML = '<option value="all">All themes</option>';
-        cats.forEach(c => filter.innerHTML += `<option value="${c}">${c.charAt(0).toUpperCase()+c.slice(1)}</option>`);
+        applyLibraryFilters();
     }
 
-    function applyFilter() {
-        const val = document.getElementById('themeFilter').value;
-        document.querySelectorAll('.template-card').forEach(c => {
-            c.style.display = (val === 'all' || c.dataset.category === val) ? 'block' : 'none';
+    const libFilters = { players: 'all', role: 'all' };
+
+    function applyLibraryFilters() {
+        const search = (document.getElementById('libSearch')?.value || '').toLowerCase().trim();
+        const cards  = document.querySelectorAll('.template-card');
+        let visible  = 0;
+
+        cards.forEach(card => {
+            const p       = parseInt(card.dataset.players || '0');
+            const roles   = card.dataset.roles || '';
+            const title   = card.dataset.title || '';
+
+            const pMatch = libFilters.players === 'all'
+                || (libFilters.players === 'small'  && p <= 6)
+                || (libFilters.players === 'medium' && p >= 7 && p <= 9)
+                || (libFilters.players === 'large'  && p >= 10);
+
+            const rMatch = libFilters.role === 'all' || roles.includes(libFilters.role);
+            const sMatch = !search || title.includes(search);
+
+            const show = pMatch && rMatch && sMatch;
+            card.style.display = show ? 'block' : 'none';
+            if (show) visible++;
         });
+
+        const countEl = document.getElementById('libCount');
+        if (countEl) countEl.innerText = visible < cards.length
+            ? `Showing ${visible} of ${cards.length} games` : `${cards.length} games`;
     }
+
+    // Library filter chip clicks (delegated so it works after templates load)
+    document.addEventListener('click', e => {
+        const chip = e.target.closest('[data-libfilter]');
+        if (!chip) return;
+        const group = chip.dataset.libfilter;
+        libFilters[group] = chip.dataset.value;
+        document.querySelectorAll(`[data-libfilter="${group}"]`).forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        applyLibraryFilters();
+    });
 
     async function spawnPreset(presetId, btnId) {
         const pass = document.getElementById('adminPass').value;
@@ -1091,18 +1170,20 @@
     }
 
     // ── Experimental Lab filter ───────────────────────────────────────────────
-    const labFilters = { players: 'all', type: 'all' };
+    const labFilters = { players: 'all', type: 'all', role: 'all' };
 
     function applyLabFilters() {
         document.querySelectorAll('#viewExperimental .preset-card').forEach(card => {
-            const p = parseInt(card.dataset.players || '0');
-            const t = card.dataset.type || 'standard';
+            const p     = parseInt(card.dataset.players || '0');
+            const t     = card.dataset.type || 'standard';
+            const roles = card.dataset.roles || '';
             const pMatch = labFilters.players === 'all'
                 || (labFilters.players === 'small'  && p <= 6)
                 || (labFilters.players === 'medium' && p >= 7 && p <= 9)
                 || (labFilters.players === 'large'  && p >= 10);
             const tMatch = labFilters.type === 'all' || labFilters.type === t;
-            card.style.display = (pMatch && tMatch) ? 'block' : 'none';
+            const rMatch = labFilters.role === 'all' || roles.includes(labFilters.role);
+            card.style.display = (pMatch && tMatch && rMatch) ? 'block' : 'none';
         });
     }
 
