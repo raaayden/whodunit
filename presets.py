@@ -1109,3 +1109,650 @@ _register("the_forgetting", {
         }
     ]
 })
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PRESET 8 — Night in the Tower (10 players, corporate KL, crisis night)
+# Setting: A tech company's rooftop anniversary dinner on the 88th floor of a
+# KL skyscraper. The CEO is found dead in the private boardroom.
+# Roles: Killer, Accomplice/Poisoner, Investigator, Undertaker, Recluse,
+#        Paranoid, Spy, Drunk, Jester, Innocent x1
+# ══════════════════════════════════════════════════════════════════════════════
+
+_register("night_in_the_tower", {
+    "is_crisis": True,
+    "theme_title": "Night in the Tower",
+    "short_description": "Datuk Rashid Azlan, CEO of NexaCore Technologies, was found dead in the private boardroom during his own company's anniversary dinner on the 88th floor. Eighty-eight floors of glass and steel. No way down without being seen.",
+    "master_story": {
+        "background": "• NexaCore's anniversary dinner brought together the board, senior executives, and a handful of carefully selected guests at the top of Menara Axiom in Kuala Lumpur.\n• Datuk Rashid had spent the week quietly informing board members of a planned hostile restructuring — consolidating power, eliminating three senior VP roles, and forcing out the company co-founder.\n• At 21:45 he excused himself from the dinner table to take a private call in the adjoining boardroom. He never returned.",
+        "the_murder": "• Datuk Rashid was found by the event coordinator at 22:30, slumped in the boardroom chair with traces of a fast-acting cardiac compound in the glass of Scotch beside him.\n• The compound is derived from a combination of medications — individually harmless, together lethal — requiring medical knowledge to dose correctly.\n• The boardroom door was unlocked. Anyone on the guest list could have entered during the forty-five minute window.",
+        "the_solution": "• Puan Sri Faridah Yusof, the Chief Legal Officer, poisoned the Scotch during the brief moment she entered the boardroom to 'deliver a document' at 22:05.\n• She was assisted by Hazwan Idris, Head of Corporate Strategy, who arranged for Datuk Rashid to be in the boardroom alone and wiped the CCTV log entry covering 22:00–22:10.\n• Faridah's motive: the restructuring would have buried the legal irregularities she had managed for Datuk Rashid for three years — when he no longer needed her, she became a liability. She chose to act first.",
+        "public_clues": [
+            {"round": 3, "content": "The building's access card log — retrieved by security — shows the boardroom was accessed at 22:05 by a card registered to the Legal division. All Legal division cards share one floor designation code: L7."}
+        ]
+    },
+    "characters": [
+        {
+            "name": "Puan Sri Faridah Yusof",
+            "public_summary": "NexaCore's Chief Legal Officer, composed and meticulous, who has protected the company's interests — and Datuk Rashid's — for twelve years.",
+            "role_description": "• Personality: Precise and controlled — never visibly rattled, always three steps ahead of the conversation\n• Connection: You managed Datuk Rashid's legal grey areas for years — including three contracts that should never have been signed\n• Dark Secret: The restructuring would have exposed those contracts to a new legal team you could not control\n• Tonight's Agenda: You entered the boardroom at 22:05 to deliver a document. You were there for six minutes. The Scotch was already poured.",
+            "is_killer": True, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were at the dinner table from 21:00 until 22:30, speaking with board members on your left and right — except for a six-minute window at 22:05 when you stepped away to deliver a document to the boardroom.",
+            "objective": "Ensure Encik Yusri Abd Halim receives at least one vote at the final count.",
+            "ghost_clue": "Faridah entered the boardroom at 22:05. I poured the Scotch myself at 21:50. When I took the first sip at 22:15 it tasted different — I thought it was my imagination. It was not.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You noticed Hazwan checking his phone at 22:02 and immediately leaving the table without explanation — he returned eleven minutes later, slightly flushed.",
+                 "poisoned_content": "You noticed Dr. Priya Chandran leave the dinner table at 21:58 carrying what appeared to be a small medical case, returning without it fifteen minutes later."},
+                {"round": 3,
+                 "true_content": "You were in the boardroom at 22:05 and saw the Scotch glass already poured on the side table — you set the document beside it and left without touching the glass.",
+                 "poisoned_content": "You found a torn strip of blister packaging — the kind pharmaceutical tablets come in — near the boardroom entrance on your way back from the bathroom."}
+            ]
+        },
+        {
+            "name": "Hazwan Idris",
+            "public_summary": "NexaCore's Head of Corporate Strategy, Datuk Rashid's most trusted internal operator and the architect of the restructuring plan.",
+            "role_description": "• Personality: Smooth and charming, excellent at making people feel included while telling them nothing\n• Connection: You designed the restructuring and knew which loose ends it would create — including Faridah\n• Dark Secret: You agreed to erase the CCTV log entry covering 22:00–22:10 in exchange for being protected in the new structure\n• Poisoner Ability: Each round you may secretly corrupt one player's evidence on your device.",
+            "is_killer": False, "is_accomplice": True, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": True, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were at the dinner table until 22:02 when you received a text and stepped to the corridor — you returned at 22:13 after the call ended, which two people at the table can confirm.",
+            "objective": "Before Round 3, make at least one player publicly question Dr. Priya Chandran's alibi.",
+            "ghost_clue": "Hazwan left the table at exactly the wrong moment and came back looking relieved. Whatever he did in those eleven minutes was not a phone call.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You told the group you were taking a call — but you were at the server room on floor 88A erasing eleven minutes of footage from the boardroom camera log.",
+                 "poisoned_content": "You overheard Dr. Priya Chandran asking the event staff whether anyone had access to the boardroom before 22:00 — a strange question to ask before the body was even found."},
+                {"round": 3,
+                 "true_content": "You erased the CCTV log entry covering 22:00 to 22:10 at Faridah's instruction. The gap will eventually be noticed — you just needed it to last the night.",
+                 "poisoned_content": "You saw Dr. Priya reach into her bag during dinner and check something quickly — it looked like a small amber prescription bottle that she immediately put away."}
+            ]
+        },
+        {
+            "name": "Dato Shahril Mokhtar",
+            "public_summary": "NexaCore's Chairman of the Board, a silver-haired patriarch who built the company's early foundation before handing operational control to Datuk Rashid.",
+            "role_description": "• Personality: Measured and grand — you speak slowly, command attention without effort, and avoid direct confrontation\n• Connection: Datuk Rashid was your protégé. His death removes the one person still loyal to your original vision for the company\n• Dark Secret: You were quietly in discussions with a rival firm about a potential merger that Datuk Rashid did not know about and would have blocked\n• Tonight's Agenda: You wanted to sound out the board's appetite for the merger without Datuk Rashid in the room. Now he will never be.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": True, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were at the head of the dinner table for the entire evening — six board members and the event photographer can place you there from 20:30 to 22:30 without interruption.",
+            "objective": "Ensure Puan Siti Ramlah Osman is not voted for at the final count.",
+            "ghost_clue": "Dato Shahril knows the legal situation better than he admits. He had his own reasons to want the restructuring stopped — just not this way.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You observed Puan Sri Faridah leave the table at 22:05 carrying a slim document folder — she returned six minutes later without it and immediately resumed conversation as if nothing had happened.",
+                 "poisoned_content": "You noticed Encik Yusri leave his seat at 21:55 and speak briefly with one of the catering staff near the service entrance, then return to the table looking unsettled."},
+                {"round": 3,
+                 "true_content": "Thirty years in boardrooms tells you either Puan Sri Faridah Yusof or Hazwan Idris arranged this — one controls the legal exposure and one controls the information architecture. Together they are the entire risk.",
+                 "poisoned_content": "Your read of the room suggests either Dr. Priya Chandran or Encik Yusri is responsible — both have been too composed since the body was found."}
+            ]
+        },
+        {
+            "name": "Dr. Priya Chandran",
+            "public_summary": "NexaCore's Chief Medical Officer, responsible for employee wellness programmes and occupational health compliance.",
+            "role_description": "• Personality: Clinical and efficient, quick to note what others miss — you observe more than you say\n• Connection: You conducted Datuk Rashid's last executive health screening three weeks ago and flagged an irregular prescription in his file\n• Dark Secret: You discovered someone inside NexaCore had been accessing the pharmaceutical procurement channel for personal use — you had not yet decided what to do with that information\n• Tonight's Agenda: You brought your medical bag out of habit — and because you had a feeling tonight would not end well.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": True, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were at the dinner table from 21:00 to 22:30 without leaving your seat — your medical bag was under your chair the entire time and you did not open it until asked to assess the body.",
+            "objective": "Discover what role Puan Sri Faridah Yusof claims to be before the final vote.",
+            "ghost_clue": "Dr. Priya knew about the pharmaceutical access anomaly before tonight. She was still deciding who to tell. That hesitation cost me everything.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "Your CMO access shows the company's pharmaceutical procurement log has an unusual entry from three weeks ago — a prescription-grade compound ordered under a department code that should not have access to that category.",
+                 "poisoned_content": "You noticed Encik Yusri's hands were unsteady when he returned to the table at 22:05 — a physiological stress response inconsistent with someone who had just taken a phone call."},
+                {"round": 3,
+                 "true_content": "The compound in Datuk Rashid's Scotch is consistent with a cardiac glycoside interaction — requiring medical knowledge to dose correctly and access to a procurement channel to obtain quietly.",
+                 "poisoned_content": "You found a nitrile glove — the kind worn for pharmaceutical handling — discarded in the bin near the corridor bathroom outside the boardroom."}
+            ]
+        },
+        {
+            "name": "Encik Yusri Abd Halim",
+            "public_summary": "NexaCore's VP of Operations, a pragmatic and detail-oriented executive who has run the company's logistics and facilities for eight years.",
+            "role_description": "• Personality: Efficient and literal — you solve problems, you do not philosophise about them\n• Connection: The restructuring would have eliminated your role entirely within six months\n• Dark Secret: You have been quietly interviewing at a competitor for four weeks — if that comes out tonight, you look like a man with a reason to act\n• Tonight's Agenda: You wanted to speak privately with Datuk Rashid about the restructuring timeline. You never got the chance.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were at the dinner table until 21:55 when you stepped to the corridor to speak with a catering staff member about a logistics issue — you returned at 22:03 and stayed for the rest of the evening.",
+            "objective": "Before Round 3, ensure at least one other player has publicly named Hazwan Idris as a suspect.",
+            "ghost_clue": "Yusri left the table at 21:55. He passed the boardroom door on his way to the service corridor. He did not go in. But he heard something through the door that he has not told anyone.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You passed the boardroom door at 21:57 and heard two voices inside — one was Datuk Rashid's, the other was lower, deliberate, and stopped abruptly when you got close.",
+                 "poisoned_content": "You saw Dr. Priya's medical bag open briefly at the table around 21:50 — she closed it quickly but you noticed a small amber bottle that does not look like standard first-aid equipment."},
+                {"round": 3,
+                 "true_content": "The voice you heard through the boardroom door at 21:57 was conversational — face to face, not a phone call. Someone was already in the boardroom with Datuk Rashid before 22:00.",
+                 "poisoned_content": "You found a discarded folded document near the lift lobby — a NexaCore legal memorandum with a handwritten note in the margin where the word 'tonight' is clearly legible."}
+            ]
+        },
+        {
+            "name": "Puan Siti Ramlah Osman",
+            "public_summary": "NexaCore's Head of Communications, the architect of the company's public image and the person who controls what story gets told tomorrow morning.",
+            "role_description": "• Personality: Polished and strategic — every sentence you say in public has been considered at least twice\n• Connection: You have written the press release for every major NexaCore announcement for nine years, including the ones that buried bad news\n• Dark Secret: You have been leaking internal NexaCore documents to a financial journalist in exchange for favourable coverage\n• Tonight's Agenda: You needed to ensure the restructuring announcement lands correctly with the media. Now you have a much larger story to manage.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were at the dinner table from start to finish — your phone was on the table the entire evening and you sent eleven work messages between 20:30 and 22:30, all timestamped.",
+            "objective": "Do not be named as a suspect by more than two players during the entire game.",
+            "ghost_clue": "Siti Ramlah has been managing my public narrative for nine years. She knew where every body was buried — metaphorically. She will already be writing the version of tonight's story that protects NexaCore. Pay attention to what she leaves out.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You noticed Hazwan return to the table at 22:13 and immediately make eye contact with Faridah with a small nod — the silent confirmation between two people who have agreed on something in advance.",
+                 "poisoned_content": "You noticed Encik Yusri make direct eye contact with the event coordinator at 22:00 and then look deliberately away — a non-verbal signal you have seen in media briefings when someone is confirming a plan."},
+                {"round": 3,
+                 "true_content": "Twenty years of watching group dynamics: the coordination between Faridah and Hazwan tonight was rehearsed — three specific looks at timed intervals that suggest a pre-agreed sequence.",
+                 "poisoned_content": "You noticed Dr. Priya take her medical bag to the bathroom at 22:00 and return without it — she retrieved it forty minutes later after the body was found, which is the wrong order of events."}
+            ]
+        },
+        {
+            "name": "Tengku Izzuddin Shah",
+            "public_summary": "An independent board member and minor royal, present as a symbolic stakeholder and long-standing friend of Datuk Rashid's family.",
+            "role_description": "• Personality: Graciously vague — you attend these events, you observe, and you say very little that commits you to anything\n• Connection: Your family invested in NexaCore's founding round — you have more financial interest in this company than anyone knows\n• Dark Secret: You have been quietly supporting a competing technology venture that directly rivals NexaCore's core product — Datuk Rashid recently discovered this\n• Tonight's Agenda: You came to reassure Datuk Rashid that your competing investment was merely diversification. Now the conversation will never happen.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": True,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were at the dinner table the entire evening, consuming rather more of the company's wine collection than was entirely dignified — two board members have noted your condition with visible concern.",
+            "objective": "Ensure Dato Shahril Mokhtar is not voted for at the final count.",
+            "ghost_clue": "Tengku Izzuddin was drinking heavily from the moment he arrived. Whatever he thinks he saw through the champagne haze, apply appropriate discount.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You are absolutely certain the event coordinator is responsible — the way he kept checking the boardroom corridor at 22:00 was deeply suspicious and nobody else seems to have noticed.",
+                 "poisoned_content": "You are quite sure Dr. Priya did something — she had a medical bag, she left the table, and she came back looking pale. That is practically a confession."},
+                {"round": 3,
+                 "true_content": "You maintain the event coordinator arranged this — he was the only one moving freely between all areas of the floor and nobody questioned him once all evening.",
+                 "poisoned_content": "You are now more convinced than ever that Dr. Priya administered something from her medical bag — the timeline fits and she had the knowledge to do it without drawing attention."}
+            ]
+        },
+        {
+            "name": "Rozita Fadzillah",
+            "public_summary": "NexaCore's Chief Financial Officer, sharp and quietly powerful, who controls every budget line in the company.",
+            "role_description": "• Personality: Economical with words and with trust — you say the minimum necessary and absorb everything else\n• Connection: The restructuring would have given you significantly more autonomy — you were one of the few who stood to gain\n• Dark Secret: You have been aware of the legal irregularities Faridah managed for Datuk Rashid and have kept a private record of them as insurance\n• Tonight's Agenda: You wanted to understand exactly how the restructuring would affect the three contracts you know about. You still do.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": True, "is_recluse": False,
+            "alibi": "You were at the dinner table without interruption — you do not drink at company events and had your laptop open reviewing Q3 projections for most of the evening.",
+            "objective": "By Round 2, convince at least one other player that Tengku Izzuddin Shah could not have done this.",
+            "ghost_clue": "Rozita knew about the contracts. She kept records. After tonight she will have a decision to make about what to do with them — and that decision will reveal more about her than anything she says tonight.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You noticed the CCTV monitor at the security desk — visible from your seat — showed a gap in the boardroom corridor feed between 22:00 and 22:10. You noted the time. Nobody else appeared to notice.",
+                 "poisoned_content": "You observed Encik Yusri speaking in low, urgent tones with the event coordinator near the service entrance at 21:58, which ended abruptly when another guest approached."},
+                {"round": 3,
+                 "true_content": "The CCTV gap between 22:00 and 22:10 is not a technical glitch — the system shows deliberate manual override, which requires floor-level admin credentials that only three people on the guest list possess.",
+                 "poisoned_content": "You found a printed copy of the restructuring proposal with handwritten annotations on pages four and seven — in a hand you almost recognise but cannot immediately place."}
+            ]
+        },
+        {
+            "name": "Ahmad Firdaus Baharom",
+            "public_summary": "The evening's event coordinator, a meticulous young professional hired to run NexaCore's anniversary dinner with flawless discretion.",
+            "role_description": "• Personality: Professionally invisible — you are present everywhere and noticed nowhere, which is exactly how you prefer it\n• Connection: You have coordinated three NexaCore events this year and know the layout of the 88th floor better than most executives\n• Dark Secret: You accepted an envelope from a man outside the building two hours before the dinner — instructions inside told you to ensure the boardroom was unlocked and the Scotch was poured. You told yourself it was just setup instructions.\n• Tonight's Agenda: You have been pretending all evening that you do not know what you know. You are very good at pretending.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": True, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were moving between the kitchen, dining floor, and service corridor throughout the evening — your job required you to be everywhere, which means no single person can account for your complete movements.",
+            "objective": "Do not let Rozita Fadzillah go an entire round without being questioned by someone at the table.",
+            "ghost_clue": "The event coordinator poured the Scotch at my request. He brought it to the boardroom at 21:50. He did not know what was in it — but someone ensured he would not question the instructions.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You are absolutely convinced Rozita arranged this — the CFO with access to every financial record had the most to gain and the most to protect if those records were ever examined.",
+                 "poisoned_content": "You are certain Dato Shahril is behind it — he has been circling this company like a patient creditor for years and tonight gave him everything he needed."},
+                {"round": 3,
+                 "true_content": "You know in your gut that Rozita is responsible — she was the only executive who remained completely calm from the moment the body was found, and calm is not a natural response unless you already knew.",
+                 "poisoned_content": "You are more convinced than ever that Dato Shahril orchestrated this — his composure is too perfect, his grief too well-measured for someone who genuinely did not know."}
+            ]
+        },
+        {
+            "name": "Marina Lim Mei Ling",
+            "public_summary": "A technology journalist from a major business publication, the only non-employee in the room, invited to cover the anniversary.",
+            "role_description": "• Personality: Attentive and disarmingly direct — people underestimate how much you remember because you never take notes visibly\n• Connection: You wrote the profile piece on Datuk Rashid eighteen months ago — he gave you more than he intended\n• Dark Secret: You already know about the restructuring — a source inside NexaCore leaked it three days ago. You came tonight hoping for confirmation, not a murder.\n• Jester Goal: Get the executives to vote for YOU. Play the suspicious outsider. Make them think the journalist is covering something up — because you are, but not murder.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": True,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were at the dinner table taking notes on your phone from 20:30 until the body was found — your editor has three voice notes timestamped between 21:00 and 22:15 that you recorded quietly under the table.",
+            "objective": "Ensure at least one other player publicly accepts your alibi before the final vote.",
+            "ghost_clue": "The journalist was the only person in that room with no stake in NexaCore's future. She was watching all of them. She saw something. She just has not decided yet whether to publish it or say it out loud.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You saw Hazwan return to the table at 22:13 and immediately make eye contact with Faridah — not social acknowledgement, but the eye contact of people confirming something has been done.",
+                 "poisoned_content": "You noticed Encik Yusri's hands were shaking slightly when he came back to the table at 22:03 — you have interviewed people under pressure for ten years and that is not how someone looks after a phone call."},
+                {"round": 3,
+                 "true_content": "Eight years covering corporate malfeasance. The coordination between Faridah and Hazwan tonight matches every pattern — timed departures, silent acknowledgements, the performance of ordinary behaviour after the fact.",
+                 "poisoned_content": "Your source told you three days ago that someone in the legal or strategy division was preparing a contingency that went beyond the restructuring. Tonight looks like that contingency."}
+            ]
+        }
+    ]
+})
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PRESET 9 — The last show (8 players, heritage cinema Chow Kit, no crisis)
+# Setting: A private screening of a restored 1965 Malay film at the last
+# standing heritage cinema in KL. The cinema owner is found dead in the
+# projection room. Intimate deduction — no crisis mechanic.
+# Roles: Killer, Accomplice, Investigator, Undertaker, Paranoid, Spy, Drunk, Innocent
+# ══════════════════════════════════════════════════════════════════════════════
+
+_register("last_show", {
+    "is_crisis": False,
+    "theme_title": "Pawagam Cahaya",
+    "short_description": "Encik Halim Sulaiman, owner of the last standing heritage cinema in Chow Kit, was found dead in the projection room during a private screening. The film kept playing. Nobody heard anything over the orchestra track.",
+    "master_story": {
+        "background": "• Pawagam Cahaya was built in 1957 and has survived demolition campaigns, floods, and three recessions through the stubborn determination of its owner, Encik Halim Sulaiman.\n• Tonight's private screening of a restored 1965 Malay classic was by invitation only — eight guests, a projectionist, and Encik Halim, who curated every detail himself.\n• In the weeks before tonight, Encik Halim had been approached by a developer with an offer to purchase the cinema. He had publicly refused. Privately, he had begun to waver.",
+        "the_murder": "• Encik Halim was found in the projection room at the interval — slumped over the editing table as if he had fallen asleep.\n• The cause was blunt force trauma from behind — delivered with the heavy metal reel canister that sits on the shelf beside the editing table.\n• The projection booth door has no lock. Anyone who slipped upstairs during the forty-minute first half would have been invisible to the audience below.",
+        "the_solution": "• Nor Azlina Rashid, a property developer's legal representative, killed Encik Halim after he told her at the interval that he had reconsidered and would refuse the developer's final offer.\n• She was assisted by Faizal Hamdan, the cinema's projectionist, who agreed to keep the film running and make no interval announcement in exchange for a relocation payment if the sale went through.\n• The reel canister was wiped down and returned to the shelf. Nor Azlina left the projection room before the lights came up.",
+        "public_clues": [
+            {"round": 3, "content": "The projectionist's logbook — found behind the projection console — contains a handwritten note in different ink from the surrounding entries: 'Interval: do not stop. Keep running until told.' The handwriting is not Encik Halim's."}
+        ]
+    },
+    "characters": [
+        {
+            "name": "Nor Azlina Rashid",
+            "public_summary": "A property lawyer representing the development consortium that has been attempting to acquire Pawagam Cahaya for the past eighteen months.",
+            "role_description": "• Personality: Professionally pleasant, never visibly pressured — you have conducted difficult negotiations before and you never let it show\n• Connection: You met Encik Halim privately at the interval to receive his final answer on the acquisition. His answer was no.\n• Dark Secret: The acquisition was your biggest career deal — its failure would have ended your partnership track. You chose not to accept failure.\n• Tonight's Agenda: You went upstairs at the interval. You came back down alone. The film kept playing.",
+            "is_killer": True, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were in your seat for the first forty minutes, then stepped out at the interval to use the bathroom on the ground floor — you were back in your seat before the second half began.",
+            "objective": "Ensure Cikgu Rosnani Hamid receives at least one vote at the final count.",
+            "ghost_clue": "Nor Azlina asked to speak privately at the interval. I told her the answer was no. She was calm. That should have worried me more than it did.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You noticed Faizal descend the stairs briefly during the interval, speak to you for thirty seconds near the lobby curtain, and return upstairs without speaking to anyone else.",
+                 "poisoned_content": "You saw Cikgu Rosnani slip away from the lobby group during the interval and take the side stairs toward the upper floor — she claimed later to have been looking for the bathroom, but the bathroom is on the ground floor."},
+                {"round": 3,
+                 "true_content": "The reel canister on the projection room shelf was in a different position when you left from when you arrived. You noticed it because you always notice the details of a room you are about to leave permanently.",
+                 "poisoned_content": "You found a folded cinema programme near the bottom of the upper stairs with a handwritten price figure on the back — matching one of the consortium's previous offer amounts."}
+            ]
+        },
+        {
+            "name": "Faizal Hamdan",
+            "public_summary": "Pawagam Cahaya's projectionist of fourteen years, the only person who understands the restored 35mm equipment well enough to run it.",
+            "role_description": "• Personality: Quiet and avoidant — you are most comfortable when the lights are down and nobody is looking at you\n• Connection: Encik Halim paid your salary for fourteen years and never once questioned your absences. You owe him everything. You forgot that tonight.\n• Dark Secret: You agreed to keep the film running through the interval and make no announcement in exchange for a relocation payment. You did not think anyone would die.\n• Tonight's Agenda: You stayed at the projection console. The booth window faces the screen. It does not face the editing table. You told yourself you did not know what was happening.",
+            "is_killer": False, "is_accomplice": True, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were in the projection booth for the entire screening — the booth can only be accessed via the upper staircase and you did not leave until called down after the body was found.",
+            "objective": "Before Round 3, make at least one player publicly question Cikgu Rosnani Hamid's alibi.",
+            "ghost_clue": "Faizal knew what was going to happen. He kept the film running so the music would cover any sound from the room behind him. He is not a killer. But he is not innocent either.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You agreed to keep the film running through the interval without announcement. You stayed at the projection console and did not look toward the back of the booth — deliberately.",
+                 "poisoned_content": "You observed Cikgu Rosnani ascending the upper staircase during the interval — she appeared to be moving quickly and quietly, unlike someone looking for a bathroom."},
+                {"round": 3,
+                 "true_content": "When you finally looked toward the editing table at the end of the interval, the reel canister was in a different position from where Encik Halim always kept it. You put it back before you raised the alarm. You do not know why you did that.",
+                 "poisoned_content": "You heard the projection room door open and close twice during the interval. The second set of footsteps was lighter and faster than the first."}
+            ]
+        },
+        {
+            "name": "Profesor Madya Dr. Azhari Kassim",
+            "public_summary": "A film historian from Universiti Malaya who has spent twenty years documenting Malaysia's heritage cinema culture, and Encik Halim's closest academic ally.",
+            "role_description": "• Personality: Passionate and easily distracted by detail — you can speak for forty minutes about a single frame of celluloid\n• Connection: Encik Halim helped you access archive footage for your research. He was the last person keeping certain films alive.\n• Dark Secret: You have been writing a newspaper column arguing against the sale for three months without disclosing your personal connection to Encik Halim\n• Tonight's Agenda: You wanted to understand whether Encik Halim had genuinely decided to refuse the offer. You believe he had.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": True, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were in your seat for the entire first half and spent the interval in the lobby speaking with Datin Zubaidah about the restoration quality — she will confirm this without hesitation.",
+            "objective": "By Round 2, convince at least one other player that Datin Zubaidah Mahmood could not have done this.",
+            "ghost_clue": "Azhari knew I intended to refuse. He was the last person I told — three days ago, by phone. He cried. That is the kind of man he is. He did not do this.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You noticed Nor Azlina leave the lobby during the interval and not return for at least twelve minutes — far longer than a bathroom visit, and in the wrong direction for the ground floor facilities.",
+                 "poisoned_content": "You noticed Cikgu Rosnani speaking quietly to Faizal near the base of the upper staircase during the interval — an unusual pairing given they appeared not to know each other when introduced earlier."},
+                {"round": 3,
+                 "true_content": "Your academic instinct says either Nor Azlina Rashid or Faizal Hamdan is responsible — one had the motive to end the negotiation permanently and one had the access to the projection room without raising suspicion.",
+                 "poisoned_content": "Your reading of the evening suggests either Cikgu Rosnani or Izwan Shah is responsible — both arrived without a clear relationship to Encik Halim and both seemed to be watching him rather than the film."}
+            ]
+        },
+        {
+            "name": "Datin Zubaidah Mahmood",
+            "public_summary": "A cultural philanthropist and retired civil servant who has funded Pawagam Cahaya's restoration programme for the past five years.",
+            "role_description": "• Personality: Gracious and occasionally imperious — you have given enough money to earn the right to an opinion on everything\n• Connection: You have funded three cinema restorations through your foundation. Pawagam Cahaya was the most personal.\n• Dark Secret: You have been in preliminary discussions with a cultural preservation trust about gifting the cinema — which would only be possible if Encik Halim agreed to transfer the deed, which he never did\n• Tonight's Agenda: You wanted to raise the deed transfer with Encik Halim at the right moment. Now the moment is gone.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": True, "is_recluse": False,
+            "alibi": "You were in the lobby during the interval in direct conversation with Professor Azhari for the full duration — he barely stopped talking long enough for you to refill your drink.",
+            "objective": "Ensure Profesor Madya Dr. Azhari Kassim is not voted for at the final vote.",
+            "ghost_clue": "Datin Zubaidah has already begun calculating what happens to the cinema now. She is not the killer — her grief is genuine. But her plans for this building were never entirely what she told me they were.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You noticed the projectionist's booth window was dark at the wrong moment during the interval — the projection light should be visible through the booth window at all times during a screening, but for approximately eight minutes it was not.",
+                 "poisoned_content": "You observed Izwan Shah moving toward the service corridor at the rear of the cinema during the interval — not a route a guest should know."},
+                {"round": 3,
+                 "true_content": "The projectionist's booth window was dark for approximately eight minutes during the interval — meaning the projector was briefly stopped, which contradicts Faizal's account of keeping the film running continuously.",
+                 "poisoned_content": "You found a folded architectural drawing of Pawagam Cahaya's upper floor near the water fountain — it includes the projection room layout with handwritten measurements suggesting someone was planning access routes."}
+            ]
+        },
+        {
+            "name": "Cikgu Rosnani Hamid",
+            "public_summary": "A retired schoolteacher from Kelantan who was Encik Halim's first sweetheart, reconnecting with him after forty years through a mutual friend's invitation.",
+            "role_description": "• Personality: Gentle and a little overwhelmed — this city moves faster than you are comfortable with and this evening has moved faster still\n• Connection: You and Encik Halim were close forty years ago. Tonight was the first time you had spoken in person since 1983.\n• Dark Secret: You came tonight hoping Encik Halim would finally agree to return to Kelantan with you. He was kind. He said no.\n• Tonight's Agenda: You spent the interval collecting yourself near the lobby entrance after a difficult private conversation. You are not a suspect. You look like one.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": True, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were near the lobby entrance during the interval collecting yourself — you did not speak to anyone and cannot account for your movements beyond 'I was standing near the curtain feeling quite overwhelmed.'",
+            "objective": "Do not let Nor Azlina Rashid go an entire round without being questioned by someone at the table.",
+            "ghost_clue": "Rosnani was upset when she came back to her seat for the second half. She had been crying. She had nothing to do with my death — she was the only person tonight who came without an agenda.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You are absolutely certain it was the property lawyer — she arrived looking purposeful, she left during the interval, and she came back looking different. Something had changed for her.",
+                 "poisoned_content": "You are equally convinced it was Izwan Shah — too young to have a real reason to be here, too attentive to the building layout, and he went upstairs during the interval claiming to admire the ceiling."},
+                {"round": 3,
+                 "true_content": "You watched Nor Azlina return to her seat at the start of the second half. The negotiator's tension she carried all evening was gone. The only reason for that kind of release is if something has been resolved.",
+                 "poisoned_content": "Izwan Shah was the last person you saw near the base of the upper stairs before the interval ended. He told you he wanted to look at the ceiling plasterwork. The stairs lead to the projection room, not the ceiling."}
+            ]
+        },
+        {
+            "name": "Izwan Shah Badrul",
+            "public_summary": "A final-year architecture student at UTM, present as the guest of a lecturer who cancelled — he stayed because Pawagam Cahaya is the subject of his thesis.",
+            "role_description": "• Personality: Earnest and slightly too eager — you have been collecting details about this building all evening in a way that makes some guests uncomfortable\n• Connection: Pawagam Cahaya is your thesis subject. You have floor plans, structural reports, and the developer's rejected proposal in your portfolio.\n• Dark Secret: The developer's consortium has been paying you as a 'heritage assessment consultant' for six months — your thesis data has been feeding their acquisition strategy without Encik Halim's knowledge\n• Tonight's Agenda: You went upstairs during the interval to sketch the upper floor layout. You found Encik Halim. You came back down and said nothing for eleven minutes.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": True, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You went upstairs during the interval to sketch the upper floor mouldings for your thesis — you found Encik Halim unresponsive and came back downstairs. You sat with this knowledge for eleven minutes before telling anyone.",
+            "objective": "Discover what role Nor Azlina Rashid claims to be before the final vote.",
+            "ghost_clue": "The architecture student found me. He sat with the knowledge for eleven minutes. That is either guilt or shock. Watch him carefully and see which one it is.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "When you entered the projection room at the interval you noticed the editing table had been disturbed — the reel canister was in the wrong position and there was a smudge on the surface consistent with someone having rested a hand there in a hurry.",
+                 "poisoned_content": "You noticed Cikgu Rosnani ascending the upper staircase at the interval — she appeared to be watching for witnesses before she went up."},
+                {"round": 3,
+                 "true_content": "The eleven minutes you sat with the knowledge before speaking: you recognised something in the projection room — the reel canister position, the way the chair was turned. Someone had been there very recently and left quickly.",
+                 "poisoned_content": "You found a business card near the upper staircase door with a consortium logo and a handwritten note: 'interval, upstairs, keep it quiet'. The handwriting is not yours."}
+            ]
+        },
+        {
+            "name": "Shamsul Anuar Mat Isa",
+            "public_summary": "A veteran Malay film actor who starred in the very film being screened tonight, now in his seventies and present as the evening's guest of honour.",
+            "role_description": "• Personality: Warmly theatrical — you have spent sixty years being watched and you are entirely comfortable with it\n• Connection: Encik Halim championed the restoration of this film and personally invited you. You owe him a genuine debt.\n• Dark Secret: You have been negotiating to sell the rights to your archived footage to an overseas streaming platform — Encik Halim, as co-custodian of some of that archive, would have needed to approve the transfer\n• Tonight's Agenda: You wanted to charm Encik Halim into signing the archive transfer documents you brought in your jacket pocket. Now that is no longer the evening's most pressing matter.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": True,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were in your seat in the front row for the entire first half — the cinema's guest of honour does not sneak away during a film made in 1965 in which you are clearly visible on screen.",
+            "objective": "Ensure Datin Zubaidah Mahmood is not voted for at the final vote.",
+            "ghost_clue": "Shamsul's clues are coloured by decades of dramatic training — he sees what he expects to see and shapes it into a story. Take the emotion, question the detail.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You are absolutely certain the property lawyer arranged this — you have met her type in sixty years of dealing with producers and distributors. She came with a plan and she executed it.",
+                 "poisoned_content": "You are equally convinced the retired teacher is hiding something — the way she positioned herself near the exit during the interval was not distress, it was surveillance."},
+                {"round": 3,
+                 "true_content": "You have performed guilt and innocence on screen for sixty years. Nor Azlina's composure when she returned to her seat is the composure of a performance — technically correct, emotionally empty. She had already separated herself from what she had done.",
+                 "poisoned_content": "Cikgu Rosnani's distress during the interval was too well-timed to be coincidental. In sixty years of film you have learned to tell the difference between grief and performance. That was performance."}
+            ]
+        },
+        {
+            "name": "Nurul Hidayah Zulkifli",
+            "public_summary": "A heritage journalist writing a long-form piece on Malaysia's disappearing cinemas, attending to research her article and interview Encik Halim.",
+            "role_description": "• Personality: Attentive and disarmingly direct — people underestimate how much you remember because you never take notes visibly\n• Connection: You interviewed Encik Halim last month. He showed you the developer's offer during that interview — off the record.\n• Dark Secret: You have a contact inside the development consortium who has been speaking to you for months. You came tonight because that contact told you something would happen.\n• Tonight's Agenda: You came to write the ending of your cinema article. You did not expect the ending to be this.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were in your seat from the start of the screening until the interval, then stood near the lobby entrance recording ambient sound for your article — your phone has a continuous audio recording covering the interval period.",
+            "objective": "Before Round 3, ensure at least one other player has publicly named Nor Azlina Rashid as a suspect.",
+            "ghost_clue": "The journalist knows more than she has said. She has a source inside the consortium. Whatever that source told her about tonight, she is deciding whether it counts as reporting or testifying.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You observed Nor Azlina and Faizal exchange a brief exchange near the lobby curtain during the interval — Faizal descended from the upper stairs, spoke to her for less than a minute, and returned without speaking to anyone else.",
+                 "poisoned_content": "Your source told you three days ago that someone would attempt to resolve the acquisition outside normal negotiation channels this week. You did not know it would be tonight."},
+                {"round": 3,
+                 "true_content": "Your audio recording from the interval captures footsteps on the upper staircase twice — once going up, once coming down — during a twelve-minute window when the lobby was otherwise quiet. The second set is faster and lighter.",
+                 "poisoned_content": "Your source told you the consortium had arranged for someone inside the cinema's operation to cooperate tonight. You assumed that meant Faizal. You now suspect it meant someone else as well."}
+            ]
+        }
+    ]
+})
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PRESET 10 — Hujan di Bukit Larut (12 players, hill station Perak, crisis)
+# Setting: A colonial-era rest house on Bukit Larut during a state government
+# task force retreat. A senior official is found dead in the library.
+# The road down is blocked by a landslide. Nobody is leaving until morning.
+# Roles: Killer, Accomplice/Poisoner, Investigator, Undertaker, Recluse,
+#        Paranoid, Spy, Drunk, Fool, Jester, Innocent x2
+# ══════════════════════════════════════════════════════════════════════════════
+
+_register("hujan_di_bukit_larut", {
+    "is_crisis": True,
+    "theme_title": "Hujan di Bukit Larut",
+    "short_description": "A landslide has blocked the only road down from Bukit Larut. Inside the colonial rest house, among twelve members of a Perak state government retreat, someone has killed the Deputy Director of Land Development — and everyone is waiting for morning.",
+    "master_story": {
+        "background": "• The Perak Land Policy Task Force retreats annually to Rest House Larut, a colonial-era building from 1880 — no mobile signal, no road access during rain, twelve officials reviewing land acquisition proposals worth hundreds of millions of ringgit.\n• Tuan Haji Mansur Ibrahim, Deputy Director of Land Development, had spent the retreat quietly building a case against a contentious land deal implicating at least two people in the rest house.\n• At 23:10 on the final evening, after dinner and the after-dinner briefing, Tuan Haji Mansur excused himself to the library to review documents. At 23:55 he was found dead.",
+        "the_murder": "• Tuan Haji Mansur was found slumped over the library's central reading table, a glass of air sejuk beside him and a folder of documents spread beneath his hands.\n• The post-mortem will confirm poisoning — a compound introduced into his drink during the briefing session.\n• The library's single window was open despite the rain. The ground below shows two partial bootprints in the wet soil.",
+        "the_solution": "• Puan Hajah Salwani Darus, Senior Land Acquisition Officer, introduced a compound into Tuan Haji Mansur's air sejuk during the briefing — she refilled his glass from the service trolley she had positioned near her seat.\n• She was assisted by Encik Rizwan Fauzi, the administrative coordinator, who ensured the library CCTV camera was disabled during the post-dinner period.\n• Salwani's motive: Tuan Haji Mansur's investigation had traced the land deal irregularities directly to her division. His presentation the following morning would have ended her career and triggered a criminal referral.",
+        "public_clues": [
+            {"round": 3, "content": "The rest house maintenance logbook — found in the utility room — shows the library CCTV camera was reported as 'faulty' at 22:45 and signed off by the administrative coordinator. The camera was working perfectly at morning inspection two days prior."}
+        ]
+    },
+    "characters": [
+        {
+            "name": "Puan Hajah Salwani Darus",
+            "public_summary": "The Senior Land Acquisition Officer for Perak, the most technically experienced person on the task force and the person responsible for the division under investigation.",
+            "role_description": "• Personality: Authoritative and slightly defensive — you have run this division for eleven years and do not appreciate your methods being questioned\n• Connection: Tuan Haji Mansur's investigation traced the irregularities directly to your division's approvals process\n• Dark Secret: Three land acquisition approvals under your signature were processed with documentation that does not match the physical surveys — you arranged the discrepancy\n• Tonight's Agenda: You positioned yourself near the service trolley during the briefing. You refilled Tuan Haji Mansur's glass at 22:55. You have been performing concern ever since.",
+            "is_killer": True, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were at the briefing table from 22:00 to 23:10, then retired to your room at the end of the session — you did not visit the library and had no reason to.",
+            "objective": "Ensure Encik Hafizuddin Noor receives at least one vote at the final count.",
+            "ghost_clue": "Salwani refilled my glass. I accepted it without thinking — we had been colleagues for three years of these retreats. I trusted her. That was the last mistake I made.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You noticed Encik Rizwan leave the briefing at 22:42 with a small tool bag from the utility room — he returned at 22:51 and sat back down without explanation.",
+                 "poisoned_content": "You observed Encik Hafizuddin speaking quietly with Tuan Haji Mansur near the library entrance at 23:05, just before Tuan Haji Mansur went in alone — their exchange looked urgent and ended with Tuan Haji Mansur shaking his head."},
+                {"round": 3,
+                 "true_content": "You watched Encik Rizwan mark something in the maintenance logbook at 22:43 and close it quickly when a colleague glanced over — that logbook covers the building's facilities, including the CCTV systems.",
+                 "poisoned_content": "You found a handwritten note near the library door in Encik Hafizuddin's handwriting asking Tuan Haji Mansur to 'please reconsider before tomorrow' — dated today, suggesting a confrontation earlier in the evening."}
+            ]
+        },
+        {
+            "name": "Encik Rizwan Fauzi",
+            "public_summary": "The task force's administrative coordinator, responsible for logistics, documentation, and the smooth running of the retreat.",
+            "role_description": "• Personality: Helpful and self-effacing — you are most comfortable when others overlook you, which they usually do\n• Connection: You have managed the administrative infrastructure for Salwani's division for four years — including certain documentation processes that should not have been automated\n• Dark Secret: You knew about the falsified approvals. You did not create them but you processed them. Your cooperation makes you as exposed as Salwani.\n• Poisoner Ability: Each round you may secretly corrupt one player's evidence on your device.",
+            "is_killer": False, "is_accomplice": True, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": True, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were at the briefing until 22:42 when you stepped out to deal with a facilities issue — a faulty light fitting in the corridor near the library, which you logged in the maintenance book. You returned at 22:51.",
+            "objective": "Before Round 3, make at least one player publicly question Puan Nurul Asykin's alibi.",
+            "ghost_clue": "Rizwan disabled the camera. He will say it was a facilities issue. The log will say it was a facilities issue. Ask him why the repair required a tool bag he signed out himself, not the maintenance staff.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You told the group you fixed a light fitting. You actually disabled the library CCTV by accessing the junction box in the corridor utility cabinet — a sixty-second job if you know where the connection is.",
+                 "poisoned_content": "You saw Puan Nurul Asykin near the library window from the corridor at 23:08 — she was looking in through the glass from outside, meaning she had gone around the building in the rain."},
+                {"round": 3,
+                 "true_content": "The maintenance log entry you made at 22:43 reads 'library camera — connectivity fault.' The camera's connectivity was fine. The coaxial connection inside the junction box was the point of failure — and you created it.",
+                 "poisoned_content": "You found muddy boot marks on the veranda outside the library window that are smaller than any of the male officials' shoes — consistent with Puan Nurul Asykin, who was wearing outdoor sandals at dinner."}
+            ]
+        },
+        {
+            "name": "Tuan Haji Ahmad Zabidi Rashid",
+            "public_summary": "The Director General of the Perak Land and Mines Department, the most senior official on the retreat and Tuan Haji Mansur's direct superior.",
+            "role_description": "• Personality: Formal and deliberate — you choose your words carefully and expect others to choose theirs\n• Connection: Tuan Haji Mansur briefed you privately on his findings three days ago. You told him to proceed carefully. You did not expect this.\n• Dark Secret: You approved the task force's investigation but did not pass its findings to the state attorney general as required — you were waiting to understand the full exposure before committing to an official position\n• Tonight's Agenda: You need to understand exactly what Tuan Haji Mansur had documented before anyone else does.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": True, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were in the common room from 23:10 until the alarm was raised at 23:55 — four colleagues can confirm your presence, as you were reviewing the following day's agenda with them.",
+            "objective": "Ensure Puan Noraziela Kamarudin is not voted for at the final count.",
+            "ghost_clue": "Ahmad Zabidi knew three days ago. He told me to proceed carefully. I understand now that 'carefully' meant 'not in a way that exposes him.' He is not the killer. But his caution gave the killer time to act.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You noticed Puan Hajah Salwani position herself near the service trolley during the briefing and remain there for nearly twenty minutes — an unusual place to stand during a presentation.",
+                 "poisoned_content": "You noticed Encik Hafizuddin leave the briefing at 23:05 and return at 23:20 — a fifteen-minute absence he did not explain when he sat back down."},
+                {"round": 3,
+                 "true_content": "Forty years in government administration: either Puan Hajah Salwani Darus or Encik Rizwan Fauzi arranged this — one controls the approvals and one controls the paper trail. Together they are the entire exposure.",
+                 "poisoned_content": "Your read of tonight points to either Encik Hafizuddin or the state legal advisor — both have access to the investigation file and both have been too quiet since the body was found."}
+            ]
+        },
+        {
+            "name": "Dr. Norzaharah Talib",
+            "public_summary": "The task force's appointed forensic economist from Universiti Utara Malaysia, brought in to provide independent analysis of the land deal valuations.",
+            "role_description": "• Personality: Methodical and slightly impatient — you have provided your analysis, it is correct, and you are frustrated by how slowly the institutional machinery moves\n• Connection: Your economic analysis identified the valuation discrepancies that gave Tuan Haji Mansur the evidence he needed to proceed\n• Dark Secret: You have already sent a preliminary version of your analysis to a journalist contact — off the record, embargoed — because you expected the internal process to be suppressed\n• Tonight's Agenda: You wanted to know whether Tuan Haji Mansur intended to act on your analysis tomorrow or delay again.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": True, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were in the common room from 22:30 until the body was found, working on your laptop — your document autosave timestamps confirm continuous activity throughout that period.",
+            "objective": "Discover what role Puan Hajah Salwani Darus claims to be before the final vote.",
+            "ghost_clue": "Norzaharah's analysis is accurate. Her numbers do not lie. The question is whether the people who need to act on them will do so — or whether what happened to me will become the reason they find to delay.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "Your economic analysis shows the valuation discrepancies are concentrated in approvals signed by Puan Hajah Salwani's division over a 26-month period — the pattern is too consistent to be administrative error.",
+                 "poisoned_content": "You observed Encik Hafizuddin accessing the document server using Tuan Haji Mansur's login credentials during the briefing — he claimed he was retrieving a shared file, but those credentials should not have been shared."},
+                {"round": 3,
+                 "true_content": "The compound in Tuan Haji Mansur's glass requires knowledge of his existing medical conditions to dose at a non-obvious level. His medical records are in the staff HR system. Only a handful of people in this building have HR access.",
+                 "poisoned_content": "You found a USB drive near the library entrance labelled with a file code from your own analysis — someone has been copying your economic reports without your knowledge."}
+            ]
+        },
+        {
+            "name": "Puan Noraziela Kamarudin",
+            "public_summary": "The state legal advisor attached to the task force, responsible for ensuring the investigation's findings are legally sound before any action is taken.",
+            "role_description": "• Personality: Careful and precise — you have built your reputation on never saying anything that cannot be defended in writing\n• Connection: Tuan Haji Mansur's investigation needed your legal sign-off to proceed to the attorney general. You had not yet given it.\n• Dark Secret: You were approached six weeks ago by a lawyer representing the development consortium with a social dinner invitation that was not entirely social. You attended. You should not have.\n• Tonight's Agenda: You had decided to give the sign-off. You never got to tell Tuan Haji Mansur.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": True, "is_recluse": False,
+            "alibi": "You were at the briefing table until 23:10 and then moved to the common room — you spoke with three colleagues there until the alarm was raised.",
+            "objective": "By Round 2, convince at least one other player that Dr. Norzaharah Talib could not have done this.",
+            "ghost_clue": "Noraziela had decided to sign off. I did not know that yet. She was going to tell me in the morning. She is not the killer — she is someone who made a mistake she was trying to correct.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You noticed the library CCTV monitor at the corridor security station was displaying a static image at 22:50 — not a live feed, which means the camera had been replaced with a still frame, a more sophisticated intervention than a simple power cut.",
+                 "poisoned_content": "You observed Puan Nurul Asykin moving toward the rear veranda exit at 23:05 — she said she needed air, but the rain was heavy and she was dressed for indoors."},
+                {"round": 3,
+                 "true_content": "The CCTV monitor was displaying a looped still image from earlier in the evening — the kind of loop that requires deliberate technical access to set up, not just disconnecting a wire.",
+                 "poisoned_content": "You found muddy sandal prints on the veranda near the library window — the tread pattern matches footwear you saw Puan Nurul Asykin wearing at dinner."}
+            ]
+        },
+        {
+            "name": "Encik Hafizuddin Noor",
+            "public_summary": "A senior officer from the state treasury department, present to assess the fiscal implications of the land deal investigation findings.",
+            "role_description": "• Personality: Numbers-focused and slightly suspicious of everyone — you have spent fifteen years watching how money moves and you notice when it moves wrong\n• Connection: Your fiscal analysis found the state treasury had been underpaid by approximately RM4.2 million across the flagged transactions\n• Dark Secret: You have been quietly building a personal case file on the irregularities for two years — intending to publish a policy paper on government land deal opacity that will make your academic reputation\n• Tonight's Agenda: You spoke to Tuan Haji Mansur at 23:05 to understand his timeline for the morning presentation. The last thing he told you changed everything.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You spoke with Tuan Haji Mansur at 23:05 near the library entrance, then returned to the briefing room to retrieve your materials before going to your room at 23:20 — you did not enter the library.",
+            "objective": "Before Round 3, ensure at least one other player has publicly named Puan Hajah Salwani Darus as a suspect.",
+            "ghost_clue": "Hafizuddin asked me about the treasury referral at 23:05. I shook my head — not because I was delaying, but because I had already filed it privately. The referral is in the attorney general's system. It has already been sent.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "When you spoke to Tuan Haji Mansur at 23:05 he told you he had already filed the treasury referral privately — not tomorrow morning as scheduled, but earlier that day. Someone in this building killed him for a document that is already gone.",
+                 "poisoned_content": "You observed Puan Noraziela enter the library briefly at 23:15 and exit three minutes later carrying a document folder she had not been holding before — she put it in her room before the alarm was raised."},
+                {"round": 3,
+                 "true_content": "The treasury referral was filed at 17:43 today from Tuan Haji Mansur's laptop. Whoever killed him acted on information that was already outdated — they killed him for a presentation that was already delivered.",
+                 "poisoned_content": "You found a copy of your own fiscal analysis in the corridor near the library — printed without your knowledge, with handwritten annotations in a margin style you associate with the legal advisor."}
+            ]
+        },
+        {
+            "name": "Puan Nurul Asykin Hamzah",
+            "public_summary": "A young development planner from the Perak planning department, the most junior member of the task force and Tuan Haji Mansur's appointed assistant for the retreat.",
+            "role_description": "• Personality: Conscientious and quietly observant — you have spent three days watching how the senior officials interact and noticed more than you have mentioned\n• Connection: You were Tuan Haji Mansur's assistant for the retreat. You prepared his documents, arranged his schedule, and brought his water to the briefing.\n• Dark Secret: You submitted Tuan Haji Mansur's treasury referral earlier today — he dictated it to you this afternoon and asked you to file it quietly. You are the only other person who knows it has been sent.\n• Tonight's Agenda: You stepped out to the veranda at 23:05 for air. You walked past the library window. You saw a figure at the reading table through the glass.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You stepped outside to the veranda at 23:05 for approximately ten minutes, then returned inside — you passed the library window during that time but did not enter the library.",
+            "objective": "Do not be named as a suspect by more than two players during the entire game.",
+            "ghost_clue": "Nurul Asykin filed the referral. She is the only other person who knows. She was also the last person to see me alive through a window — though she did not know that at the time. Protect her. What she knows matters.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "When you passed the library window at 23:08 you saw a figure standing at the reading table with their back to the window — not sitting, but standing, moving in a way that suggested they were doing something at the table surface, not reading.",
+                 "poisoned_content": "You noticed Puan Noraziela leave the briefing at 23:12 carrying a document folder and return two minutes later without it — a brief absence nobody else appears to have noticed."},
+                {"round": 3,
+                 "true_content": "The figure you saw through the window at 23:08 was not Tuan Haji Mansur — the posture and height were wrong, and the movement was quick and purposeful, not the contemplative stillness of someone reading at a desk.",
+                 "poisoned_content": "You found a set of Tuan Haji Mansur's access cards on the corridor floor near the document server — they should have been in his room, and they appear to have been used recently."}
+            ]
+        },
+        {
+            "name": "Haji Roslan Basir",
+            "public_summary": "A veteran land surveyor with thirty-eight years of service, brought out of semi-retirement to provide technical context for the task force's assessment.",
+            "role_description": "• Personality: Plain-spoken and impatient with procedure — you have been doing this since before most of your colleagues were born and have less patience for politics than you once did\n• Connection: The falsified surveys passed through your department's external review process. Someone used your division's rubber stamp without your knowledge.\n• Dark Secret: You know which two junior officers processed the fraudulent surveys — and you have not reported them because one is your nephew\n• Tonight's Agenda: You wanted to understand whether Tuan Haji Mansur's investigation would go far enough to find your nephew's involvement.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": True,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You retired to the common room after the briefing at 23:10 and poured yourself several glasses of the rest house's whisky, which you consumed with notable dedication until the alarm was raised.",
+            "objective": "Ensure Tuan Haji Ahmad Zabidi Rashid is not voted for at the final count.",
+            "ghost_clue": "Roslan's clues are shaped by thirty years of wanting to see what is convenient. Apply technical scrutiny to his surveys; apply similar scrutiny to his testimony.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You are absolutely certain it was the forensic economist — she came here with a prepared case against named individuals and she is the type who believes ends justify means.",
+                 "poisoned_content": "You are equally certain it was the treasury officer — he spoke to Tuan Haji Mansur at 23:05 and whatever was said upset Tuan Haji Mansur enough to send him straight to the library alone."},
+                {"round": 3,
+                 "true_content": "You maintain that Norzaharah did this — she had the most to gain from Tuan Haji Mansur's silence, and without him to present it tomorrow her analysis falls back to her alone.",
+                 "poisoned_content": "Hafizuddin's behaviour has been wrong all evening — too composed, too ready with his theory, too eager to name others. That is not how someone acts when they are grieving a colleague."}
+            ]
+        },
+        {
+            "name": "Dato' Sulaiman Mohd Yusoff",
+            "public_summary": "The Perak state executive councillor responsible for land development, the most politically senior figure at the retreat.",
+            "role_description": "• Personality: Politically careful and surprisingly approachable — you have survived four administrations by being the person everyone assumes is on their side\n• Connection: The land deal under investigation was approved at your division's recommendation three years ago. Your verbal approval was sought and given.\n• Dark Secret: You have been quietly exploring early retirement options in anticipation of the investigation's findings reaching the state legislative assembly. You are not corrupt. You are just very careful about proximity.\n• Tonight's Agenda: You attended this retreat to be seen supporting the process. You had no idea the process would end like this.\n• Note: You believe you are the killer and have a full motive and backstory — but you did not do it. Play your role exactly as written.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": True, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were at the briefing for the full session and moved to the sitting room at 23:10, where you spoke on the satellite phone with your personal assistant about tomorrow's diary — the call lasted approximately fourteen minutes.",
+            "objective": "Before Round 3, make at least one player publicly doubt Encik Rizwan Fauzi's alibi.",
+            "ghost_clue": "Sulaiman gave verbal approval three years ago and has spent every day since managing his distance from it. He is not the killer. He is something more common and more difficult to prosecute.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You have been in government long enough to recognise when an administrative coordinator is managing information flow rather than simply processing it — Encik Rizwan's movements this evening have been those of someone following a sequence, not responding to events.",
+                 "poisoned_content": "You noticed Encik Hafizuddin's demeanour change noticeably at 23:07 — whatever Tuan Haji Mansur told him during their brief conversation appeared to alarm rather than reassure him."},
+                {"round": 3,
+                 "true_content": "In thirty years of politics you have watched administrators cover for their superiors. Encik Rizwan's behaviour tonight — the tool bag, the log entry, the convenient absence — matches that pattern precisely.",
+                 "poisoned_content": "You observed Encik Hafizuddin take a private call at 22:50, which is notable because there is no mobile signal at Bukit Larut — he must have used the satellite handset reserved for the Director General's use only."}
+            ]
+        },
+        {
+            "name": "Puan Hajah Rasidah Mohd Salleh",
+            "public_summary": "The task force's appointed community liaison officer, representing the affected communities in the land acquisition process.",
+            "role_description": "• Personality: Direct and slightly combative — you represent people who are consistently talked over and you have learned to be louder than the institutions around you\n• Connection: The communities affected by the land deal are the people you have worked with for two years. Tuan Haji Mansur's investigation was the first official process that took your reports seriously.\n• Dark Secret: You are currently in a legal dispute with Puan Hajah Salwani's division over a separate land acquisition case from last year — a conflict of interest you did not disclose when appointed\n• Tonight's Agenda: You wanted to confirm with Tuan Haji Mansur that the community representatives would be acknowledged in tomorrow's presentation.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": True, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were in the common room from 23:10 until the alarm was raised, making handwritten notes for the community representatives you will need to brief tomorrow — you did not leave the room.",
+            "objective": "Do not let Puan Hajah Salwani Darus go an entire round without being questioned by someone at the table.",
+            "ghost_clue": "Rasidah knows something is wrong with Salwani's division — she has been living inside its consequences for two years. Her instincts are correct even if her reasoning is circular.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "You are absolutely certain Puan Hajah Salwani arranged this — three years of watching her division operate and two years fighting her in a separate case has given you a clear picture of how she responds to accountability.",
+                 "poisoned_content": "You are equally certain Dato' Sulaiman is behind it — he is the most senior official here, the political approval was his, and people like him do not let inconvenient investigations reach assembly without intervention."},
+                {"round": 3,
+                 "true_content": "Salwani's composure tonight is the composure of someone who has already made a decision and executed it — not the anxiety of someone worried about an investigation, but the stillness of someone who has removed the threat.",
+                 "poisoned_content": "Dato' Sulaiman has been too relaxed all evening — a man with this much political exposure should be visibly managing this situation, but he appears unbothered, which suggests he knows the threat has already been removed."}
+            ]
+        },
+        {
+            "name": "Encik Khairuddin Abd Wahab",
+            "public_summary": "A GIS and land mapping specialist from the Department of Survey and Mapping Malaysia, brought in to provide technical validation of the survey data.",
+            "role_description": "• Personality: Technically precise and socially awkward — you are more comfortable with coordinates than conversation\n• Connection: Your technical review identified the specific GPS coordinate discrepancies in the falsified surveys — your report is the most forensically damning document in the investigation file\n• Dark Secret: You have been sharing anonymised data from this case with a Singapore university researcher without clearance — a serious breach you have been rationalising as academic contribution\n• Tonight's Agenda: You came to ensure your technical findings were accurately represented in tomorrow's presentation.\n• Jester Goal: Get the officials to vote for YOU. Play the suspicious outsider with too much technical knowledge. Make them think you know more than you should — because you do, just not about the murder.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": True,
+            "is_undertaker": False, "is_recluse": False,
+            "alibi": "You were in your room from 23:00 onwards working on a data correction in your mapping report — your laptop activity log will show continuous work throughout the relevant period.",
+            "objective": "Ensure at least one other player publicly accepts your alibi before the final vote.",
+            "ghost_clue": "Khairuddin's mapping data is precise. His GPS coordinates do not lie. Whether he himself is capable of lying is a separate and interesting question that tonight's events will not resolve.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "Your GPS analysis shows three land parcels were recorded at coordinates placing them partially in water — an impossible outcome for an approved residential development. The surveys were generated from a desk, not a physical site visit.",
+                 "poisoned_content": "You noticed Dr. Norzaharah access the building's shared document server at 22:35 and download a file from Tuan Haji Mansur's personal folder — those files are marked restricted access."},
+                {"round": 3,
+                 "true_content": "The coordinate discrepancies follow a consistent mathematical offset — 0.003 degrees east across all three plots. This is not accidental. This is a deliberate modification applied systematically, requiring GIS software access and the knowledge to use it.",
+                 "poisoned_content": "You found a printout of your own GPS coordinate analysis in the recycling bin — printed at 22:47, after you went to your room. Someone has been printing your technical reports without your knowledge."}
+            ]
+        }
+        ,
+        {
+            "name": "Encik Fadzillah Nordin",
+            "public_summary": "A state auditor from the Perak Audit Department, present to observe the task force proceedings and ensure compliance with financial governance protocols.",
+            "role_description": "• Personality: Unassuming and methodical — you have an auditor's habit of noting discrepancies without immediately revealing that you have noticed them\n• Connection: You audited Puan Hajah Salwani's division eighteen months ago and signed off a report that, in hindsight, missed the falsification entirely\n• Dark Secret: You know your audit missed the irregularities. If the investigation exposes your failure, your career ends alongside Salwani's.\n• Tonight's Agenda: You have been watching everyone with the focus of someone who knows their own culpability depends on what others find.",
+            "is_killer": False, "is_accomplice": False, "is_investigator": False, "is_drunk": False,
+            "is_poisoner": False, "is_paranoid": False, "is_spy": False, "is_fool": False, "is_jester": False,
+            "is_undertaker": False, "is_recluse": True,
+            "alibi": "You were at the briefing table from 22:00 to 23:10 and then moved directly to your room — you did not stop at the library and did not speak to anyone in the corridor.",
+            "objective": "Find out what role Puan Noraziela Kamarudin claims to be before the final vote.",
+            "ghost_clue": "Fadzillah's audit missed everything. He knows it. Something about him sets off every alarm in the room — but he is not the killer. He is just a man who signed his name on a lie he did not write.",
+            "clues": [
+                {"round": 2,
+                 "true_content": "During the briefing you noticed Puan Hajah Salwani remain at the service trolley for an unusually long time — someone staying near a service point during a formal presentation is the kind of anomaly an auditor logs automatically.",
+                 "poisoned_content": "You observed Encik Hafizuddin access the document server during the briefing — outside the session's scheduled document review period, which an auditor notes as a procedural irregularity."},
+                {"round": 3,
+                 "true_content": "Your original audit workpapers from eighteen months ago show the three fraudulent approvals passed review because the supporting survey documents appeared genuine — the falsification was introduced after your sign-off, meaning someone with post-audit access to the files made the changes.",
+                 "poisoned_content": "You found a printed extract from your own audit report near the briefing room printer — annotated to highlight the paragraphs that cleared Salwani's division, with the word 'useful' written in the margin."}
+            ]
+        }
+    ]
+})
